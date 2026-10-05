@@ -16,6 +16,8 @@ const works = defineCollection({
       thumbnail: image().optional(),
       order: z.number().optional(),
       publishDate: z.coerce.date(),
+      category: z.enum(['python', 'sql', 'dataviz']).optional(),
+      featured: z.boolean().default(false),
     }),
 });
 

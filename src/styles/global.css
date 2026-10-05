@@ -1,77 +1,47 @@
 :root {
   color-scheme: light;
-  /* Change this one line to retune the theme accent. */
-  --color-accent: oklch(0.54 0.14 35);
-  --color-accent-hover: color-mix(in oklch, var(--color-accent), black 12%);
-  --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 84%);
-  /* Text/icon color on top of a filled accent surface. */
-  --color-on-accent: oklch(0.99 0.003 100);
-  --color-bg: oklch(0.99 0.003 100);
-  --color-surface: oklch(0.965 0.004 100);
-  --color-text: oklch(0.25 0.01 250);
-  --color-muted: oklch(0.5 0.012 250);
-  --color-line: oklch(0.86 0.008 100);
-  --color-line-strong: oklch(0.72 0.012 120);
-  --color-soft: oklch(0.94 0.006 100);
-  --font-display: 'Fraunces Variable', Georgia, serif;
-  --font-body: 'Public Sans', system-ui, sans-serif;
+
+  /* Palette */
+  --royal: #162660;
+  --powder: #D0E6FD;
+  --bone: #F1E4D1;
+  --steel: #4E8098;
+  --cream: #F7F1E8;
+
+  /* Rôles utilisés par le template */
+  --color-accent: var(--royal);
+  --color-accent-hover: #0B1640;
+  --color-accent-soft: rgba(22, 38, 96, 0.12);
+  --color-on-accent: #FFFFFF;
+  --color-bg: var(--cream);
+  --color-surface: #FFFFFF;
+  --color-text: var(--royal);
+  --color-muted: #3E4A73;
+  --color-line: rgba(22, 38, 96, 0.12);
+  --color-line-strong: rgba(22, 38, 96, 0.25);
+  --color-soft: var(--powder);
+
+  /* Typographie */
+  --font-display: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans Variable', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-accent: 'Instrument Serif', Georgia, serif;
+
+  /* Cartes bento et effet verre */
+  --radius-card: 28px;
+  --radius-pill: 999px;
+  --glass-bg: rgba(255, 255, 255, 0.62);
+  --glass-border: rgba(255, 255, 255, 0.9);
+  --glass-blur: blur(14px) saturate(140%);
+  --shadow-card: 0 10px 40px rgba(22, 38, 96, 0.06);
+
+  /* Mise en page (valeurs d'origine du template) */
   --content-width: 1160px;
   --prose-width: 68ch;
   --page-pad: clamp(1rem, 3vw, 2rem);
   --baseline: 1.5rem;
   --hairline: 1px solid var(--color-line);
   --focus-ring: 0 0 0 3px var(--color-accent-soft);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --color-accent: oklch(0.72 0.13 42);
-    --color-accent-hover: color-mix(in oklch, var(--color-accent), white 10%);
-    --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 78%);
-    /* The dark-scheme accent is light, so filled surfaces need dark text. */
-    --color-on-accent: oklch(0.18 0.009 250);
-    --color-bg: oklch(0.18 0.009 250);
-    --color-surface: oklch(0.22 0.01 250);
-    --color-text: oklch(0.93 0.006 95);
-    --color-muted: oklch(0.69 0.012 250);
-    --color-line: oklch(0.34 0.012 250);
-    --color-line-strong: oklch(0.44 0.016 230);
-    --color-soft: oklch(0.26 0.01 250);
-  }
-}
-
-:root[data-theme='light'] {
-  color-scheme: light;
-  --color-accent: oklch(0.54 0.14 35);
-  --color-accent-hover: color-mix(in oklch, var(--color-accent), black 12%);
-  --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 84%);
-  /* Text/icon color on top of a filled accent surface. */
-  --color-on-accent: oklch(0.99 0.003 100);
-  --color-bg: oklch(0.99 0.003 100);
-  --color-surface: oklch(0.965 0.004 100);
-  --color-text: oklch(0.25 0.01 250);
-  --color-muted: oklch(0.5 0.012 250);
-  --color-line: oklch(0.86 0.008 100);
-  --color-line-strong: oklch(0.72 0.012 120);
-  --color-soft: oklch(0.94 0.006 100);
-}
-
-:root[data-theme='dark'] {
-  color-scheme: dark;
-  --color-accent: oklch(0.72 0.13 42);
-  --color-accent-hover: color-mix(in oklch, var(--color-accent), white 10%);
-  --color-accent-soft: color-mix(in oklch, var(--color-accent), transparent 78%);
-  /* The dark-scheme accent is light, so filled surfaces need dark text. */
-  --color-on-accent: oklch(0.18 0.009 250);
-  --color-bg: oklch(0.18 0.009 250);
-  --color-surface: oklch(0.22 0.01 250);
-  --color-text: oklch(0.93 0.006 95);
-  --color-muted: oklch(0.69 0.012 250);
-  --color-line: oklch(0.34 0.012 250);
-  --color-line-strong: oklch(0.44 0.016 230);
-  --color-soft: oklch(0.26 0.01 250);
 }
 
 * {
@@ -90,7 +60,12 @@ html {
 body {
   min-width: 320px;
   margin: 0;
-  background: var(--color-bg);
+  background:
+    radial-gradient(820px circle at 0 0, var(--powder), transparent 68%),
+    radial-gradient(760px circle at 100% 720px, var(--bone), transparent 70%),
+    radial-gradient(700px circle at 18% 1700px, var(--powder), transparent 68%),
+    var(--color-bg);
+  background-repeat: no-repeat;
 }
 
 ::selection {

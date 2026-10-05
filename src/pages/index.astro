@@ -4,20 +4,55 @@ import StructuredData from '../components/StructuredData.astro';
 import { Image } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
-import { SITE } from '../consts';
-import { formatDate, t } from '../i18n';
+import { SITE, HOME } from '../consts';
+import { formatDate } from '../i18n';
 
-const works = (await getCollection('works'))
-  .sort((a, b) => {
-    const byDate = b.data.publishDate.getTime() - a.data.publishDate.getTime();
-    return byDate || (a.data.order ?? 999) - (b.data.order ?? 999);
-  })
-  .slice(0, 3);
+// Projects: featured ones first (max 3), otherwise the first three by order.
+const allWorks = (await getCollection('works')).sort(
+  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999),
+);
+const featuredWorks = allWorks.filter((work) => work.data.featured);
+const showcase = (featuredWorks.length > 0 ? featuredWorks : allWorks).slice(0, 3);
+
+// Project mix chart, computed from the real collection.
+const categories = [
+  { key: 'python', label: 'Python', color: 'var(--royal)' },
+  { key: 'sql', label: 'SQL', color: 'var(--steel)' },
+  { key: 'dataviz', label: 'Dataviz', color: '#E2CFB2' },
+] as const;
+const mix = categories.map((category) => ({
+  ...category,
+  count: allWorks.filter((work) => work.data.category === category.key).length,
+}));
+const mixLabel = mix.map((item) => `${item.count} ${item.label}`).join(', ');
 
 const posts = (await getCollection('blog'))
   .filter((post) => !post.data.draft)
   .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
-  .slice(0, 3);
+  .slice(0, 2);
+
+const heroTone = HOME.style === 'dark' ? 'is-dark' : 'is-light';
+const quoteTone = HOME.style === 'dark' ? 'is-light' : 'is-dark';
+const placeholderTones = ['tone-powder', 'tone-bone', 'tone-soft'];
+
+const journey = [
+  { code: 'FR', label: 'France, where it started' },
+  { code: 'AU', label: 'Australia' },
+  { code: 'SE', label: 'Sweden' },
+  { code: 'NL', label: 'The Netherlands' },
+  { code: 'FR', label: 'Back in Lyon, today', now: true },
+];
+
+const toolkit = [
+  { name: 'Python', tone: 'pill-dark' },
+  { name: 'Pandas', tone: 'pill-powder' },
+  { name: 'Jupyter', tone: 'pill-powder' },
+  { name: 'SQL', tone: 'pill-dark' },
+  { name: 'Power BI', tone: 'pill-bone' },
+  { name: 'Matplotlib', tone: 'pill-bone' },
+  { name: 'Excel', tone: 'pill-soft' },
+  { name: 'Git', tone: 'pill-soft' },
+];
 
 const site = Astro.site ?? new URL(Astro.url.origin);
 const websiteSchema = {
@@ -31,110 +66,1070 @@ const websiteSchema = {
 
 <BaseLayout description={SITE.description}>
   <StructuredData slot="head" schema={websiteSchema} />
-  <section class="hero section">
-    <p class="eyebrow">Portfolio / writing / systems notes</p>
-    <h1>Structural minimalism for careful digital work.</h1>
-    <p class="lead">
-      Astro Keel gives projects, essays, and professional notes a disciplined frame: editorial type,
-      measured rhythm, and a single accent carried through fine structural rules.
-    </p>
-    <div class="action-row" aria-label={t('home.primaryLinks')}>
-      <a class="button" href={withBase('/works/')}>{t('home.viewWorks')}</a>
-      <a class="text-link" href={withBase('/blog/')}>{t('home.readNotes')}</a>
-    </div>
-  </section>
 
-  <section class="section split-overview" aria-label={t('home.overviewLabel')}>
-    <div>
-      <p class="eyebrow">Principles</p>
-      <h2>Readable first, decorative last.</h2>
-    </div>
-    <div class="feature-list">
-      <article>
-        <h3>Baseline rhythm</h3>
-        <p>Vertical spacing follows a steady cadence for long-form reading.</p>
-      </article>
-      <article>
-        <h3>Typed content</h3>
-        <p>Collections are prepared for project case studies and durable notes.</p>
-      </article>
-      <article>
-        <h3>Keel lines</h3>
-        <p>Fine rules create structure without relying on decorative effects.</p>
-      </article>
-    </div>
-  </section>
-
-  <section class="section index-feed" aria-labelledby="latest-works">
-    <div class="section-heading">
-      <p class="eyebrow">{t('home.latestWorksEyebrow')}</p>
-      <h2 id="latest-works">Built records.</h2>
-      <a class="text-link" href={withBase('/works/')}>{t('home.allWorks')}</a>
-    </div>
-
-    {
-      works.length > 0 ? (
-        <div class="highlight-grid">
-          {works.map((work) => (
-            <article class="highlight-card">
-              {work.data.thumbnail && (
-                <Image src={work.data.thumbnail} alt="" width={720} height={480} loading="lazy" />
-              )}
-              <div>
-                <p class="meta">{formatDate(work.data.publishDate, 'short')}</p>
-                <h3>
-                  <a href={withBase(`/works/${work.id}/`)}>{work.data.title}</a>
-                </h3>
-                <p>{work.data.description}</p>
-                {work.data.tech.length > 0 && (
-                  <ul class="tag-list" aria-label={t('home.workTech', { title: work.data.title })}>
-                    {work.data.tech.slice(0, 4).map((tech) => (
-                      <li>{tech}</li>
-                    ))}
-                  </ul>
-                )}
+  <div class="home">
+    <section class="bento" aria-label="Introduction">
+      <div class:list={['card', 'hero', heroTone]}>
+        <div class="hero-glow" aria-hidden="true"></div>
+        <div class="hero-body">
+          <div class="hero-top">
+            <div class="identity">
+              {
+                HOME.photo ? (
+                  <img class="photo" src={withBase(HOME.photo)} alt="Portrait of Axel Derobert" width="92" height="92" />
+                ) : (
+                  <div class="photo photo-placeholder">[Your photo]</div>
+                )
+              }
+              <div class="identity-text">
+                <span class="identity-name">Axel Derobert</span>
+                <span class="identity-role">DATA ANALYST · LYON</span>
               </div>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <div class="empty-state compact">
-          <p set:html={t('home.worksEmpty')} />
-        </div>
-      )
-    }
-  </section>
+            </div>
+            <span class="status"><span class="status-dot"></span>{HOME.status}</span>
+          </div>
 
-  <section class="section index-feed" aria-labelledby="latest-notes">
-    <div class="section-heading">
-      <p class="eyebrow">{t('home.latestBlogEyebrow')}</p>
-      <h2 id="latest-notes">Field notes.</h2>
-      <a class="text-link" href={withBase('/blog/')}>{t('home.allPosts')}</a>
+          <h1 class="hero-title">
+            I turn raw data into
+            <span class="hero-highlight accent"
+              >clear decisions<svg
+                aria-hidden="true"
+                viewBox="0 0 300 16"
+                preserveAspectRatio="none"
+                ><path d="M3 11 C 70 3, 150 2, 297 8"></path></svg
+              ></span
+            >.
+          </h1>
+          <p class="hero-lead">
+            Data Analyst trained with OpenClassrooms, using Python, SQL and dataviz to help businesses
+            understand what really drives their performance.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href={withBase('/works/')}>
+            View my projects
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+          </a>
+          <a class="btn btn-secondary" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">
+            <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M8 11v5"></path><path d="M8 8v.01"></path><path d="M12 16v-5"></path><path d="M16 16v-3a2 2 0 0 0-4 0"></path></svg>
+            Let's talk
+          </a>
+          {HOME.cv && <a class="btn btn-ghost" href={withBase(HOME.cv)}>Download my CV</a>}
+        </div>
+      </div>
+
+      <div class="card glass geo">
+        <div class="card-head">
+          <span class="mono-label">Based in</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+        </div>
+        <div class="geo-city">
+          <span class="geo-name">Lyon<span class="accent-italic">, France</span></span>
+          <span class="mono-small">45.76° N · 4.84° E</span>
+          <span class="muted-small">[Relocation / remote]</span>
+        </div>
+        <div class="divider"></div>
+        <div class="journey">
+          <div class="journey-head">
+            <span class="mono-label">Called home</span>
+            <span class="accent-italic journey-count">4 countries</span>
+          </div>
+          <ol class="journey-list">
+            {
+              journey.map((stop) => (
+                <li class:list={[{ now: stop.now }]}>
+                  <span class="journey-dot" />
+                  <span class="journey-code">{stop.code}</span>
+                  <span class="journey-label">{stop.label}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+        <span class="muted-small">Fluent in French and English</span>
+      </div>
+
+      <div class="card glass mix">
+        <div class="mix-head">
+          <div class="mix-total">
+            <span class="mix-number">{allWorks.length}</span>
+            <span class="mix-caption">projects, from exploratory analysis to dashboards</span>
+          </div>
+          <span class="mono-small">portfolio.describe()</span>
+        </div>
+        <div class="mix-bar" role="img" aria-label={`Project mix: ${mixLabel}`}>
+          {
+            mix
+              .filter((item) => item.count > 0)
+              .map((item) => <div style={`flex: ${item.count}; background: ${item.color}`} />)
+          }
+        </div>
+        <ul class="mix-legend">
+          {
+            mix.map((item) => (
+              <li>
+                <span class="legend-swatch" style={`background: ${item.color}`} />
+                {item.label} · {item.count}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="card tone-bone education">
+        <div class="card-head">
+          <span class="mono-label">Education</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"></path><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"></path></svg>
+        </div>
+        <div class="education-body">
+          <span class="education-title">Data Analyst, <span class="accent">OpenClassrooms</span></span>
+          <span class="muted-small">RNCP Level 6, Bachelor's equivalent · [2026]</span>
+        </div>
+      </div>
+
+      <div class="card glass toolkit">
+        <div class="card-head">
+          <h2 class="toolkit-title">My <span class="accent">toolkit</span></h2>
+          <span class="mono-small">import *</span>
+        </div>
+        <ul class="pill-list">
+          {toolkit.map((tool) => <li class:list={['pill', tool.tone]}>{tool.name}</li>)}
+        </ul>
+      </div>
+
+      <div class:list={['card', 'quote', quoteTone]}>
+        <span class="quote-mark" aria-hidden="true">“</span>
+        <p class="quote-text">
+          [One or two sentences, in your own voice: why data, and what kind of company you want to
+          help.]
+        </p>
+        <a class="quote-link" href={withBase('/about/')}>
+          Read my story
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+    </section>
+
+    <div class="section-head" id="projects">
+      <div>
+        <span class="mono-label">01 — Featured projects</span>
+        <h2>Analyses that answer real <span class="accent">business questions</span>.</h2>
+      </div>
+      <a class="btn btn-outline" href={withBase('/works/')}>All projects ({allWorks.length})</a>
     </div>
 
-    {
-      posts.length > 0 ? (
-        <div class="note-list">
-          {posts.map((post) => (
-            <article class="note-row">
-              {post.data.heroImage && (
-                <Image src={post.data.heroImage} alt="" width={320} height={220} loading="lazy" />
+    <section class="bento" aria-label="Featured projects">
+      {
+        showcase.map((work, index) => (
+          <a class="card glass project" href={withBase(`/works/${work.id}/`)}>
+            <div class:list={['project-visual', placeholderTones[index % 3]]}>
+              {work.data.thumbnail ? (
+                <Image src={work.data.thumbnail} alt="" width={720} height={420} loading="lazy" />
+              ) : (
+                <span class="mono-small">[Key visual]</span>
               )}
-              <div>
-                <p class="meta">{formatDate(post.data.publishDate, 'short')}</p>
-                <h3>
-                  <a href={withBase(`/blog/${post.id}/`)}>{post.data.title}</a>
-                </h3>
-                <p>{post.data.description}</p>
-              </div>
-            </article>
-          ))}
+              <span class="project-number">{String(index + 1).padStart(2, '0')}</span>
+            </div>
+            <div class="project-body">
+              {work.data.tech.length > 0 && (
+                <ul class="tag-row">
+                  {work.data.tech.slice(0, 3).map((tech) => (
+                    <li>{tech}</li>
+                  ))}
+                </ul>
+              )}
+              <h3>{work.data.title}</h3>
+              <p>{work.data.description}</p>
+              <span class="project-cta">Read the case study →</span>
+            </div>
+          </a>
+        ))
+      }
+    </section>
+
+    <div class="section-head" id="notes">
+      <div>
+        <span class="mono-label">02 — Notes</span>
+        <h2>What's <span class="accent">caught my curiosity</span> lately.</h2>
+      </div>
+      <a class="btn btn-outline" href={withBase('/blog/')}>All notes</a>
+    </div>
+
+    <section class="bento" aria-label="Latest notes">
+      {
+        posts.map((post) => (
+          <article class="card glass note">
+            <div class="note-meta">
+              {formatDate(post.data.publishDate, 'short')}
+              {post.data.tags[0] && ` · ${post.data.tags[0]}`}
+            </div>
+            <h3>
+              <a href={withBase(`/blog/${post.id}/`)}>{post.data.title}</a>
+            </h3>
+            <p>{post.data.description}</p>
+            <a class="note-link" href={withBase(`/blog/${post.id}/`)}>
+              Read the note →
+            </a>
+          </article>
+        ))
+      }
+    </section>
+
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <span class="mono-label">03 — Contact</span>
+      <h2 id="contact-title">
+        Got a question your data <span class="accent">hasn't answered yet?</span>
+      </h2>
+      <div class="contact-row">
+        <span class="mono-small">{HOME.email || '[your.name@email.com]'}</span>
+        <div class="contact-actions">
+          <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">
+            Let's talk on LinkedIn
+          </a>
+          {HOME.email && <a class="btn btn-white" href={`mailto:${HOME.email}`}>Email me</a>}
+          <a class="btn btn-ghost-light" href={HOME.github} target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
         </div>
-      ) : (
-        <div class="empty-state compact">
-          <p set:html={t('home.postsEmpty')} />
-        </div>
-      )
-    }
-  </section>
+      </div>
+    </section>
+  </div>
 </BaseLayout>
+
+<style>
+  /* ---------- Layout ---------- */
+  .home {
+    width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+    margin-inline: auto;
+    padding-block: 2rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .home :is(h1, h2, h3, p) {
+    max-width: none;
+    margin: 0;
+    font-family: var(--font-body);
+    font-variation-settings: normal;
+  }
+
+  .home a {
+    background-image: none;
+  }
+
+  .home a:hover {
+    color: inherit;
+  }
+
+  .home ul,
+  .home ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .home svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 28px;
+    border-radius: var(--radius-card);
+  }
+
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+  }
+
+  .tone-powder {
+    background: var(--powder);
+  }
+
+  .tone-bone {
+    background: var(--bone);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .tone-soft {
+    background: rgba(22, 38, 96, 0.08);
+  }
+
+  /* ---------- Shared type ---------- */
+  .accent {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.12em;
+    letter-spacing: -0.01em;
+  }
+
+  .accent-italic {
+    font-family: var(--font-accent);
+    font-style: italic;
+  }
+
+  .mono-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+  }
+
+  .mono-small {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .muted-small {
+    font-size: 14px;
+    color: var(--color-muted);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--color-line);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-outline {
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--color-line-strong);
+  }
+
+  .home .btn-powder,
+  .home .btn-powder:hover {
+    background: var(--powder);
+    color: var(--royal);
+  }
+
+  .home .btn-white,
+  .home .btn-white:hover {
+    background: #fff;
+    color: var(--royal);
+  }
+
+  .home .btn-ghost-light,
+  .home .btn-ghost-light:hover {
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    color: #fff;
+  }
+
+  /* ---------- Hero (two variants) ---------- */
+  .hero {
+    grid-column: span 4;
+    grid-row: span 2;
+    position: relative;
+    overflow: hidden;
+    justify-content: space-between;
+    gap: 36px;
+    padding: 40px;
+    color: var(--hero-text);
+  }
+
+  .hero.is-dark {
+    --hero-text: #fff;
+    --hero-muted: rgba(255, 255, 255, 0.82);
+    --hero-sub: rgba(255, 255, 255, 0.75);
+    --hero-highlight: var(--bone);
+    --hero-underline: var(--bone);
+    --badge-bg: rgba(255, 255, 255, 0.12);
+    --badge-border: rgba(255, 255, 255, 0.22);
+    --dot: #5bd69a;
+    --btn1-bg: #fff;
+    --btn1-fg: var(--royal);
+    --btn2-bg: var(--powder);
+    --btn3-border: rgba(255, 255, 255, 0.45);
+    --btn3-fg: #fff;
+    --glow: rgba(208, 230, 253, 0.22);
+    background: var(--royal);
+    box-shadow: 0 18px 50px rgba(22, 38, 96, 0.28);
+  }
+
+  .hero.is-light {
+    --hero-text: var(--royal);
+    --hero-muted: #2a3766;
+    --hero-sub: #2a3766;
+    --hero-highlight: var(--royal);
+    --hero-underline: var(--steel);
+    --badge-bg: rgba(255, 255, 255, 0.65);
+    --badge-border: #fff;
+    --dot: #1e7a4c;
+    --btn1-bg: var(--royal);
+    --btn1-fg: #fff;
+    --btn2-bg: #fff;
+    --btn3-border: rgba(22, 38, 96, 0.3);
+    --btn3-fg: var(--royal);
+    --glow: rgba(255, 255, 255, 0.55);
+    background: var(--powder);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 12px 40px rgba(22, 38, 96, 0.1);
+  }
+
+  .hero-glow {
+    position: absolute;
+    right: -120px;
+    bottom: -160px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .hero-top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .photo {
+    width: 92px;
+    height: 92px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 24px rgba(22, 38, 96, 0.22);
+    object-fit: cover;
+  }
+
+  .photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bone);
+    color: #2a3766;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .identity-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .identity-name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .identity-role {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--hero-sub);
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--badge-bg);
+    border: 1px solid var(--badge-border);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot), transparent 80%);
+  }
+
+  .home .hero-title {
+    max-width: 660px;
+    font-size: clamp(2.5rem, 5vw, 3.6rem);
+    line-height: 1.04;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .hero-highlight {
+    position: relative;
+    display: inline-block;
+    font-size: 1.14em;
+    color: var(--hero-highlight);
+  }
+
+  .home .hero-highlight svg {
+    position: absolute;
+    left: 2%;
+    bottom: -6px;
+    width: 96%;
+    height: 12px;
+    overflow: visible;
+    stroke: var(--hero-underline);
+    stroke-width: 3;
+    opacity: 0.7;
+  }
+
+  .home .hero-lead {
+    max-width: 560px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--hero-muted);
+  }
+
+  .hero-actions {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .home .btn-primary,
+  .home .btn-primary:hover {
+    background: var(--btn1-bg);
+    color: var(--btn1-fg);
+  }
+
+  .home .btn-secondary,
+  .home .btn-secondary:hover {
+    background: var(--btn2-bg);
+    color: var(--royal);
+  }
+
+  .home .btn-ghost,
+  .home .btn-ghost:hover {
+    border: 1px solid var(--btn3-border);
+    color: var(--btn3-fg);
+  }
+
+  /* ---------- Geography card ---------- */
+  .geo {
+    grid-column: span 2;
+    grid-row: span 2;
+    justify-content: space-between;
+    gap: 22px;
+  }
+
+  .geo-city {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .geo-name {
+    font-family: var(--font-accent);
+    font-size: 44px;
+    line-height: 1;
+  }
+
+  .journey {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .journey-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .journey-count {
+    font-size: 20px;
+  }
+
+  .journey-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .journey-list li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .journey-list li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 18px;
+    bottom: -14px;
+    width: 2px;
+    background: rgba(22, 38, 96, 0.18);
+  }
+
+  .journey-dot {
+    position: relative;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--royal);
+  }
+
+  .journey-list li.now {
+    font-weight: 700;
+  }
+
+  .journey-list li.now .journey-dot {
+    background: var(--royal);
+    box-shadow: 0 0 0 4px rgba(22, 38, 96, 0.15);
+  }
+
+  .journey-code {
+    width: 26px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  /* ---------- Project mix chart ---------- */
+  .mix {
+    grid-column: span 4;
+    gap: 22px;
+  }
+
+  .mix-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .mix-total {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .mix-number {
+    font-family: var(--font-accent);
+    font-size: 76px;
+    line-height: 0.9;
+  }
+
+  .mix-caption {
+    max-width: 270px;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .mix-bar {
+    display: flex;
+    gap: 6px;
+    height: 18px;
+  }
+
+  .mix-bar div {
+    border-radius: var(--radius-pill);
+  }
+
+  .home .mix-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: auto;
+    margin-bottom: 10px;
+    padding-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .mix-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  /* ---------- Education ---------- */
+  .education {
+    grid-column: span 2;
+    min-height: 200px;
+    padding: 26px;
+  }
+
+  .education-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-block: auto;
+  }
+
+  .education-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .education-title .accent {
+    font-size: 1.15em;
+  }
+
+  /* ---------- Toolkit ---------- */
+  .toolkit {
+    grid-column: span 3;
+    padding: 30px;
+  }
+
+  .home .toolkit-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .toolkit-title .accent {
+    font-size: 1.2em;
+  }
+
+  .pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-family: var(--font-mono);
+  }
+
+  .pill {
+    padding: 10px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 13px;
+  }
+
+  .pill-dark {
+    background: var(--royal);
+    color: #fff;
+  }
+
+  .pill-powder {
+    background: var(--powder);
+  }
+
+  .pill-bone {
+    background: var(--bone);
+  }
+
+  .pill-soft {
+    background: rgba(22, 38, 96, 0.08);
+  }
+
+  /* ---------- Quote (two variants) ---------- */
+  .quote {
+    grid-column: span 3;
+    justify-content: space-between;
+    padding: 30px;
+  }
+
+  .quote.is-light {
+    --quote-mark: rgba(22, 38, 96, 0.35);
+    --quote-link: var(--royal);
+    background: var(--powder);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    color: var(--royal);
+  }
+
+  .quote.is-dark {
+    --quote-mark: var(--bone);
+    --quote-link: var(--bone);
+    background: var(--royal);
+    color: #fff;
+    box-shadow: 0 16px 44px rgba(22, 38, 96, 0.25);
+  }
+
+  .quote-mark {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 64px;
+    line-height: 0.5;
+    color: var(--quote-mark);
+  }
+
+  .home .quote-text {
+    font-family: var(--font-accent);
+    font-size: 24px;
+    line-height: 1.35;
+  }
+
+  .home .quote-link,
+  .home .quote-link:hover {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--quote-link);
+  }
+
+  /* ---------- Section headings ---------- */
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .section-head > div {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .home .section-head h2 {
+    font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+
+  /* ---------- Project cards ---------- */
+  .project {
+    grid-column: span 2;
+    gap: 18px;
+    padding: 14px 14px 26px;
+  }
+
+  .project:hover {
+    box-shadow: 0 16px 48px rgba(22, 38, 96, 0.12);
+  }
+
+  .project-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+
+  .project-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .project-number {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 34px;
+    color: var(--royal);
+  }
+
+  .project-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .home .project-body h3 {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .home .project-body p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+
+  .project-cta {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-family: var(--font-mono);
+  }
+
+  .tag-row li {
+    padding: 5px 11px;
+    border-radius: var(--radius-pill);
+    background: rgba(22, 38, 96, 0.08);
+    font-size: 12px;
+  }
+
+  /* ---------- Notes ---------- */
+  .note {
+    grid-column: span 3;
+    gap: 14px;
+    padding: 30px;
+  }
+
+  .note-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .home .note h3 {
+    font-family: var(--font-accent);
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .home .note p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .note-link {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* ---------- Contact ---------- */
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 40px;
+    padding: 56px 48px;
+    border-radius: var(--radius-card);
+    background: var(--royal);
+    color: #fff;
+    box-shadow: 0 18px 50px rgba(22, 38, 96, 0.25);
+  }
+
+  .contact .mono-label,
+  .contact .mono-small {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .contact .mono-small {
+    font-size: 15px;
+  }
+
+  .home .contact h2 {
+    max-width: 860px;
+    font-size: clamp(2.2rem, 5vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+  }
+
+  .contact h2 .accent {
+    color: var(--bone);
+  }
+
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 860px) {
+    .bento {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .bento > * {
+      grid-column: auto;
+      grid-row: auto;
+    }
+
+    .hero {
+      padding: 28px;
+    }
+
+    .contact {
+      padding: 36px 28px;
+    }
+  }
+</style>

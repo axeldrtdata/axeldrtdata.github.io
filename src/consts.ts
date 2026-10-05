@@ -4,24 +4,13 @@
 import type { UIKey } from './i18n/en';
 
 export const SITE = {
-  /** BCP 47 language tag. Picks the UI dictionary in `src/i18n/`, and sets
-   *  `<html lang>`, date formatting, and the RSS feed language. Dictionaries
-   *  ship for `en` and `ja`; regional variants like `en-GB` reuse the base
-   *  language's strings while keeping their own date format. */
   locale: 'en',
-  /** Site name — used in the header brand, <title>, and og:site_name. */
-  title: 'Astro Keel',
-  /** Default meta description for pages that don't set their own. */
-  description: 'A minimal, neutral, and modern portfolio and blog theme for Astro.',
-  /** Description of the RSS feed at /rss.xml. */
-  rssDescription: 'Notes, essays, and release logs from Astro Keel.',
-  /** Default social share image, relative to the site root (see public/). */
+  title: 'Axel Derobert',
+  description: 'Data Analyst based in Lyon. Python, SQL and dataviz to help businesses understand what drives their performance.',
+  rssDescription: 'Notes on data, analytics and what has caught my curiosity.',
   ogImage: '/og.jpg',
-  /** Post author, emitted in JSON-LD BlogPosting structured data.
-   *  Leave empty ('') to omit the author field. */
-  author: 'Astro Keel',
-  /** Footer credit line. */
-  footerText: 'Built with Astro Keel.',
+  author: 'Axel Derobert',
+  footerText: 'Designed and built in Lyon with Astro.',
 } as const;
 
 /** Icons bundled with the theme — see `src/components/SocialLinks.astro`. */
@@ -38,7 +27,8 @@ export interface SocialLink {
 /** Social profiles rendered as inline SVG icons in the footer.
  *  Add or remove entries here — no template edits needed. */
 export const SOCIAL_LINKS: readonly SocialLink[] = [
-  { label: 'GitHub', href: 'https://github.com/kpab/astro-keel', icon: 'github' },
+  { label: 'GitHub', href: 'https://github.com/axeldrtdata', icon: 'github' },
+  { label: 'LinkedIn', href: 'https://www.linkedin.com/in/axel-derobert-5717463b1/', icon: 'linkedin' },
   { label: 'RSS feed', href: '/rss.xml', icon: 'rss' },
 ];
 
@@ -110,3 +100,21 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { href: '/blog/', labelKey: 'nav.blog' },
   { href: '/search/', labelKey: 'nav.search' },
 ];
+
+/** Homepage settings. `style` switches the two hero layouts:
+ *  'dark'  → royal-blue intro card, powder-blue quote card
+ *  'light' → powder-blue intro card, royal-blue quote card */
+export type HomeStyle = 'dark' | 'light';
+
+export const HOME = {
+  style: 'dark' as HomeStyle,
+  /** Photo placed in `public/`, e.g. '/axel.jpg'. Leave '' for the placeholder. */
+  photo: '',
+  status: 'Open to [internship / first role]',
+  linkedin: 'https://www.linkedin.com/in/axel-derobert-5717463b1/',
+  github: 'https://github.com/axeldrtdata',
+  /** Contact email. Leave '' to hide the email button. */
+  email: '',
+  /** CV placed in `public/`, e.g. '/cv-axel-derobert.pdf'. Leave '' to hide the button. */
+  cv: '',
+};
