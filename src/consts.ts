@@ -114,7 +114,7 @@ export const HOME = {
   /** Contact email. Leave '' to hide the email button. */
   email: '',
   /** CV placed in `public/`, e.g. '/cv-axel-derobert.pdf'. Leave '' to hide the button. */
-  cv: '',
+  cv: '/cv-axel-derobert.pdf',
 };
 
 /** Project categories — drive the homepage chart and the filters on /works/.
