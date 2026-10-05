@@ -1,17 +1,23 @@
 ---
 import { getCollection, render } from 'astro:content';
-import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../lib/url';
-import { formatDate, t } from '../../i18n';
+import { PROJECT_CATEGORIES } from '../../consts';
 
 export async function getStaticPaths() {
-  const entries = await getCollection('works');
-  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+  const entries = (await getCollection('works')).sort(
+    (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999),
+  );
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: { entry, number: index + 1, next: entries[(index + 1) % entries.length] },
+  }));
 }
 
-const { entry } = Astro.props;
+const { entry, number, next } = Astro.props;
 const { Content } = await render(entry);
+const category = PROJECT_CATEGORIES.find((item) => item.key === entry.data.category);
+const year = entry.data.publishDate.getFullYear();
 ---
 
 <BaseLayout
@@ -20,56 +26,270 @@ const { Content } = await render(entry);
   ogType="article"
   image={withBase(`/og/works/${entry.id}.png`)}
 >
-  <article data-pagefind-body>
-    <header class="page-head section article-head">
-      <p class="eyebrow">{t('work.eyebrow')}</p>
-      <h1>{entry.data.title}</h1>
-      <p class="lead">{entry.data.description}</p>
-      <div class="entry-meta">
-        <time datetime={entry.data.publishDate.toISOString()}
-          >{formatDate(entry.data.publishDate)}</time
-        >
-        <span>{entry.data.tech.join(' / ')}</span>
+  <div class="page-wrap">
+    <a class="back-link" href={withBase('/works/')}>← All projects</a>
+
+    <header class="case-head bento">
+      <div class="card glass case-intro">
+        <span class="mono-label">
+          Case study {String(number).padStart(2, '0')}{category && ` · ${category.label}`}
+        </span>
+        <h1 class="case-title">{entry.data.title}</h1>
+        <p class="case-lead">{entry.data.description}</p>
+        <div class="case-actions">
+          {
+            entry.data.repo && (
+              <a class="btn btn-royal" href={entry.data.repo} target="_blank" rel="noopener noreferrer">
+                View the notebook on GitHub ↗
+              </a>
+            )
+          }
+          {
+            entry.data.link && (
+              <a class="btn btn-outline" href={entry.data.link} target="_blank" rel="noopener noreferrer">
+                Open the live version ↗
+              </a>
+            )
+          }
+        </div>
       </div>
-      <div class="action-row">
+
+      <dl class="card tone-bone case-facts">
         {
-          entry.data.link && (
-            <a class="button" href={entry.data.link}>
-              {t('work.visit')}
-            </a>
+          entry.data.client && (
+            <div>
+              <dt class="mono-label">Client</dt>
+              <dd>{entry.data.client}</dd>
+            </div>
           )
         }
         {
-          entry.data.repo && (
-            <a class="text-link" href={entry.data.repo}>
-              {t('work.repository')}
-            </a>
+          entry.data.role && (
+            <div>
+              <dt class="mono-label">Role</dt>
+              <dd>{entry.data.role}</dd>
+            </div>
           )
         }
-      </div>
-      {
-        entry.data.thumbnail && (
-          <Image
-            class="article-image"
-            src={entry.data.thumbnail}
-            alt=""
-            widths={[720, 1040, 1400]}
-            sizes="(min-width: 900px) 72rem, 100vw"
-          />
-        )
-      }
+        <div>
+          <dt class="mono-label">Year</dt>
+          <dd>{year}</dd>
+        </div>
+        <div>
+          <dt class="mono-label">Stack</dt>
+          <dd>
+            <ul class="tag-row">{entry.data.tech.map((tech) => <li>{tech}</li>)}</ul>
+          </dd>
+        </div>
+      </dl>
     </header>
 
-    <div class="section article-layout">
-      <aside class="article-toc">
-        <p class="eyebrow">{t('work.stackEyebrow')}</p>
-        <ul class="tech-list">
-          {entry.data.tech.map((item) => <li>{item}</li>)}
-        </ul>
-      </aside>
-      <div class="prose">
-        <Content />
-      </div>
-    </div>
-  </article>
+    <article class="case-body" data-pagefind-body>
+      <Content />
+    </article>
+
+    {
+      next.id !== entry.id && (
+        <a class="card glass next-case" href={withBase(`/works/${next.id}/`)}>
+          <span class="mono-label">Next case study</span>
+          <span class="next-title">{next.data.title} →</span>
+        </a>
+      )
+    }
+  </div>
 </BaseLayout>
+
+<style>
+  .back-link {
+    align-self: flex-start;
+    padding: 8px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-muted);
+  }
+
+  .case-head {
+    margin-bottom: 8px;
+  }
+
+  .case-intro {
+    grid-column: span 4;
+    gap: 20px;
+    padding: 36px;
+  }
+
+  .case-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+
+  .case-lead {
+    max-width: 620px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .case-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  .case-facts {
+    grid-column: span 2;
+    gap: 18px;
+    margin: 0;
+    padding: 30px;
+  }
+
+  .case-facts div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .case-facts dd {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  /* ---------- Long-form content ---------- */
+  .case-body {
+    width: min(760px, 100%);
+    margin: 2rem auto 0;
+    font-size: 17px;
+    line-height: 1.75;
+    color: #2a3766;
+  }
+
+  .case-body :global(h2) {
+    margin: 3.5rem 0 1rem;
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    color: var(--royal);
+  }
+
+  .case-body :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .case-body :global(h3) {
+    margin: 2.25rem 0 0.75rem;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--royal);
+  }
+
+  .case-body :global(p) {
+    margin: 0 0 1.2rem;
+  }
+
+  .case-body :global(strong) {
+    color: var(--royal);
+  }
+
+  .case-body :global(em) {
+    font-family: var(--font-accent);
+    font-size: 1.12em;
+  }
+
+  .case-body :global(ul:not([class])),
+  .case-body :global(ol) {
+    margin: 0 0 1.4rem;
+    padding-left: 1.3rem;
+    list-style: revert;
+  }
+
+  .case-body :global(li) {
+    margin-bottom: 0.5rem;
+  }
+
+  .case-body :global(a:not([class])) {
+    color: var(--royal);
+    text-decoration: underline;
+    text-decoration-color: var(--steel);
+    text-underline-offset: 3px;
+  }
+
+  .case-body :global(code:not(pre code)) {
+    padding: 2px 7px;
+    border-radius: 6px;
+    background: rgba(22, 38, 96, 0.07);
+    font-family: var(--font-mono);
+    font-size: 0.86em;
+  }
+
+  .case-body :global(pre) {
+    margin: 1.75rem 0;
+    padding: 22px 24px;
+    overflow-x: auto;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.75);
+    box-shadow: var(--shadow-card);
+    font-size: 14px;
+    line-height: 1.65;
+    white-space: pre !important;
+  }
+
+  .case-body :global(table) {
+    width: 100%;
+    margin: 1.75rem 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    background: var(--glass-bg);
+    box-shadow: var(--shadow-card);
+    font-size: 15px;
+  }
+
+  .case-body :global(th) {
+    padding: 14px 18px;
+    background: rgba(22, 38, 96, 0.06);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+  }
+
+  .case-body :global(td) {
+    padding: 13px 18px;
+    border-top: 1px solid var(--color-line);
+    vertical-align: top;
+  }
+
+  .next-case {
+    margin-top: 3rem;
+    gap: 8px;
+    padding: 28px 32px;
+  }
+
+  .next-title {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  @media (max-width: 860px) {
+    .case-intro {
+      padding: 26px;
+    }
+
+    .case-body :global(table) {
+      display: block;
+      overflow-x: auto;
+    }
+  }
+</style>

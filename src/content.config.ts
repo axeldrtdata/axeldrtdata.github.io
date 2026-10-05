@@ -17,6 +17,8 @@ const works = defineCollection({
       order: z.number().optional(),
       publishDate: z.coerce.date(),
       category: z.enum(['python', 'sql', 'dataviz']).optional(),
+      client: z.string().optional(),
+      role: z.string().optional(),
       featured: z.boolean().default(false),
     }),
 });

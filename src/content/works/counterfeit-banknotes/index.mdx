@@ -1,0 +1,134 @@
+---
+title: 'Spotting counterfeit banknotes from six measurements'
+description: 'Comparing four machine-learning models to tell genuine euro banknotes from fakes using their geometry alone, then shipping the best one as a ready-to-use script.'
+thumbnail: ./cover.png
+tech:
+  - Python
+  - scikit-learn
+  - Pandas
+  - Seaborn
+  - Jupyter
+category: python
+featured: true
+order: 1
+client: 'ONCFM, anti-counterfeiting agency (OpenClassrooms case)'
+role: 'Data Analyst, training project'
+repo: 'https://github.com/axeldrtdata/counterfeit-banknotes''
+publishDate: 2026-06-01
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import ConfusionMatrix from '../../../components/case/ConfusionMatrix.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+
+## The question
+
+The ONCFM fights counterfeit euro banknotes. Every note that reaches the agency goes through a machine that records six measurements: its length, its diagonal, its height on each side, and the two margins between the edge and the printed image. Over the years, the agency noticed that fakes differ slightly in size from genuine notes, by fractions of a millimetre that no one can see with the naked eye.
+
+The brief: build an algorithm that tells a genuine note from a fake using only those six measurements, compare four methods (logistic regression, k-means, k-nearest neighbours and random forest), and deliver the winner as a script that can process a file of new notes. One priority above all: **let as few counterfeits as possible slip through**.
+
+<KeyFigures
+  items={[
+    { value: '1,500', label: 'banknotes to learn from, 500 of them fake' },
+    { value: '6', label: 'measurements per note, in millimetres' },
+    { value: '99%', label: 'of test notes correctly classified' },
+    { value: '98/100', label: 'counterfeits caught in the test set' },
+  ]}
+/>
+
+## Understanding the measurements
+
+Before modelling anything, I looked at how each measurement behaves. Four of them (the diagonal, both heights and the upper margin) follow neat bell curves where genuine and fake notes overlap. Two tell a different story: the **lower margin** is skewed to the right, and the **length** has two distinct peaks, the signature of two populations that barely mix.
+
+The correlations with authenticity confirmed it. Genuine notes are longer and have smaller margins.
+
+<BarChart
+  title="Strength of the link with being genuine (absolute correlation)"
+  decimals={2}
+  data={[
+    { label: 'Length (+)', value: 0.85, highlight: true },
+    { label: 'Lower margin (−)', value: 0.78, highlight: true },
+    { label: 'Upper margin (−)', value: 0.61 },
+  ]}
+  caption="The heights are much weaker signals, and the diagonal is almost unrelated to authenticity."
+/>
+
+Some notes sat well outside the usual range, especially on the lower margin. I kept them on purpose: these unusual dimensions are very likely the fakes themselves. Removing them would have removed the very signal the models need.
+
+## Preparing the data
+
+**37 notes were missing their lower margin.** Rather than filling the gaps with a median, I used a linear regression on the five other measurements, since the lower margin is strongly linked to the length (−0.67). Every note was kept, and the authenticity label was never used to fill the gaps.
+
+I then split the data into a training set and a test set, and standardised the measurements so that no variable outweighs the others simply because of its scale.
+
+```python
+# 80/20 split, keeping the 2:1 genuine/fake ratio in both sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=y
+)
+
+# The scale is learned on training notes only
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+```
+
+## Four models, one evaluation frame
+
+Each model was trained on the same 1,200 notes and judged on the same 300 it had never seen, with the same tools: a confusion matrix to count every kind of error, the accuracy, and the ROC curve with its AUC score to check how well the model ranks notes at every possible threshold.
+
+| Model                 | Learning     | Accuracy | Errors / 300 | AUC    |
+| --------------------- | ------------ | -------- | ------------ | ------ |
+| Logistic regression   | Supervised   | 99.0%    | 3            | 0.9995 |
+| Random forest         | Supervised   | 99.0%    | 3            | 0.9994 |
+| K-nearest neighbours  | Supervised   | 98.7%    | 4            | 0.9972 |
+| K-means (2 clusters)  | Unsupervised | 98.7%    | 4            | —      |
+
+The k-means result is the most telling one. Without ever being told which notes were fake, it split them into two groups that match reality 98.7% of the time. Genuine and counterfeit notes form two naturally separate populations, which explains why every model performs so well.
+
+<ConfusionMatrix
+  title="Logistic regression on the 300 test notes"
+  negative="Fake"
+  positive="Genuine"
+  tn={98}
+  fp={2}
+  fn={1}
+  tp={198}
+  caption="Two counterfeits out of 100 were missed, and a single genuine note was wrongly flagged."
+/>
+
+## Why the simplest model won
+
+Logistic regression and random forest finished level: the same confusion matrix, the same accuracy, and AUC scores 0.0001 apart. When two models are this close, the tie-breaker is everything else.
+
+The classes are almost linearly separable, so the extra power of a hundred decision trees brings nothing here. That is the principle of parsimony, better known as **Occam's razor**: when two models perform equally well, the simpler one should win. Logistic regression is faster, less prone to overfitting, and above all **explainable**: each measurement gets one coefficient, so anyone at the agency can see why a note was flagged.
+<Takeaway label="Occam's razor">At equal performance, the simplest model always wins.</Takeaway>
+## From notebook to working tool
+
+The final model is saved as a single pipeline that bundles the standardisation and the logistic regression, so new notes can be scored straight from raw measurements without repeating any preparation step.
+
+The script loads a file of new notes and returns, for each one, a verdict and the probability of being genuine. I added one feature that wasn't in the brief: notes the model is unsure about are **flagged for a human check** instead of being decided blindly.
+
+```python
+confidence = model.predict_proba(notes)[:, 1]     # probability of being genuine
+certainty = np.abs(confidence - 0.5) * 2          # 0 = coin toss, 1 = fully certain
+results["Human check"] = np.where(certainty < 0.30, "To check", "")
+```
+
+| Note | Verdict | Probability of being genuine |
+| ---- | ------- | ---------------------------- |
+| B_1  | Genuine | 0.995                        |
+| B_2  | Fake    | 0.003                        |
+| B_3  | Genuine | 0.999                        |
+| B_4  | Fake    | 0.000                        |
+| B_5  | Fake    | 0.011                        |
+
+## What I would do next
+
+- **Tune the decision threshold towards catching fakes.** A missed counterfeit costs far more than a false alarm, so requiring a higher probability before calling a note genuine would trade a few extra checks for fewer fakes in circulation.
+- **Confirm the ranking with cross-validation.** With only three or four errors on 300 notes, the gaps between models are within the margin of chance on a single split.
+
+## What I learned
+
+[In your own voice, two or three sentences: for example, why the simplest model was the right call, what you now check to avoid data leakage, or what turning a notebook into a tool taught you.]

@@ -1,0 +1,107 @@
+---
+// Horizontal bar chart drawn in HTML/CSS, so it matches the site's fonts and colours.
+// Usage in MDX:
+// <BarChart title="Markup by product type" unit="%" data={[{ label: 'Cognac', value: 82.3 }]} />
+interface Props {
+  title: string;
+  data: { label: string; value: number; highlight?: boolean }[];
+  unit?: string;
+  caption?: string;
+  decimals?: number;
+}
+
+const { title, data, unit = '', caption, decimals = 1 } = Astro.props;
+const max = Math.max(...data.map((item) => item.value));
+const format = (value: number) =>
+  `${value.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${unit}`;
+---
+
+<figure class="chart glass">
+  <figcaption class="chart-title">{title}</figcaption>
+  <ul class="chart-rows">
+    {
+      data.map((item) => (
+        <li class:list={['chart-row', { 'is-highlight': item.highlight }]}>
+          <span class="chart-label">{item.label}</span>
+          <span class="chart-track">
+            <span class="chart-bar" style={`width: ${(item.value / max) * 100}%`} />
+          </span>
+          <span class="chart-value">{format(item.value)}</span>
+        </li>
+      ))
+    }
+  </ul>
+  {caption && <p class="chart-caption">{caption}</p>}
+</figure>
+
+<style>
+  .chart {
+    margin: 2.5rem 0;
+    padding: 26px 28px;
+    border-radius: var(--radius-card);
+  }
+
+  .chart-title {
+    margin-bottom: 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+  }
+
+  .chart-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chart-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 30%) 1fr 64px;
+    align-items: center;
+    gap: 14px;
+    margin: 0;
+  }
+
+  .chart-label {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--royal);
+  }
+
+  .chart-track {
+    height: 14px;
+    border-radius: var(--radius-pill);
+    background: rgba(22, 38, 96, 0.06);
+  }
+
+  .chart-bar {
+    display: block;
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: var(--steel);
+  }
+
+  .is-highlight .chart-bar {
+    background: var(--royal);
+  }
+
+  .chart-value {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-align: right;
+    color: var(--royal);
+  }
+
+  .chart-caption {
+    margin: 16px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+</style>

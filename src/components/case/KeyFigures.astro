@@ -1,0 +1,53 @@
+---
+// A row of headline numbers for a case study.
+// Usage in MDX: <KeyFigures items={[{ value: '€143k', label: 'online revenue in October' }]} />
+interface Props {
+  items: { value: string; label: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="key-figures">
+  {
+    items.map((item, index) => (
+      <li class:list={['figure', index % 3 === 1 ? 'tone-powder' : index % 3 === 2 ? 'tone-bone' : 'glass']}>
+        <span class="figure-value">{item.value}</span>
+        <span class="figure-label">{item.label}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .key-figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 14px;
+    margin: 2.5rem 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .figure {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 22px;
+    border-radius: 22px;
+  }
+
+  .figure-value {
+    font-family: var(--font-accent);
+    font-size: 44px;
+    line-height: 1;
+    color: var(--royal);
+  }
+
+  .figure-label {
+    font-size: 14px;
+    line-height: 1.4;
+    color: var(--color-muted);
+  }
+</style>

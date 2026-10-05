@@ -1,0 +1,46 @@
+---
+// Highlighted box for the key message of a section.
+// Usage in MDX: <Takeaway>Wine drives volume, spirits drive margin.</Takeaway>
+interface Props {
+  label?: string;
+}
+
+const { label = 'Takeaway' } = Astro.props;
+---
+
+<aside class="takeaway">
+  <span class="takeaway-label">{label}</span>
+  <div class="takeaway-body"><slot /></div>
+</aside>
+
+<style>
+  .takeaway {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 2rem 0;
+    padding: 24px 28px;
+    border-radius: 22px;
+    background: var(--royal);
+    color: #fff;
+  }
+
+  .takeaway-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--bone);
+  }
+
+  .takeaway-body {
+    font-family: var(--font-accent);
+    font-size: 24px;
+    line-height: 1.35;
+  }
+
+  .takeaway-body :global(p) {
+    margin: 0;
+    color: #fff;
+  }
+</style>

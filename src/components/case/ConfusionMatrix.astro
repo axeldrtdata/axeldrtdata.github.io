@@ -1,0 +1,142 @@
+---
+// 2×2 confusion matrix for a binary classifier.
+// Usage in MDX:
+// <ConfusionMatrix title="…" negative="Fake" positive="Genuine" tn={98} fp={2} fn={1} tp={198} />
+interface Props {
+  title: string;
+  negative: string;
+  positive: string;
+  tn: number;
+  fp: number;
+  fn: number;
+  tp: number;
+  caption?: string;
+}
+
+const { title, negative, positive, tn, fp, fn, tp, caption } = Astro.props;
+---
+
+<figure class="matrix glass">
+  <figcaption class="matrix-title">{title}</figcaption>
+  <div class="matrix-grid" role="table" aria-label={title}>
+    <div role="row" class="matrix-row">
+      <span role="columnheader" class="corner"></span>
+      <span role="columnheader" class="col-head">Predicted {negative.toLowerCase()}</span>
+      <span role="columnheader" class="col-head">Predicted {positive.toLowerCase()}</span>
+    </div>
+    <div role="row" class="matrix-row">
+      <span role="rowheader" class="row-head">Actually {negative.toLowerCase()}</span>
+      <span role="cell" class="cell is-good">
+        <strong>{tn}</strong><small>correctly caught</small>
+      </span>
+      <span role="cell" class="cell is-bad">
+        <strong>{fp}</strong><small>slipped through</small>
+      </span>
+    </div>
+    <div role="row" class="matrix-row">
+      <span role="rowheader" class="row-head">Actually {positive.toLowerCase()}</span>
+      <span role="cell" class="cell is-warn">
+        <strong>{fn}</strong><small>false alarm</small>
+      </span>
+      <span role="cell" class="cell is-good">
+        <strong>{tp}</strong><small>correctly cleared</small>
+      </span>
+    </div>
+  </div>
+  {caption && <p class="matrix-caption">{caption}</p>}
+</figure>
+
+<style>
+  .matrix {
+    margin: 2.5rem 0;
+    padding: 26px 28px;
+    border-radius: var(--radius-card);
+  }
+
+  .matrix-title {
+    margin-bottom: 18px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+  }
+
+  .matrix-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .matrix-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 0.8fr) 1fr 1fr;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  .col-head,
+  .row-head {
+    display: flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--color-muted);
+  }
+
+  .col-head {
+    justify-content: center;
+    text-align: center;
+  }
+
+  .cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-height: 104px;
+    padding: 14px;
+    border-radius: 18px;
+    text-align: center;
+  }
+
+  .cell strong {
+    font-family: var(--font-accent);
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 1;
+  }
+
+  .cell small {
+    font-size: 13px;
+  }
+
+  .is-good {
+    background: var(--royal);
+    color: #fff;
+  }
+
+  .is-good strong {
+    color: #fff;
+  }
+
+  .is-bad {
+    background: var(--bone);
+    color: var(--royal);
+  }
+
+  .is-warn {
+    background: var(--powder);
+    color: var(--royal);
+  }
+
+  .matrix-caption {
+    margin: 16px 0 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+</style>
