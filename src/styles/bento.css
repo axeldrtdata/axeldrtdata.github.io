@@ -174,6 +174,27 @@
   font-size: 12px;
 }
 
+/* Tag colour by technology family — see src/lib/tech.ts */
+.tag-row li.tag-language {
+  background: var(--royal);
+  color: #fff;
+}
+
+.tag-row li.tag-library {
+  background: var(--powder);
+  color: var(--royal);
+}
+
+.tag-row li.tag-tool {
+  background: var(--bone);
+  color: var(--royal);
+}
+
+/* On a bone-coloured card, tool tags switch to white so they stay visible */
+.tone-bone .tag-row li.tag-tool {
+  background: #fff;
+}
+
 /* ---------- Buttons ---------- */
 .btn {
   display: inline-flex;

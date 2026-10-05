@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../lib/url';
 import { PROJECT_CATEGORIES } from '../../consts';
+import { techTone } from '../../lib/tech';
 
 export async function getStaticPaths() {
   const entries = (await getCollection('works')).sort(
@@ -78,7 +79,7 @@ const year = entry.data.publishDate.getFullYear();
         <div>
           <dt class="mono-label">Stack</dt>
           <dd>
-            <ul class="tag-row">{entry.data.tech.map((tech) => <li>{tech}</li>)}</ul>
+            <ul class="tag-row">{entry.data.tech.map((tech) => <li class={techTone(tech)}>{tech}</li>)}</ul>
           </dd>
         </div>
       </dl>

@@ -1,125 +1,843 @@
 ---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StructuredData from '../components/StructuredData.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import { getCollection } from 'astro:content';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import ProjectCard from '../../components/ProjectCard.astro';
-import { SITE, PROJECT_CATEGORIES } from '../../consts';
+import { withBase } from '../lib/url';
+import { SITE, HOME, PROJECT_CATEGORIES } from '../consts';
+import { formatDate } from '../i18n';
 
-const works = (await getCollection('works')).sort((a, b) => {
-  const orderA = a.data.order ?? Number.MAX_SAFE_INTEGER;
-  const orderB = b.data.order ?? Number.MAX_SAFE_INTEGER;
-  if (orderA !== orderB) return orderA - orderB;
-  return b.data.publishDate.valueOf() - a.data.publishDate.valueOf();
-});
+// Projects: featured ones first (max 3), otherwise the first three by order.
+const allWorks = (await getCollection('works')).sort(
+  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999),
+);
+const featuredWorks = allWorks.filter((work) => work.data.featured);
+const showcase = (featuredWorks.length > 0 ? featuredWorks : allWorks).slice(0, 3);
 
-// Only show a filter when at least one project uses that category.
-const filters = PROJECT_CATEGORIES.map((category) => ({
+// Project mix chart, computed from the real collection.
+const mix = PROJECT_CATEGORIES.map((category) => ({
   ...category,
-  count: works.filter((work) => work.data.category === category.key).length,
-})).filter((category) => category.count > 0);
+  count: allWorks.filter((work) => work.data.category === category.key).length,
+}));
+const mixLabel = mix.map((item) => `${item.count} ${item.label}`).join(', ');
+
+const posts = (await getCollection('blog'))
+  .filter((post) => !post.data.draft)
+  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
+  .slice(0, 2);
+
+const heroTone = HOME.style === 'dark' ? 'is-dark' : 'is-light';
+const quoteTone = HOME.style === 'dark' ? 'is-light' : 'is-dark';
+
+const journey = [
+  { code: 'FR', label: 'France, where it started' },
+  { code: 'AU', label: 'Australia' },
+  { code: 'SE', label: 'Sweden' },
+  { code: 'NL', label: 'The Netherlands' },
+  { code: 'FR', label: 'Back in Lyon, today', now: true },
+];
+
+const toolkit = [
+  { name: 'Python', tone: 'pill-dark' },
+  { name: 'SQL', tone: 'pill-dark' },
+  { name: 'Pandas', tone: 'pill-powder' },
+  { name: 'scikit-learn', tone: 'pill-powder' },
+  { name: 'Matplotlib', tone: 'pill-powder' },
+  { name: 'Seaborn', tone: 'pill-powder' },
+  { name: 'Power BI', tone: 'pill-bone' },
+  { name: 'VS Code', tone: 'pill-bone' },
+  { name: 'Excel', tone: 'pill-bone' },
+  { name: 'Git', tone: 'pill-bone' },
+];
+
+const site = Astro.site ?? new URL(Astro.url.origin);
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.title,
+  description: SITE.description,
+  url: new URL(withBase('/'), site).href,
+};
 ---
 
-<BaseLayout title="Projects" description={`Data analysis projects and case studies by ${SITE.title}.`}>
+<BaseLayout description={SITE.description}>
+  <StructuredData slot="head" schema={websiteSchema} />
+
   <div class="page-wrap">
-    <header class="works-head">
-      <span class="mono-label">Projects</span>
-      <h1 class="page-title">Every analysis, <span class="accent">start to finish</span>.</h1>
-      <p class="page-lead">
-        {works.length} projects across Python, SQL and data visualisation. Each one starts from a business
-        question and ends with something a team can act on.
-      </p>
-    </header>
+    <section class="bento" aria-label="Introduction">
+      <div class:list={['card', 'intro', heroTone]}>
+        <div class="intro-glow" aria-hidden="true"></div>
+        <div class="intro-body">
+          <div class="intro-top">
+            <div class="identity">
+              {
+                HOME.photo ? (
+                  <img class="photo" src={withBase(HOME.photo)} alt="Portrait of Axel Derobert" width="92" height="92" />
+                ) : (
+                  <div class="photo photo-placeholder">[Your photo]</div>
+                )
+              }
+              <div class="identity-text">
+                <span class="identity-name">Axel Derobert</span>
+                <span class="identity-role">DATA ANALYST · LYON</span>
+              </div>
+            </div>
+            <span class="status"><span class="status-dot"></span>{HOME.status}</span>
+          </div>
 
-    {
-      filters.length > 0 && (
-        <div class="filters" role="group" aria-label="Filter projects">
-          <button class="filter" type="button" data-filter="all" aria-pressed="true">
-            All <span>{works.length}</span>
-          </button>
-          {filters.map((category) => (
-            <button class="filter" type="button" data-filter={category.key} aria-pressed="false">
-              {category.label} <span>{category.count}</span>
-            </button>
-          ))}
+          <h1 class="intro-title">
+            I turn raw data into
+            <span class="intro-highlight accent"
+              >clear decisions<svg
+                aria-hidden="true"
+                viewBox="0 0 300 16"
+                preserveAspectRatio="none"
+                ><path d="M3 11 C 70 3, 150 2, 297 8"></path></svg
+              ></span
+            >.
+          </h1>
+          <p class="intro-lead">
+            Data Analyst trained with OpenClassrooms, using Python, SQL and dataviz to help businesses
+            understand what really drives their performance.
+          </p>
         </div>
-      )
-    }
 
-    <section class="bento" aria-label="All projects">
-      {works.map((work, index) => <ProjectCard work={work} number={index + 1} />)}
+        <div class="intro-actions">
+          <a class="btn btn-primary" href={withBase('/works/')}>
+            View my projects
+            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+          </a>
+          <a class="btn btn-secondary" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">
+            <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M8 11v5"></path><path d="M8 8v.01"></path><path d="M12 16v-5"></path><path d="M16 16v-3a2 2 0 0 0-4 0"></path></svg>
+            Let's talk
+          </a>
+          {HOME.cv && <a class="btn btn-ghost" href={withBase(HOME.cv)} download>Download my CV</a>}
+        </div>
+      </div>
+
+      <div class="card glass geo">
+        <div class="card-head">
+          <span class="mono-label">Based in</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+        </div>
+        <div class="geo-city">
+          <span class="geo-name">Lyon<span class="accent-italic">, France</span></span>
+          <span class="mono-small">45.76° N · 4.84° E</span>
+          <span class="muted-small">[Relocation / remote]</span>
+        </div>
+        <div class="divider"></div>
+        <div class="journey">
+          <div class="journey-head">
+            <span class="mono-label">Called home</span>
+            <span class="accent-italic journey-count">4 countries</span>
+          </div>
+          <ol class="journey-list">
+            {
+              journey.map((stop) => (
+                <li class:list={[{ now: stop.now }]}>
+                  <span class="journey-dot" />
+                  <span class="journey-code">{stop.code}</span>
+                  <span class="journey-label">{stop.label}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+        <span class="muted-small">Fluent in French and English</span>
+      </div>
+
+      <div class="card glass mix">
+        <div class="mix-head">
+          <div class="mix-total">
+            <span class="mix-number">{allWorks.length}</span>
+            <span class="mix-caption">projects, from exploratory analysis to dashboards</span>
+          </div>
+          <span class="mono-small">portfolio.describe()</span>
+        </div>
+        <div class="mix-bar" role="img" aria-label={`Project mix: ${mixLabel}`}>
+          {
+            mix
+              .filter((item) => item.count > 0)
+              .map((item) => <div style={`flex: ${item.count}; background: ${item.color}`} />)
+          }
+        </div>
+        <ul class="mix-legend">
+          {
+            mix.map((item) => (
+              <li>
+                <span class="legend-swatch" style={`background: ${item.color}`} />
+                {item.label} · {item.count}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="card tone-bone education">
+        <div class="card-head">
+          <span class="mono-label">Education</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"></path><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"></path></svg>
+        </div>
+        <div class="education-body">
+          <span class="education-title">Data Analyst, <span class="accent">OpenClassrooms</span></span>
+          <span class="muted-small">RNCP Level 6, Bachelor's equivalent · [2026]</span>
+        </div>
+      </div>
+
+      <div class="card glass toolkit">
+        <div class="card-head">
+          <h2 class="toolkit-title">My <span class="accent">toolkit</span></h2>
+          <span class="mono-small">import *</span>
+        </div>
+        <ul class="pill-list">
+          {toolkit.map((tool) => <li class:list={['pill', tool.tone]}>{tool.name}</li>)}
+        </ul>
+      </div>
+
+      <div class:list={['card', 'quote', quoteTone]}>
+        <span class="quote-mark" aria-hidden="true">“</span>
+        <p class="quote-text">
+          [One or two sentences, in your own voice: why data, and what kind of company you want to
+          help.]
+        </p>
+        <a class="quote-link" href={withBase('/about/')}>
+          Read my story
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
+        </a>
+      </div>
+    </section>
+
+    <div class="section-head" id="projects">
+      <div>
+        <span class="mono-label">01 — Featured projects</span>
+        <h2>Analyses that answer real <span class="accent">business questions</span>.</h2>
+      </div>
+      <a class="btn btn-outline" href={withBase('/works/')}>All projects ({allWorks.length})</a>
+    </div>
+
+    <section class="bento" aria-label="Featured projects">
+      {showcase.map((work, index) => <ProjectCard work={work} number={index + 1} />)}
+    </section>
+
+    <div class="section-head" id="notes">
+      <div>
+        <span class="mono-label">02 — Notes</span>
+        <h2>What's <span class="accent">caught my curiosity</span> lately.</h2>
+      </div>
+      <a class="btn btn-outline" href={withBase('/blog/')}>All notes</a>
+    </div>
+
+    <section class="bento" aria-label="Latest notes">
+      {
+        posts.map((post) => (
+          <article class="card glass note">
+            <div class="note-meta">
+              {formatDate(post.data.publishDate, 'short')}
+              {post.data.tags[0] && ` · ${post.data.tags[0]}`}
+            </div>
+            <h3>
+              <a href={withBase(`/blog/${post.id}/`)}>{post.data.title}</a>
+            </h3>
+            <p>{post.data.description}</p>
+            <a class="note-link" href={withBase(`/blog/${post.id}/`)}>
+              Read the note →
+            </a>
+          </article>
+        ))
+      }
+    </section>
+
+    <section class="contact" id="contact" aria-labelledby="contact-title">
+      <span class="mono-label">03 — Contact</span>
+      <h2 id="contact-title">
+        Got a question your data <span class="accent">hasn't answered yet?</span>
+      </h2>
+      <div class="contact-row">
+        <span class="mono-small">{HOME.email || '[your.name@email.com]'}</span>
+        <div class="contact-actions">
+          <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">
+            Let's talk on LinkedIn
+          </a>
+          {
+            HOME.cv && (
+              <a class="btn btn-white" href={withBase(HOME.cv)} download>
+                Download my CV
+              </a>
+            )
+          }
+          {HOME.email && <a class="btn btn-ghost-light" href={`mailto:${HOME.email}`}>Email me</a>}
+          <a class="btn btn-ghost-light" href={HOME.github} target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </div>
+      </div>
     </section>
   </div>
 </BaseLayout>
 
-<script>
-  // Client-side filtering. Re-runs after each page navigation (view transitions).
-  function initProjectFilters() {
-    const buttons = document.querySelectorAll<HTMLButtonElement>('[data-filter]');
-    const cards = document.querySelectorAll<HTMLElement>('[data-category]');
+<style>
+  /* Homepage-only styles. Shared pieces (cards, glass, buttons…) live in src/styles/bento.css. */
 
-    buttons.forEach((button) => {
-      button.addEventListener('click', () => {
-        const filter = button.dataset.filter;
-        buttons.forEach((other) => other.setAttribute('aria-pressed', String(other === button)));
-        cards.forEach((card) => {
-          card.hidden = filter !== 'all' && card.dataset.category !== filter;
-        });
-      });
-    });
+  /* ---------- Intro card (two variants, see HOME.style) ---------- */
+  .intro {
+    grid-column: span 4;
+    grid-row: span 2;
+    position: relative;
+    overflow: hidden;
+    justify-content: space-between;
+    gap: 36px;
+    padding: 40px;
+    color: var(--hero-text);
   }
 
-  document.addEventListener('astro:page-load', initProjectFilters);
-</script>
+  .intro.is-dark {
+    --hero-text: #fff;
+    --hero-muted: rgba(255, 255, 255, 0.82);
+    --hero-sub: rgba(255, 255, 255, 0.75);
+    --hero-highlight: var(--bone);
+    --hero-underline: var(--bone);
+    --badge-bg: rgba(255, 255, 255, 0.12);
+    --badge-border: rgba(255, 255, 255, 0.22);
+    --dot: #5bd69a;
+    --btn1-bg: #fff;
+    --btn1-fg: var(--royal);
+    --btn2-bg: var(--powder);
+    --btn3-border: rgba(255, 255, 255, 0.45);
+    --btn3-fg: #fff;
+    --glow: rgba(208, 230, 253, 0.22);
+    background: var(--royal);
+    box-shadow: 0 18px 50px rgba(22, 38, 96, 0.28);
+  }
 
-<style>
-  .works-head {
+  .intro.is-light {
+    --hero-text: var(--royal);
+    --hero-muted: #2a3766;
+    --hero-sub: #2a3766;
+    --hero-highlight: var(--royal);
+    --hero-underline: var(--steel);
+    --badge-bg: rgba(255, 255, 255, 0.65);
+    --badge-border: #fff;
+    --dot: #1e7a4c;
+    --btn1-bg: var(--royal);
+    --btn1-fg: #fff;
+    --btn2-bg: #fff;
+    --btn3-border: rgba(22, 38, 96, 0.3);
+    --btn3-fg: var(--royal);
+    --glow: rgba(255, 255, 255, 0.55);
+    background: var(--powder);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 12px 40px rgba(22, 38, 96, 0.1);
+  }
+
+  .intro-glow {
+    position: absolute;
+    right: -120px;
+    bottom: -160px;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .intro-body {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding-block: 2rem 1rem;
+    gap: 24px;
   }
 
-  .filters {
+  .intro-top {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 8px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
   }
 
-  .filter {
+  .identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .photo {
+    width: 92px;
+    height: 92px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 24px rgba(22, 38, 96, 0.22);
+    object-fit: cover;
+  }
+
+  .photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bone);
+    color: #2a3766;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .identity-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .identity-name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .identity-role {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--hero-sub);
+  }
+
+  .status {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 16px;
-    border: 1px solid var(--glass-border);
+    padding: 8px 14px;
     border-radius: var(--radius-pill);
-    background: var(--glass-bg);
+    background: var(--badge-bg);
+    border: 1px solid var(--badge-border);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--dot), transparent 80%);
+  }
+
+  .intro-title {
+    max-width: 660px;
+    font-size: clamp(2.5rem, 5vw, 3.6rem);
+    line-height: 1.04;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .intro-highlight {
+    position: relative;
+    display: inline-block;
+    font-size: 1.14em;
+    color: var(--hero-highlight);
+  }
+
+  .intro-highlight svg {
+    position: absolute;
+    left: 2%;
+    bottom: -6px;
+    width: 96%;
+    height: 12px;
+    overflow: visible;
+    stroke: var(--hero-underline);
+    stroke-width: 3;
+    opacity: 0.7;
+  }
+
+  .intro-lead {
+    max-width: 560px;
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--hero-muted);
+  }
+
+  .intro-actions {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .btn-primary,
+  .btn-primary:hover {
+    background: var(--btn1-bg);
+    color: var(--btn1-fg);
+  }
+
+  .btn-secondary,
+  .btn-secondary:hover {
+    background: var(--btn2-bg);
     color: var(--royal);
+  }
+
+  .btn-ghost,
+  .btn-ghost:hover {
+    border-color: var(--btn3-border);
+    color: var(--btn3-fg);
+  }
+
+  /* ---------- Geography card ---------- */
+  .geo {
+    grid-column: span 2;
+    grid-row: span 2;
+    justify-content: space-between;
+    gap: 22px;
+  }
+
+  .geo-city {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .geo-name {
+    font-family: var(--font-accent);
+    font-size: 44px;
+    line-height: 1;
+  }
+
+  .journey {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .journey-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .journey-count {
+    font-size: 20px;
+  }
+
+  .journey-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .journey-list li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .journey-list li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 18px;
+    bottom: -14px;
+    width: 2px;
+    background: rgba(22, 38, 96, 0.18);
+  }
+
+  .journey-dot {
+    position: relative;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--royal);
+  }
+
+  .journey-list li.now {
+    font-weight: 700;
+  }
+
+  .journey-list li.now .journey-dot {
+    background: var(--royal);
+    box-shadow: 0 0 0 4px rgba(22, 38, 96, 0.15);
+  }
+
+  .journey-code {
+    width: 26px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  /* ---------- Project mix chart ---------- */
+  .mix {
+    grid-column: span 4;
+    gap: 22px;
+  }
+
+  .mix-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .mix-total {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .mix-number {
+    font-family: var(--font-accent);
+    font-size: 76px;
+    line-height: 0.9;
+  }
+
+  .mix-caption {
+    max-width: 270px;
+    font-size: 19px;
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .mix-bar {
+    display: flex;
+    gap: 6px;
+    height: 18px;
+  }
+
+  .mix-bar div {
+    border-radius: var(--radius-pill);
+  }
+
+  .mix-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: auto;
+    margin-bottom: 10px;
+    padding-top: 6px;
     font-family: var(--font-mono);
     font-size: 13px;
-    cursor: pointer;
-    transition:
-      background-color 160ms ease,
-      color 160ms ease;
   }
 
-  .filter span {
-    padding: 1px 8px;
+  .mix-legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+  }
+
+  /* ---------- Education ---------- */
+  .education {
+    grid-column: span 2;
+    min-height: 200px;
+    padding: 26px;
+  }
+
+  .education-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-block: auto;
+  }
+
+  .education-title {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .education-title .accent {
+    font-size: 1.15em;
+  }
+
+  /* ---------- Toolkit ---------- */
+  .toolkit {
+    grid-column: span 3;
+    padding: 30px;
+  }
+
+  .toolkit-title {
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .toolkit-title .accent {
+    font-size: 1.2em;
+  }
+
+  .pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-family: var(--font-mono);
+  }
+
+  .pill {
+    padding: 10px 16px;
     border-radius: var(--radius-pill);
-    background: rgba(22, 38, 96, 0.08);
-    font-size: 12px;
+    font-size: 13px;
   }
 
-  .filter:hover {
-    background: #fff;
-  }
-
-  .filter[aria-pressed='true'] {
+  .pill-dark {
     background: var(--royal);
-    border-color: var(--royal);
     color: #fff;
   }
 
-  .filter[aria-pressed='true'] span {
-    background: rgba(255, 255, 255, 0.18);
+  .pill-powder {
+    background: var(--powder);
+  }
+
+  .pill-bone {
+    background: var(--bone);
+  }
+
+  .pill-soft {
+    background: rgba(22, 38, 96, 0.08);
+  }
+
+  /* ---------- Quote card (two variants) ---------- */
+  .quote {
+    grid-column: span 3;
+    justify-content: space-between;
+    padding: 30px;
+  }
+
+  .quote.is-light {
+    --quote-mark: rgba(22, 38, 96, 0.35);
+    --quote-link: var(--royal);
+    background: var(--powder);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    color: var(--royal);
+  }
+
+  .quote.is-dark {
+    --quote-mark: var(--bone);
+    --quote-link: var(--bone);
+    background: var(--royal);
+    color: #fff;
+    box-shadow: 0 16px 44px rgba(22, 38, 96, 0.25);
+  }
+
+  .quote-mark {
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 64px;
+    line-height: 0.5;
+    color: var(--quote-mark);
+  }
+
+  .quote-text {
+    font-family: var(--font-accent);
+    font-size: 24px;
+    line-height: 1.35;
+  }
+
+  .quote-link,
+  .quote-link:hover {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--quote-link);
+  }
+
+  /* ---------- Notes ---------- */
+  .note {
+    grid-column: span 3;
+    gap: 14px;
+    padding: 30px;
+  }
+
+  .note-meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .note h3 {
+    font-family: var(--font-accent);
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .note p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .note-link {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* ---------- Contact ---------- */
+  .contact {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    margin-top: 40px;
+    padding: 56px 48px;
+    border-radius: var(--radius-card);
+    background: var(--royal);
+    color: #fff;
+    box-shadow: 0 18px 50px rgba(22, 38, 96, 0.25);
+  }
+
+  .contact .mono-label,
+  .contact .mono-small {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .contact .mono-small {
+    font-size: 15px;
+  }
+
+  .contact h2 {
+    max-width: 860px;
+    font-size: clamp(2.2rem, 5vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+  }
+
+  .contact h2 .accent {
+    color: var(--bone);
+  }
+
+  .contact-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 860px) {
+    .intro {
+      padding: 28px;
+    }
+
+    .contact {
+      padding: 36px 28px;
+    }
   }
 </style>
