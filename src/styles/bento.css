@@ -1,0 +1,242 @@
+/* Shared design system — bento cards, glass, typography accents, buttons.
+   Used by every custom page wrapped in `.page-wrap`. */
+
+/* ---------- Page container & resets ---------- */
+.page-wrap {
+  width: min(var(--content-width), calc(100% - var(--page-pad) * 2));
+  margin-inline: auto;
+  padding-block: 2rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-wrap :is(h1, h2, h3, p) {
+  max-width: none;
+  margin: 0;
+  font-family: var(--font-body);
+  font-variation-settings: normal;
+  letter-spacing: normal;
+}
+
+.page-wrap a {
+  background-image: none;
+}
+
+.page-wrap a:hover {
+  color: inherit;
+}
+
+.page-wrap :is(ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page-wrap svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ---------- Grid & cards ---------- */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  border-radius: var(--radius-card);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+}
+
+.tone-powder {
+  background: var(--powder);
+}
+
+.tone-bone {
+  background: var(--bone);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.tone-soft {
+  background: rgba(22, 38, 96, 0.08);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.divider {
+  height: 1px;
+  background: var(--color-line);
+}
+
+/* ---------- Typography accents ---------- */
+.accent {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.12em;
+  letter-spacing: -0.01em;
+}
+
+.accent-italic {
+  font-family: var(--font-accent);
+  font-style: italic;
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.mono-small {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.muted-small {
+  font-size: 14px;
+  color: var(--color-muted);
+}
+
+.page-title {
+  font-size: clamp(2.4rem, 5.5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.03em;
+}
+
+.page-lead {
+  max-width: 640px;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--color-muted);
+}
+
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 40px;
+}
+
+.section-head > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.page-wrap .section-head h2 {
+  font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* ---------- Pills & tags ---------- */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-family: var(--font-mono);
+}
+
+.tag-row li {
+  padding: 5px 11px;
+  border-radius: var(--radius-pill);
+  background: rgba(22, 38, 96, 0.08);
+  font-size: 12px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 22px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.page-wrap .btn-royal,
+.page-wrap .btn-royal:hover {
+  background: var(--royal);
+  color: #fff;
+}
+
+.page-wrap .btn-outline,
+.page-wrap .btn-outline:hover {
+  padding: 12px 18px;
+  background: rgba(255, 255, 255, 0.7);
+  border-color: var(--color-line-strong);
+  color: var(--royal);
+}
+
+.page-wrap .btn-powder,
+.page-wrap .btn-powder:hover {
+  background: var(--powder);
+  color: var(--royal);
+}
+
+.page-wrap .btn-white,
+.page-wrap .btn-white:hover {
+  background: #fff;
+  color: var(--royal);
+}
+
+.page-wrap .btn-ghost-light,
+.page-wrap .btn-ghost-light:hover {
+  border-color: rgba(255, 255, 255, 0.45);
+  color: #fff;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 860px) {
+  .bento {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .bento > * {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+}

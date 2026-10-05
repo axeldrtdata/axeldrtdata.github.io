@@ -1,0 +1,123 @@
+---
+// One project card — used on the homepage and on /works/.
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { withBase } from '../lib/url';
+import { PROJECT_CATEGORIES } from '../consts';
+
+interface Props {
+  work: CollectionEntry<'works'>;
+  number: number;
+}
+
+const { work, number } = Astro.props;
+const category = PROJECT_CATEGORIES.find((item) => item.key === work.data.category);
+const tone = category?.tone ?? 'tone-powder';
+const placeholder = category?.visual ?? '[Key visual]';
+---
+
+<a
+  class="card glass project-card"
+  href={withBase(`/works/${work.id}/`)}
+  data-category={work.data.category ?? 'none'}
+>
+  <div class:list={['project-visual', tone]}>
+    {
+      work.data.thumbnail ? (
+        <Image src={work.data.thumbnail} alt="" width={720} height={420} loading="lazy" />
+      ) : (
+        <span class="mono-small">{placeholder}</span>
+      )
+    }
+    <span class="project-number">{String(number).padStart(2, '0')}</span>
+  </div>
+  <div class="project-body">
+    {
+      work.data.tech.length > 0 && (
+        <ul class="tag-row">
+          {work.data.tech.slice(0, 3).map((tech) => (
+            <li>{tech}</li>
+          ))}
+        </ul>
+      )
+    }
+    <h3>{work.data.title}</h3>
+    <p>{work.data.description}</p>
+    <span class="project-cta">Read the case study →</span>
+  </div>
+</a>
+
+<style>
+  .project-card {
+    grid-column: span 2;
+    gap: 18px;
+    padding: 14px 14px 26px;
+    transition:
+      box-shadow 180ms ease,
+      transform 180ms ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 48px rgba(22, 38, 96, 0.12);
+  }
+
+  .project-card[hidden] {
+    display: none;
+  }
+
+  .project-visual {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+
+  .project-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .project-number {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    padding: 2px 12px 4px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.75);
+    font-family: var(--font-accent);
+    font-style: italic;
+    font-size: 26px;
+    line-height: 1.2;
+    color: var(--royal);
+  }
+
+  .project-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .project-body h3 {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .project-body p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-muted);
+  }
+
+  .project-cta {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+</style>

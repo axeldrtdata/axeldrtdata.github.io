@@ -116,3 +116,11 @@ export const HOME = {
   /** CV placed in `public/`, e.g. '/cv-axel-derobert.pdf'. Leave '' to hide the button. */
   cv: '',
 };
+
+/** Project categories — drive the homepage chart and the filters on /works/.
+ *  A project picks one with `category:` in its front matter. */
+export const PROJECT_CATEGORIES = [
+  { key: 'python', label: 'Python', color: 'var(--royal)', tone: 'tone-powder', visual: '[Key chart]' },
+  { key: 'sql', label: 'SQL', color: 'var(--steel)', tone: 'tone-soft', visual: '[Database schema]' },
+  { key: 'dataviz', label: 'Dataviz', color: '#E2CFB2', tone: 'tone-bone', visual: '[Dashboard screenshot]' },
+] as const;
