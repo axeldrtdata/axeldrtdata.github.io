@@ -4,6 +4,7 @@ import '@fontsource/instrument-serif/400.css';
 import '@fontsource/instrument-serif/400-italic.css';
 import '@fontsource-variable/jetbrains-mono/wght.css';
 import '../styles/global.css';
+import '../styles/chrome.css';
 import { ClientRouter } from 'astro:transitions';
 import { withBase } from '../lib/url';
 import { SITE, NAV_ITEMS } from '../consts';
@@ -19,6 +20,8 @@ interface Props {
 }
 
 const siteName = SITE.title;
+const [firstName, ...lastNames] = siteName.split(' ');
+const lastRefresh = new Date().toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
 const { title = siteName, description = SITE.description, ogType = 'website', image } = Astro.props;
 
@@ -84,8 +87,8 @@ const isActive = (href: string) => {
   <body>
     <header class="site-header">
       <a class="brand" href={withBase('/')} aria-label={t('nav.brandHome', { site: siteName })}>
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span>{siteName}</span>
+        <span class="brand-first">{firstName}</span>
+        <span class="brand-last">{lastNames.join(' ')}</span>
       </a>
       <nav class="site-nav" aria-label={t('nav.label')}>
         {
@@ -96,6 +99,13 @@ const isActive = (href: string) => {
           ))
         }
       </nav>
+      <div class="header-actions">
+        <div class="lang-switch" role="group" aria-label="Language">
+          <a class="lang is-active" href={withBase('/')} aria-current="true">EN</a>
+          <span class="lang is-soon" title="French version coming soon">FR</span>
+        </div>
+        <a class="header-cta" href={withBase('/#contact')}>Contact me</a>
+      </div>
     </header>
 
     <main>
@@ -103,10 +113,11 @@ const isActive = (href: string) => {
     </main>
 
     <footer class="site-footer">
-      <p>{SITE.footerText}</p>
-      <div class="footer-links">
-        <a href={withBase('/blog/')}>{t('footer.notes')}</a>
-      </div>
+      <p>© {new Date().getFullYear()} {siteName} · {SITE.footerText}</p>
+      <p class="footer-status">
+        <span class="footer-dot" aria-hidden="true"></span>
+        Last refresh: {lastRefresh} · all pipelines green
+      </p>
       <SocialLinks />
     </footer>
 

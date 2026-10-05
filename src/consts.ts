@@ -94,11 +94,9 @@ export type NavItem =
  *  localize through the UI dictionary; give a page you add yourself a literal
  *  `label` instead — one of the two is required. */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/', labelKey: 'nav.home' },
-  { href: '/about/', labelKey: 'nav.about' },
-  { href: '/works/', labelKey: 'nav.works' },
-  { href: '/blog/', labelKey: 'nav.blog' },
-  { href: '/search/', labelKey: 'nav.search' },
+  { href: '/works/', label: 'Projects' },
+  { href: '/blog/', label: 'Notes' },
+  { href: '/about/', label: 'About' },
 ];
 
 /** Homepage settings. `style` switches the two hero layouts:

@@ -1,0 +1,180 @@
+/* Header and footer — Axel Derobert portfolio.
+   Loaded after global.css, so these rules override the template's. */
+
+/* ---------- Header: floating glass pill ---------- */
+body {
+  padding-top: 18px;
+}
+
+.site-header {
+  position: sticky;
+  top: 14px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 10px 10px 10px 22px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 8px 30px rgba(22, 38, 96, 0.07);
+}
+
+.site-header a {
+  background-image: none;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-family: var(--font-body);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.brand-first {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.brand-last {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 22px;
+}
+
+.site-nav {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+
+.site-nav a {
+  padding: 10px 14px;
+  border-radius: var(--radius-pill);
+  color: var(--color-muted);
+  font-size: 15px;
+  font-weight: 500;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.site-header .site-nav a:hover {
+  color: var(--color-text);
+  background-color: rgba(22, 38, 96, 0.06);
+}
+
+.site-nav a[aria-current='page'] {
+  color: var(--color-text);
+  font-weight: 600;
+  background-color: rgba(22, 38, 96, 0.07);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-switch {
+  display: inline-flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: rgba(22, 38, 96, 0.07);
+}
+
+.lang {
+  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-muted);
+}
+
+.lang.is-active {
+  background: #fff;
+  color: var(--color-text);
+  box-shadow: 0 1px 4px rgba(22, 38, 96, 0.12);
+}
+
+.lang.is-soon {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.header-cta {
+  padding: 12px 20px;
+  border-radius: var(--radius-pill);
+  background: var(--royal);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color 160ms ease;
+}
+
+.site-header .header-cta:hover {
+  color: #fff;
+  background-color: var(--color-accent-hover);
+}
+
+/* ---------- Footer ---------- */
+.site-footer {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.footer-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.social-links a {
+  border-radius: 50%;
+}
+
+.footer-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #1e7a4c;
+}
+
+/* ---------- Mobile ---------- */
+@media (max-width: 760px) {
+  .site-header {
+    top: 8px;
+    flex-wrap: wrap;
+    row-gap: 6px;
+    padding: 10px 10px 8px 18px;
+    border-radius: 24px;
+  }
+
+  .site-nav {
+    order: 3;
+    width: 100%;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+
+  .site-nav a {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-cta {
+    display: none;
+  }
+}
