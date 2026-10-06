@@ -65,9 +65,11 @@ Only 105 of the 181 countries had a complete profile. I set a strict rule: a cou
 For the remaining gaps, the imputation depended on what the gap meant. Values of zero for internet access or unemployment were treated as missing rather than real, then filled with the **median of the country's income group**: a low-income country is compared with other low-income countries, not with the global average. Missing tourism figures, on the other hand, were set to zero, since they mostly concerned unstable or very small states where tourism is genuinely negligible.
 
 ```python
-# Fill gaps with the median of countries at the same income level
-for col in ["Internet", "Unemployment", "LPI", "Poultry production", "Poultry imports"]:
-    df[col] = df.groupby("income_group")[col].transform(lambda x: x.fillna(x.median()))
+   # Fill gaps with the median of countries in the same income group (IC)
+   for col in ["Internet", "Chomage"]:
+       df_volaille[col] = df_volaille.groupby("IC")[col].transform(
+           lambda x: x.fillna(x.median())
+       )
 ```
 
 ### Taming the giants

@@ -1,20 +1,33 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { getCollection } from 'astro:content';
-import { readFile } from 'node:fs/promises';
+import { readFile, access } from 'node:fs/promises';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
-import { SITE } from '../../../consts';
+import { PROJECT_CATEGORIES } from '../../../consts';
 
-// Build-time generated Open Graph images for every blog post and work entry,
-// rendered in the theme's light palette (see global.css tokens). The static
-// `public/og.jpg` remains the site-wide fallback for all other pages.
+// Share images (Open Graph) generated at build time for every case study and note,
+// in the portfolio's own palette. When a case study has an icon.png next to its
+// index.mdx, the icon is shown on the right of the image.
 
 interface OgProps {
   title: string;
   description: string;
   kind: string;
+  iconPath?: string;
 }
+
+const iconNextTo = async (filePath?: string) => {
+  if (!filePath) return undefined;
+  const candidate = path.join(path.dirname(filePath), 'icon.png');
+  try {
+    await access(candidate);
+    return candidate;
+  } catch {
+    return undefined;
+  }
+};
 
 export const getStaticPaths = (async () => {
   const blog = await getCollection('blog', ({ data }) => !data.draft);
@@ -22,184 +35,117 @@ export const getStaticPaths = (async () => {
   return [
     ...blog.map((entry) => ({
       params: { collection: 'blog', slug: entry.id },
-      props: {
-        title: entry.data.title,
-        description: entry.data.description,
-        kind: 'Blog',
-      } satisfies OgProps,
+      props: { title: entry.data.title, description: entry.data.description, kind: 'Note' } satisfies OgProps,
     })),
-    ...works.map((entry) => ({
-      params: { collection: 'works', slug: entry.id },
-      props: {
-        title: entry.data.title,
-        description: entry.data.description,
-        kind: 'Work',
-      } satisfies OgProps,
-    })),
+    ...(await Promise.all(
+      works.map(async (entry) => {
+        const category = PROJECT_CATEGORIES.find((item) => item.key === entry.data.category);
+        return {
+          params: { collection: 'works', slug: entry.id },
+          props: {
+            title: entry.data.title,
+            description: entry.data.description,
+            kind: category ? `Case study · ${category.label}` : 'Case study',
+            iconPath: await iconNextTo(entry.filePath),
+          } satisfies OgProps,
+        };
+      }),
+    )),
   ];
 }) satisfies GetStaticPaths;
 
-// Satori has no oklch() support, so these are hex equivalents of the
-// light-theme tokens in global.css.
 const COLOR = {
-  bg: '#fcfcfa',
-  text: '#252831',
-  muted: '#697080',
-  line: '#dbd8d0',
-  accent: '#a8492c',
+  cream: '#F7F1E8',
+  powder: '#D0E6FD',
+  royal: '#162660',
+  muted: '#3E4A73',
 };
 
 const require = createRequire(import.meta.url);
 const font = (pkgPath: string) => readFile(require.resolve(pkgPath));
 
-// Latin subsets, to keep the build light. Satori draws any glyph these fonts
-// lack as an empty box, which is why the `kind` labels above stay Latin rather
-// than going through the UI dictionary — `SITE.locale = 'ja'` would otherwise
-// render them as tofu in every share image. Post titles in a non-Latin script
-// hit the same limit: install a face that covers them (e.g.
-// `@fontsource/noto-sans-jp`) and point the paths below at it.
-const [fraunces, publicSans] = await Promise.all([
-  font('@fontsource/fraunces/files/fraunces-latin-600-normal.woff'),
-  font('@fontsource/public-sans/files/public-sans-latin-400-normal.woff'),
+const [jakarta400, jakarta800, serifItalic] = await Promise.all([
+  font('@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-400-normal.woff'),
+  font('@fontsource/plus-jakarta-sans/files/plus-jakarta-sans-latin-800-normal.woff'),
+  font('@fontsource/instrument-serif/files/instrument-serif-latin-400-italic.woff'),
 ]);
 
-const truncate = (text: string, max: number) =>
-  text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+// Cut long text at the last full word, so it never stops mid-word.
+const truncate = (text: string, max: number) => {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max - 1);
+  return `${cut.slice(0, cut.lastIndexOf(' ')).replace(/[,:;.]$/, '')}…`;
+};
+
+const el = (type: string, style: Record<string, unknown>, children?: unknown) => ({
+  type,
+  props: { style, children },
+});
 
 export const GET: APIRoute<OgProps> = async ({ props }) => {
-  const { title, description, kind } = props;
+  const { title, description, kind, iconPath } = props;
+  const icon = iconPath ? `data:image/png;base64,${(await readFile(iconPath)).toString('base64')}` : undefined;
+
+  const textColumn = el('div', { display: 'flex', flexDirection: 'column', flex: 1, gap: 22 }, [
+    el('div', { fontSize: 20, letterSpacing: 3, textTransform: 'uppercase', color: COLOR.muted }, kind),
+    el(
+      'div',
+      { fontSize: title.length > 50 ? 54 : 62, fontWeight: 800, lineHeight: 1.08, letterSpacing: -1.5, color: COLOR.royal },
+      truncate(title, 80),
+    ),
+    el('div', { fontSize: 24, lineHeight: 1.45, color: COLOR.muted }, truncate(description, 130)),
+  ]);
+
+  const card = el(
+    'div',
+    {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 48,
+      flex: 1,
+      padding: '56px 60px',
+      borderRadius: 36,
+      backgroundColor: '#FFFFFF',
+      border: '2px solid rgba(255,255,255,0.9)',
+      boxShadow: '0 20px 60px rgba(22,38,96,0.10)',
+    },
+    icon ? [textColumn, { type: 'img', props: { src: icon, width: 280, height: 280 } }] : [textColumn],
+  );
+
+  const footer = el('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 26, padding: '0 8px' }, [
+    el('div', { display: 'flex', alignItems: 'baseline', gap: 8, color: COLOR.royal }, [
+      el('div', { fontSize: 28, fontWeight: 800 }, 'Axel'),
+      el('div', { fontFamily: 'Instrument Serif', fontSize: 34 }, 'Derobert'),
+    ]),
+    el('div', { fontSize: 22, color: COLOR.muted }, 'axeldrtdata.github.io'),
+  ]);
 
   const svg = await satori(
-    {
-      type: 'div',
-      props: {
-        style: {
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          backgroundColor: COLOR.bg,
-          padding: 40,
-          fontFamily: 'Public Sans',
-        },
-        children: {
-          type: 'div',
-          props: {
-            style: {
-              flex: 1,
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              border: `1px solid ${COLOR.line}`,
-              padding: '52px 60px',
-            },
-            children: [
-              {
-                type: 'div',
-                props: {
-                  style: { display: 'flex', alignItems: 'center', gap: 16 },
-                  children: [
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          width: 22,
-                          height: 22,
-                          backgroundColor: COLOR.accent,
-                        },
-                      },
-                    },
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          fontFamily: 'Fraunces',
-                          fontSize: 30,
-                          color: COLOR.text,
-                        },
-                        children: SITE.title,
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                type: 'div',
-                props: {
-                  style: { display: 'flex', flexDirection: 'column' },
-                  children: [
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 14,
-                          marginBottom: 28,
-                          color: COLOR.accent,
-                          fontFamily: 'Fraunces',
-                          fontSize: 24,
-                          textTransform: 'uppercase',
-                          letterSpacing: 4,
-                        },
-                        children: [
-                          {
-                            type: 'div',
-                            props: {
-                              style: {
-                                width: 40,
-                                height: 1,
-                                backgroundColor: COLOR.accent,
-                              },
-                            },
-                          },
-                          { type: 'div', props: { children: kind } },
-                        ],
-                      },
-                    },
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          fontFamily: 'Fraunces',
-                          fontSize: title.length > 55 ? 54 : 64,
-                          lineHeight: 1.15,
-                          color: COLOR.text,
-                        },
-                        children: truncate(title, 90),
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    fontSize: 26,
-                    lineHeight: 1.4,
-                    color: COLOR.muted,
-                  },
-                  children: truncate(description, 120),
-                },
-              },
-            ],
-          },
-        },
+    el(
+      'div',
+      {
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: 44,
+        fontFamily: 'Plus Jakarta Sans',
+        backgroundColor: COLOR.cream,
+        backgroundImage: `radial-gradient(circle at 0% 0%, ${COLOR.powder} 0%, ${COLOR.cream} 55%)`,
       },
-    },
+      [card, footer],
+    ) as never,
     {
       width: 1200,
       height: 630,
       fonts: [
-        { name: 'Fraunces', data: fraunces, weight: 600, style: 'normal' },
-        { name: 'Public Sans', data: publicSans, weight: 400, style: 'normal' },
+        { name: 'Plus Jakarta Sans', data: jakarta400, weight: 400, style: 'normal' },
+        { name: 'Plus Jakarta Sans', data: jakarta800, weight: 800, style: 'normal' },
+        { name: 'Instrument Serif', data: serifItalic, weight: 400, style: 'normal' },
       ],
     },
   );
 
   const png = await sharp(Buffer.from(svg)).png().toBuffer();
-
-  return new Response(new Uint8Array(png), {
-    headers: { 'Content-Type': 'image/png' },
-  });
+  return new Response(new Uint8Array(png), { headers: { 'Content-Type': 'image/png' } });
 };
