@@ -86,7 +86,7 @@ const websiteSchema = {
           </div>
 
           <h1 class="intro-title">
-            Curious by nature
+            Curious by nature,
             <span class="intro-highlight accent"
               >analytical by training<svg
                 aria-hidden="true"
@@ -97,8 +97,8 @@ const websiteSchema = {
             >
           </h1>
           <p class="intro-lead">
-            Iturn raw data into clear decisions. Data Analyst trained with OpenClassrooms, using Python, SQL and dataviz to help businesses
-            understand what really drives their performance.
+            I turn raw data into clear decisions. Data Analyst trained with OpenClassrooms, using Python,
+            SQL and dataviz to help businesses understand what really drives their performance.
           </p>
         </div>
 
@@ -163,7 +163,7 @@ const websiteSchema = {
         </div>
         <ul class="mix-legend">
           {
-            mix.map((item) => (
+            mix.filter((item) => item.count > 0).map((item) => (
               <li>
                 <span class="legend-swatch" style={`background: ${item.color}`} />
                 {item.label} · {item.count}
@@ -219,6 +219,9 @@ const websiteSchema = {
       {showcase.map((work, index) => <ProjectCard work={work} number={index + 1} />)}
     </section>
 
+    {
+      posts.length > 0 && (
+        <>
     <div class="section-head" id="notes">
       <div>
         <span class="mono-label">02 — Notes</span>
@@ -246,6 +249,9 @@ const websiteSchema = {
         ))
       }
     </section>
+        </>
+      )
+    }
 
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <span class="mono-label">03 — Contact</span>

@@ -14,7 +14,7 @@ featured: true
 order: 1
 client: 'ONCFM, anti-counterfeiting agency (OpenClassrooms case)'
 role: 'Data Analyst, training project'
-repo: 'https://github.com/axeldrtdata/counterfeit-banknotes'
+repo: 'https://github.com/axeldrtdata'
 publishDate: 2026-06-01
 ---
 
@@ -71,8 +71,8 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # The scale is learned on training notes only
 scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+x_train_scaled = scaler.fit_transform(X_train)
+x_test_scaled = scaler.transform(X_test)
 ```
 
 ## Four models, one evaluation frame
@@ -95,7 +95,7 @@ The k-means result is the most telling one. Without ever being told which notes 
   tn={98}
   fp={2}
   fn={1}
-  tp={198}
+  tp={199}
   caption="Two counterfeits out of 100 were missed, and a single genuine note was wrongly flagged."
 />
 
@@ -104,7 +104,9 @@ The k-means result is the most telling one. Without ever being told which notes 
 Logistic regression and random forest finished level: the same confusion matrix, the same accuracy, and AUC scores 0.0001 apart. When two models are this close, the tie-breaker is everything else.
 
 The classes are almost linearly separable, so the extra power of a hundred decision trees brings nothing here. That is the principle of parsimony, better known as **Occam's razor**: when two models perform equally well, the simpler one should win. Logistic regression is faster, less prone to overfitting, and above all **explainable**: each measurement gets one coefficient, so anyone at the agency can see why a note was flagged.
+
 <Takeaway label="Occam's razor">At equal performance, the simplest model always wins.</Takeaway>
+
 ## From notebook to working tool
 
 The final model is saved as a single pipeline that bundles the standardisation and the logistic regression, so new notes can be scored straight from raw measurements without repeating any preparation step.
@@ -112,18 +114,20 @@ The final model is saved as a single pipeline that bundles the standardisation a
 The script loads a file of new notes and returns, for each one, a verdict and the probability of being genuine. I added one feature that wasn't in the brief: notes the model is unsure about are **flagged for a human check** instead of being decided blindly.
 
 ```python
-confidence = model.predict_proba(notes)[:, 1]     # probability of being genuine
-certainty = np.abs(confidence - 0.5) * 2          # 0 = coin toss, 1 = fully certain
-results["Human check"] = np.where(certainty < 0.30, "To check", "")
+# Flag uncertain notes for a human check
+confiance = modele.predict_proba(df_taille_billets)[:, 1]   # probability of being genuine
+ecart = np.abs(confiance - 0.5) * 2                          # 0 = coin toss, 1 = fully certain
+seuil = 0.30
+resultats["Human check"] = np.where(ecart < seuil, "To check", "")
 ```
 
 | Note | Verdict | Probability of being genuine |
 | ---- | ------- | ---------------------------- |
 | B_1  | Genuine | 0.995                        |
-| B_2  | Fake    | 0.003                        |
+| B_2  | Counterfeit | 0.003                    |
 | B_3  | Genuine | 0.999                        |
-| B_4  | Fake    | 0.000                        |
-| B_5  | Fake    | 0.011                        |
+| B_4  | Counterfeit | 0.000                    |
+| B_5  | Counterfeit | 0.011                    |
 
 ## What I would do next
 
