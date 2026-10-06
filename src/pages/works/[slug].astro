@@ -1,5 +1,6 @@
 ---
 import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { withBase } from '../../lib/url';
 import { PROJECT_CATEGORIES } from '../../consts';
@@ -32,9 +33,16 @@ const year = entry.data.publishDate.getFullYear();
 
     <header class="case-head bento">
       <div class="card glass case-intro">
-        <span class="mono-label">
-          Case study {String(number).padStart(2, '0')}{category && ` · ${category.label}`}
-        </span>
+        <div class="case-top">
+          <span class="mono-label">
+            Case study {String(number).padStart(2, '0')}{category && ` · ${category.label}`}
+          </span>
+          {
+            entry.data.icon && (
+              <Image class="case-icon" src={entry.data.icon} alt="" width={256} height={256} />
+            )
+          }
+        </div>
         <h1 class="case-title">{entry.data.title}</h1>
         <p class="case-lead">{entry.data.description}</p>
         <div class="case-actions">
@@ -117,6 +125,29 @@ const year = entry.data.publishDate.getFullYear();
     grid-column: span 4;
     gap: 20px;
     padding: 36px;
+  }
+
+  .case-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .case-icon {
+    width: 128px;
+    height: 128px;
+    flex-shrink: 0;
+    margin: -14px -12px -12px 0;
+    object-fit: contain;
+  }
+
+  @media (max-width: 560px) {
+    .case-icon {
+      width: 84px;
+      height: 84px;
+      margin: -6px -4px -6px 0;
+    }
   }
 
   .case-title {

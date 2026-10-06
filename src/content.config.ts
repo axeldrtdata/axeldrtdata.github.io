@@ -14,6 +14,7 @@ const works = defineCollection({
       link: z.string().url().optional(),
       repo: z.string().url().optional(),
       thumbnail: image().optional(),
+      icon: image().optional(),
       order: z.number().optional(),
       publishDate: z.coerce.date(),
       category: z.enum(['python', 'sql', 'dataviz']).optional(),
