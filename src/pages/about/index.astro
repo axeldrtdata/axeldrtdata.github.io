@@ -1,80 +1,307 @@
 ---
-// The prose on this page is placeholder copy — rewrite it as your own. It is
-// intentionally *not* in `src/i18n/`: the dictionary holds UI chrome, so a
-// translator isn't handed someone else's biography, and you don't have to open
-// a dictionary file to edit your own about page.
+import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SITE } from '../../consts';
-import { t } from '../../i18n';
+import { withBase } from '../../lib/url';
+import { HOME } from '../../consts';
+
+const projectCount = (await getCollection('works')).length;
+
+const journey = [
+  { code: 'FR', label: 'France, where I grew up' },
+  { code: 'AU', label: 'Australia' },
+  { code: 'SE', label: 'Sweden' },
+  { code: 'NL', label: 'The Netherlands' },
+  { code: 'FR', label: 'Back in Lyon, today', now: true },
+];
+
+const fields = ['E-commerce', 'Real estate', 'Food security', 'Market research', 'Fraud detection'];
 ---
 
-<BaseLayout
-  title={t('about.title')}
-  description={`About the author behind this ${SITE.title} site.`}
->
-  <section class="page-head section">
-    <p class="eyebrow">{t('about.eyebrow')}</p>
-    <h1>A measured profile for the person behind the work.</h1>
-    <p class="lead">
-      This page is shaped for a concise biography, a working philosophy, and the handful of details
-      that help readers understand how you think.
-    </p>
-  </section>
-
-  <section class="section prose-grid">
-    <div>
-      <p class="eyebrow">Profile</p>
-      <h2>Quiet systems, clear writing, durable interfaces.</h2>
-    </div>
-    <div class="prose-stack">
-      <p>
-        I work across product strategy, interface systems, and technical writing. The common thread
-        is structure: making complex material easier to scan, trust, and maintain.
-      </p>
-      <p>
-        Astro Keel leaves room for this kind of context without forcing a loud personal brand.
-        Replace this placeholder with a specific background, current role, and the constraints that
-        shape your work.
-      </p>
-    </div>
-  </section>
-
-  <section class="section" aria-label={t('about.ledgerLabel')}>
-    <div class="about-ledger">
-      <article>
-        <span>01</span>
-        <h3>Current focus</h3>
-        <p>Designing lean content systems, portfolio surfaces, and editorial product pages.</p>
-      </article>
-      <article>
-        <span>02</span>
-        <h3>Background</h3>
-        <p>
-          Experience spanning frontend implementation, design systems, and writing for technical
-          audiences.
+<BaseLayout title="About" description="Axel Derobert, Data Analyst in Lyon: finding the story behind the numbers.">
+  <div class="page-wrap">
+    <section class="bento" aria-label="About Axel">
+      <div class="card glass about-intro">
+        <span class="mono-label">About</span>
+        <h1 class="page-title">Finding the <span class="accent">story</span> behind the numbers</h1>
+        <p class="page-lead">
+          Born and raised in France, I left right after high school to live abroad: Australia, then
+          Sweden, then the Netherlands. Those years away made me fluent in English, taught me real
+          independence, and left me with a lasting habit: figuring out how things work wherever I land.
         </p>
-      </article>
-      <article>
-        <span>03</span>
-        <h3>Contact</h3>
-        <p>
-          Use this section for availability, collaboration preferences, or a direct contact route.
-        </p>
-      </article>
-    </div>
-  </section>
+      </div>
 
-  <section class="section prose-grid about-closing">
-    <div>
-      <p class="eyebrow">Method</p>
-      <h2>Structure before surface.</h2>
-    </div>
-    <div class="prose-stack">
-      <p>
-        The theme treats the page like a working document: hierarchy first, rhythm second, visual
-        signature third. Fine rules, generous spacing, and type contrast carry the identity without
-        competing with the content.
-      </p>
-    </div>
-  </section>
+      <div class="card portrait-card">
+        {
+          HOME.photo ? (
+            <img class="portrait" src={withBase(HOME.photo)} alt="Portrait of Axel Derobert" width="480" height="480" />
+          ) : (
+            <div class="portrait portrait-placeholder">[Your photo]</div>
+          )
+        }
+      </div>
+
+      <div class="card tone-powder today">
+        <span class="mono-label">Today</span>
+        <p class="today-text">
+          That curiosity has found its playground: <strong>data</strong>. I am training as a Data
+          Analyst with OpenClassrooms, learning to turn raw, messy data into clear and game-changing
+          decisions.
+        </p>
+      </div>
+
+
+
+
+      <div class="card tone-bone toolkit-card">
+        <span class="mono-label">My toolkit</span>
+        <p class="toolkit-text">
+          Python, SQL, Power BI: <span class="accent">whatever it takes to make data talk.</span>
+        </p>
+      </div>
+
+      <div class="card glass fields">
+        <div class="card-head">
+          <span class="mono-label">End-to-end analyses</span>
+          <span class="mono-small">{projectCount} on this site</span>
+        </div>
+        <p class="fields-text">
+          Across my OpenClassrooms projects, I have run analyses from raw data to recommendation in
+          very different fields.
+        </p>
+        <ul class="tag-row big-tags">{fields.map((field) => <li>{field}</li>)}</ul>
+        <a class="fields-link" href={withBase('/works/')}>See the case studies →</a>
+      </div>
+
+      <div class="card glass journey-card">
+        <div class="card-head">
+          <span class="mono-label">Called home</span>
+          <span class="accent-italic journey-count">4 countries</span>
+        </div>
+        <ol class="journey-list">
+          {
+            journey.map((stop) => (
+              <li class:list={[{ now: stop.now }]}>
+                <span class="journey-dot" />
+                <span class="journey-code">{stop.code}</span>
+                <span>{stop.label}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <span class="muted-small">Native French, fluent English</span>
+      </div>
+
+      <div class="card glass offscreen">
+        <span class="mono-label">Off-screen</span>
+        <p class="offscreen-text">Listening to and making music, and football.</p>
+      </div>
+    </section>
+
+    <section class="cta" aria-labelledby="cta-title">
+      <span class="mono-label">What I'm looking for</span>
+      <h2 id="cta-title">
+        A data internship in Lyon or hybrid. If you need someone <span class="accent">curious and rigorous</span>,
+        let's talk.
+      </h2>
+      <div class="cta-actions">
+        <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">Let's talk on LinkedIn</a>
+        {HOME.cv && <a class="btn btn-white" href={withBase(HOME.cv)} download>Download my CV</a>}
+        <a class="btn btn-ghost-light" href={HOME.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+    </section>
+  </div>
 </BaseLayout>
+
+<style>
+  .about-intro {
+    grid-column: span 4;
+    justify-content: center;
+    gap: 20px;
+    padding: 40px;
+  }
+
+  .portrait-card {
+    grid-column: span 2;
+    padding: 0;
+    overflow: hidden;
+    background: var(--powder);
+  }
+
+  .portrait {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 280px;
+    object-fit: cover;
+  }
+
+  .portrait-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+
+  .today {
+    grid-column: span 4;
+    justify-content: center;
+  }
+
+  .today-text {
+    font-family: var(--font-accent);
+    font-size: 26px;
+    line-height: 1.35;
+  }
+
+  .today-text strong {
+    font-family: var(--font-body);
+    font-size: 0.9em;
+  }
+
+  .journey-card {
+    grid-column: span 2;
+    grid-row: span 2;
+    justify-content: space-between;
+    gap: 22px;
+  }
+
+  .journey-count {
+    font-size: 20px;
+  }
+
+  .journey-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .journey-list li {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .journey-list li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 18px;
+    bottom: -14px;
+    width: 2px;
+    background: rgba(22, 38, 96, 0.18);
+  }
+
+  .journey-dot {
+    position: relative;
+    z-index: 1;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--royal);
+  }
+
+  .journey-list li.now {
+    font-weight: 700;
+  }
+
+  .journey-list li.now .journey-dot {
+    background: var(--royal);
+    box-shadow: 0 0 0 4px rgba(22, 38, 96, 0.15);
+  }
+
+  .journey-code {
+    width: 26px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .fields {
+    grid-column: span 4;
+  }
+
+  .fields-text {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .big-tags li {
+    padding: 8px 14px;
+    font-size: 13px;
+  }
+
+  .fields-link {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .toolkit-card {
+    grid-column: span 2;
+    justify-content: space-between;
+  }
+
+  .toolkit-text {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.35;
+  }
+
+  .offscreen {
+    grid-column: span 4;
+    justify-content: space-between;
+  }
+
+  .offscreen-text {
+    font-family: var(--font-accent);
+    font-size: 24px;
+    line-height: 1.3;
+  }
+
+  .cta {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 40px;
+    padding: 48px;
+    border-radius: var(--radius-card);
+    background: var(--royal);
+    color: #fff;
+    box-shadow: 0 18px 50px rgba(22, 38, 96, 0.25);
+  }
+
+  .cta .mono-label {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .cta h2 {
+    max-width: 860px;
+    font-size: clamp(1.9rem, 4vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .cta h2 .accent {
+    color: var(--bone);
+  }
+
+  .cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 860px) {
+    .about-intro,
+    .cta {
+      padding: 28px;
+    }
+  }
+</style>

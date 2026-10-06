@@ -107,8 +107,8 @@ export type HomeStyle = 'dark' | 'light';
 export const HOME = {
   style: 'dark' as HomeStyle,
   /** Photo placed in `public/`, e.g. '/axel.jpg'. Leave '' for the placeholder. */
-  photo: '',
-  status: 'Open to [internship / first role]',
+  photo: '/axel.jpg',
+  status: 'Open to a data internship · Lyon or hybrid',
   linkedin: 'https://www.linkedin.com/in/axel-derobert-5717463b1/',
   github: 'https://github.com/axeldrtdata',
   /** Contact email. Leave '' to hide the email button. */
