@@ -56,7 +56,7 @@ const year = entry.data.publishDate.getFullYear();
           {
             entry.data.link && (
               <a class="btn btn-outline" href={entry.data.link} target="_blank" rel="noopener noreferrer">
-                Open the live version ↗
+                {entry.data.category === 'dataviz' ? 'Open the live dashboard ↗' : 'Open the live version ↗'}
               </a>
             )
           }

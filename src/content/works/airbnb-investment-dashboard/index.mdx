@@ -15,12 +15,14 @@ order: 3
 client: 'Short-term rental investors (OpenClassrooms case)'
 role: 'Data Analyst, training project'
 repo: 'https://github.com/axeldrtdata/airbnb-investment-dashboard'
+link: 'https://public.tableau.com/app/profile/axel.derobert/viz/AirbnbInvestmentDashboard/World'
 publishDate: 2026-08-01
 ---
 
 import KeyFigures from '../../../components/case/KeyFigures.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
+import TableauEmbed from '../../../components/case/TableauEmbed.astro';
 import worldImg from './dashboard-world.png';
 import countriesImg from './dashboard-countries.png';
 import citiesImg from './dashboard-cities.png';
@@ -43,6 +45,18 @@ But income alone is not enough to decide. An investor also needs to know who the
 />
 
 One principle runs through the whole dashboard: **no number is ever read on its own**. A city charging $130 a night means nothing until you know whether that is above or below its market. Every indicator is compared to a reference, the median city on the charts and the national average on the KPI cards. You never read a value, you read a gap.
+
+## Try it yourself
+
+The dashboard is published on Tableau Public. Launch it below to move the slider, filter a country or compare cities, exactly as an investor would.
+
+<TableauEmbed
+  workbook="AirbnbInvestmentDashboard"
+  view="World"
+  profile="axel.derobert"
+  poster={worldImg}
+  alt="Preview of the World page of the Airbnb investment dashboard."
+/>
 
 ## Making 500,000 listings comparable
 
