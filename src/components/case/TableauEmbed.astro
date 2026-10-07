@@ -13,15 +13,19 @@ interface Props {
   poster: ImageMetadata;
   alt: string;
   title?: string;
+  /** Fixed size of the dashboard in Tableau (Dashboard > Size > Fixed size). */
+  width?: number;
   height?: number;
 }
 
-const { workbook, view, profile, poster, alt, title = 'Live dashboard', height = 880 } = Astro.props;
-const embedUrl = `https://public.tableau.com/views/${workbook}/${view}?:showVizHome=no&:embed=true&:tabs=yes&:toolbar=yes&:language=en-US`;
+const { workbook, view, profile, poster, alt, title = 'Live dashboard', width = 1400, height = 900 } = Astro.props;
+// Tabs bar above the dashboard and toolbar below it, added by Tableau Public.
+const chrome = 62;
+const embedUrl = `https://public.tableau.com/views/${workbook}/${view}?:showVizHome=no&:embed=true&:tabs=yes&:toolbar=yes&:device=desktop&:language=en-US`;
 const pageUrl = `https://public.tableau.com/app/profile/${profile}/viz/${workbook}/${view}`;
 ---
 
-<figure class="tableau glass" data-tableau-embed data-src={embedUrl} style={`--tableau-height: ${height}px`}>
+<figure class="tableau glass" data-tableau-embed data-src={embedUrl} data-width={width} data-height={height + chrome}>
   <figcaption class="tableau-head">
     <span class="tableau-title">{title}</span>
     <a class="tableau-open" href={pageUrl} target="_blank" rel="noopener noreferrer">Open on Tableau Public ↗</a>
@@ -44,13 +48,25 @@ const pageUrl = `https://public.tableau.com/app/profile/${profile}/viz/${workboo
       if (!button || !stage || button.dataset.bound) return;
       button.dataset.bound = 'true';
       button.addEventListener('click', () => {
+        const width = Number(embed.dataset.width);
+        const height = Number(embed.dataset.height);
         const iframe = document.createElement('iframe');
         iframe.src = embed.dataset.src ?? '';
         iframe.title = 'Interactive Tableau dashboard';
-        iframe.loading = 'lazy';
         iframe.allowFullscreen = true;
+        iframe.width = String(width);
+        iframe.height = String(height);
         stage.replaceChildren(iframe);
         embed.classList.add('is-live');
+
+        // Render the dashboard at its real size, then scale it down to fit the page.
+        const fit = () => {
+          const scale = Math.min(1, stage.clientWidth / width);
+          iframe.style.transform = `scale(${scale})`;
+          stage.style.height = `${Math.round(height * scale)}px`;
+        };
+        fit();
+        new ResizeObserver(fit).observe(stage);
       });
     });
   }
@@ -141,11 +157,14 @@ const pageUrl = `https://public.tableau.com/app/profile/${profile}/viz/${workboo
     box-shadow: 0 0 0 4px rgba(91, 214, 154, 0.25);
   }
 
+  .tableau.is-live .tableau-stage {
+    border-radius: 6px;
+  }
+
   .tableau-stage :global(iframe) {
     display: block;
-    width: 100%;
-    height: var(--tableau-height);
     border: 0;
+    transform-origin: top left;
   }
 
   .tableau-note {
