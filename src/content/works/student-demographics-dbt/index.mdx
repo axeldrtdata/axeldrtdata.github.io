@@ -1,0 +1,179 @@
+---
+title: 'Who still enrols in the Data path?'
+description: 'A dbt and Snowflake pipeline that cleans, pseudonymises and enriches four years of OpenClassrooms enrolments with INSEE data, then reads how the student profile is changing.'
+thumbnail: ./cover.png
+icon: ./icon.png
+tech:
+  - SQL
+  - dbt
+  - Snowflake
+  - Git
+category: sql
+featured: false
+order: 5
+client: 'OpenClassrooms, pedagogical team (training case)'
+role: 'Data Analyst, training project'
+repo: 'https://github.com/axeldrtdata/student-demographics-dbt'
+publishDate: 2026-07-01
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import pipelineImg from './pipeline.png';
+import genderImg from './gender-artefact.png';
+
+## The question
+
+OpenClassrooms wanted to understand how the profile of the students enrolling in its Data Analyst path had changed over four years, to inform its thinking on accessibility and equal opportunities. The internal data had been collected, but it needed a transformation that was **reliable, documented and reproducible**, with strict respect for the GDPR, and enriched with public INSEE data to compare the students with the French population.
+
+The team already worked with **Snowflake and dbt**, so the deliverable was a dbt pipeline, a final dataset, and a presentation for a non-technical audience.
+
+<KeyFigures
+  items={[
+    { value: '4,647', label: 'enrolments, 2022 to 2025' },
+    { value: '−44%', label: 'enrolments between 2022 and 2025' },
+    { value: '30%', label: 'women, with no progress in four years' },
+    { value: '×2.5', label: 'over-representation of Île-de-France' },
+  ]}
+/>
+
+## The pipeline
+
+Rather than one large query, I split the transformation into layers, each with a single role. **Staging** cleans and standardises each raw source, one model per source. **Intermediate** applies business logic, such as moving from one row per enrolment to one row per student. **Marts** produce the final tables, ready for analysis. If a figure is wrong, I know exactly which layer to look at.
+
+<Figure
+  src={pipelineImg}
+  wide
+  title="The dbt pipeline, from raw data to analysis tables"
+  alt="Four columns: three sources (enrolments in Snowflake, INSEE population and unemployment seeds), three staging models, one intermediate model and seven marts."
+/>
+
+Four choices shape the whole pipeline:
+
+| Choice | Why |
+| ------ | --- |
+| **Identifiers hashed with SHA-256** in staging | GDPR: no raw identifier goes further than the first layer. It is pseudonymisation, not anonymisation, since the link can in theory be rebuilt at the source, and I state it as such |
+| **Missing genders kept as "unknown"** rather than deleted | Deleting them would hide the non-response rate, which turned out to be one of the key findings |
+| **Region labels harmonised** with INSEE, overseas departments grouped as DROM, Corsica excluded | Without identical labels, a join silently loses rows |
+| **Tests on every run** | Unique and non-null keys, accepted values for each variable, and a relationship test checking that every student region exists in the INSEE reference |
+
+That last test is the one that served me most: it catches any label mismatch between the student data and INSEE before it can distort a result.
+
+```sql
+-- stg_students: pseudonymise identifiers and make missing genders explicit
+select
+    {{ hash_id("replace(user_id, '-', '')") }} as user_id_hash,
+    {{ hash_id("replace(user_id, '-', '') || '_' || year_path_started") }} as primary_key,
+    path_category_name as category,
+    age_group,
+    coalesce(gender, 'unknown') as gender,
+    region,
+    year_path_started as year_started
+from {{ source('openclassrooms', 'students') }}
+```
+
+## Enrolments are falling
+
+<BarChart
+  title="Enrolments per year"
+  decimals={0}
+  data={[
+    { label: '2022', value: 1696, highlight: true },
+    { label: '2023', value: 1150 },
+    { label: '2024', value: 850 },
+    { label: '2025', value: 951 },
+  ]}
+  caption="The completeness of 2025 remains to be confirmed with the data collection team."
+/>
+
+Enrolments fell from 1,696 in 2022 to 850 in 2024, then partly recovered to 951 in 2025: a net drop of 44%. The data does not explain why: there is nothing on the job market or on marketing. It is an observation, not a diagnosis. But if the data cannot say why fewer students enrol, it does show **who still does**, and that profile is changing.
+
+## A younger audience
+
+Students under 35 went from 43% of enrolments in 2022 to 53% in 2025, and became the majority. All of that growth comes from the youngest: the 20–24 share was multiplied by seven, from 1.2% to 8.5%, and the 25–29 share rose from 15% to 21%. Every older age group declined.
+
+## A path that stays male, and a trap in the raw data
+
+<Figure
+  src={genderImg}
+  title="Share of women: the raw figure misleads"
+  alt="Line chart from 2022 to 2025: the share of women among all enrolments rises from 18% to 31%, but only because the share of missing genders falls from 42% to 7%; among students who gave their gender, the share of women stays around 30%."
+/>
+
+In the raw data, the share of women seems to climb from 18% to 31%. **It is an artefact.** In 2022, more than four enrolments in ten had no gender; in 2025, fewer than one in fifteen. What is really improving is data collection, not gender balance. Measured only among students who gave their gender, which is the reliable indicator, the share of women stays around 30% every year. The decline in enrolments hits men and women alike.
+
+<BarChart
+  title="Share of women by age group (students who gave their gender)"
+  unit="%"
+  decimals={0}
+  data={[
+    { label: '20–24', value: 18.3, highlight: true },
+    { label: '25–29', value: 27.5 },
+    { label: '30–34', value: 33.4 },
+    { label: '35–39', value: 32.8 },
+    { label: '40–44', value: 36.5 },
+    { label: '45–49', value: 32.7 },
+    { label: '50–54', value: 30.1 },
+    { label: '55–59', value: 30.9 },
+    { label: '60+', value: 6.5, highlight: true },
+  ]}
+/>
+
+This is the key insight of the analysis. The core of the age range is stable, between 30% and 37% women, but the youngest group drops to 18%. And the youngest groups are precisely the ones that are growing. As the audience gets younger, the overall share of women will mechanically fall, unless something is done.
+
+<Takeaway label="Key insight">The audience is getting younger, and the youngest are the least gender-balanced: without action, gender balance will get worse.</Takeaway>
+
+No region comes close to parity either, with rates between 21% and 36%. Île-de-France, at 36%, pulls the national average up; elsewhere it is around 27%. Regional gaps rest on small numbers and are not interpretable one by one: gender balance is a national issue for the field, not a territorial one.
+
+## A strong concentration in Île-de-France
+
+<BarChart
+  title="Representation ratio: share of students / share of the population"
+  decimals={2}
+  data={[
+    { label: 'Île-de-France', value: 2.47, highlight: true },
+    { label: 'Provence-Alpes-Côte d’Azur', value: 0.84 },
+    { label: 'Auvergne-Rhône-Alpes', value: 0.78 },
+    { label: 'Hauts-de-France', value: 0.74 },
+    { label: 'Centre-Val de Loire', value: 0.73 },
+    { label: 'Nouvelle-Aquitaine', value: 0.70 },
+    { label: 'Grand Est', value: 0.69 },
+    { label: 'Occitanie', value: 0.68 },
+    { label: 'Bretagne', value: 0.60 },
+    { label: 'Pays de la Loire', value: 0.58 },
+    { label: 'Normandie', value: 0.51 },
+    { label: 'Bourgogne-Franche-Comté', value: 0.42 },
+    { label: 'Overseas regions (DROM)', value: 0.32 },
+  ]}
+  caption="A ratio of 1 means a region weighs as much among students as in the population."
+/>
+
+Île-de-France accounts for 45% of students but only 18% of the French population, an over-representation by a factor of 2.5. Twelve regions out of thirteen sit below their demographic weight. For a course that is **100% online**, this is striking: there is no geographic barrier to remove, so the issue is not access but visibility outside the Paris region.
+
+I tested an obvious explanation: regions with high unemployment might send more people into retraining. It does not hold. Hauts-de-France has the highest unemployment but an average presence, Île-de-France an average unemployment rate but a record presence. A regional average says nothing about the individual situation of the people who enrol.
+
+## A one-off audience
+
+86% of students follow a single path (3,442 out of 4,010); only 14% come back for another one. With enrolments falling, the business relies almost entirely on finding new students. Recent cohorts have had less time to come back, so this rate is a floor, but it is unlikely to change much on its own.
+
+## Recommendations
+
+- **Target young women** in recruitment, the group where the gap is largest and the audience is growing.
+- **Build visibility outside Île-de-France**, since online training has no geographic barrier.
+- **Collect professional status at enrolment**, to understand who signs up and why.
+- **Keep improving gender collection**, already much better since 2022.
+- **Repeat the study in two to three years**, on a now homogeneous base, by re-running the same pipeline.
+
+## Limits
+
+- **The causes of the decline are not in the data**: the analysis describes, it does not explain.
+- **The completeness of 2025** remains to be confirmed.
+- **Regional gaps rest on small numbers** for several regions.
+- **Unemployment data is missing for the overseas regions**, which are left out of that comparison.
+- **One INSEE year (2024)** is used for the whole period; regional population shares move by less than 0.1 point between 2022 and 2025.
+
+## What I learned
+
+[In your own voice, two or three sentences: for example, what splitting a pipeline into layers changed, why you kept the missing genders, or what the region relationship test caught.]
