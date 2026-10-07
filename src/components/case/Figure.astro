@@ -11,14 +11,16 @@ interface Props {
   alt: string;
   caption?: string;
   title?: string;
+  /** Break out of the text column to use the full page width (dashboards, maps). */
+  wide?: boolean;
 }
 
-const { src, alt, caption, title } = Astro.props;
+const { src, alt, caption, title, wide = false } = Astro.props;
 ---
 
-<figure class="figure glass">
+<figure class:list={['figure', 'glass', { 'is-wide': wide }]}>
   {title && <figcaption class="figure-title">{title}</figcaption>}
-  <Image src={src} alt={alt} widths={[700, 1100, 1600]} sizes="(min-width: 860px) 760px, 100vw" />
+  <Image src={src} alt={alt} widths={[700, 1100, 1600, 2200]} sizes={wide ? '(min-width: 1200px) 1160px, 100vw' : '(min-width: 860px) 760px, 100vw'} />
   {caption && <p class="figure-caption">{caption}</p>}
 </figure>
 
@@ -28,6 +30,13 @@ const { src, alt, caption, title } = Astro.props;
     padding: 22px;
     border-radius: var(--radius-card);
     background: #fff;
+  }
+
+  .figure.is-wide {
+    position: relative;
+    left: 50%;
+    width: min(var(--content-width), calc(100vw - var(--page-pad) * 2));
+    transform: translateX(-50%);
   }
 
   .figure-title {
