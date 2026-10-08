@@ -1,0 +1,129 @@
+---
+title: 'What drives the price of a home insurance policy?'
+description: 'A SQLite database of 30,335 home insurance contracts, twelve business questions in SQL, and what the joins were hiding.'
+thumbnail: ./cover.png
+icon: ./icon.png
+tech:
+  - SQL
+  - SQLite
+category: sql
+featured: true
+order: 8
+client: 'Home insurance company (OpenClassrooms case)'
+role: 'Data Analyst, training project'
+repo: 'https://github.com/axeldrtdata/home-insurance-sql'
+publishDate: 2025-12-01
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import schemaImg from './schema.png';
+
+## The question
+
+A home insurance company kept its contracts in two flat files: one row per contract, and a reference list of French communes. It wanted them in a relational database its teams could query, and answers to twelve business questions: where its customers live, what they insure, and how much they pay.
+
+This was my first SQL project. Coming back to it for my portfolio, I added the question the twelve queries circle around without asking it directly: **what actually sets the price of a policy?**
+
+<KeyFigures
+  items={[
+    { value: '30,335', label: 'home insurance contracts' },
+    { value: '12', label: 'business questions answered in SQL' },
+    { value: '×14', label: 'monthly premium, from the lowest to the highest value band' },
+    { value: '9', label: 'contracts silently lost by every join' },
+  ]}
+/>
+
+## Building the database
+
+I started with a data dictionary listing each field with its type, size and role, then designed two tables linked by a foreign key: every contract points to the commune where the insured home is located, and the commune table holds its department and region. This avoids repeating the same geographic information on 30,335 rows.
+
+<Figure
+  src={schemaImg}
+  title="The relational schema"
+  alt="Two tables: contrat, with ten columns and a foreign key Code_dep_code_commune, points to region, whose primary key is Code_dep_code_commune; many contracts link to one commune."
+  caption="Column names are kept in French, as in the source files."
+/>
+
+On the **GDPR** side, the contract table held the street address of every insured home. Combined with a commune, a surface and a premium, an address can point to a person, so the public version of the database leaves the four address columns out.
+
+## Who the customers are
+
+The portfolio is mostly made of apartments (92%) and main homes (84%), and 70% of the policyholders own their home. Geographically, it leans heavily towards the Paris region.
+
+<BarChart
+  title="Contracts by region (top 6)"
+  decimals={0}
+  data={[
+    { label: 'Île-de-France', value: 14177, highlight: true },
+    { label: 'Provence-Alpes-Côte d’Azur', value: 3279 },
+    { label: 'Auvergne-Rhône-Alpes', value: 3042 },
+    { label: 'Nouvelle-Aquitaine', value: 2038 },
+    { label: 'Occitanie', value: 1609 },
+    { label: 'Pays de la Loire', value: 1196 },
+  ]}
+  caption="Île-de-France alone holds 47% of the contracts. Paris’s arrondissements fill most of the communes with at least 150 contracts."
+/>
+
+## What drives the premium
+
+The average monthly premium is €19.33, but the median is only €15: a few large contracts, up to €450 a month, pull the average up. To find out what makes them large, I compared the average premium across every variable in the table. Only one really matters: **the declared value of the insured contents**.
+
+<BarChart
+  title="Average monthly premium by declared value of the contents"
+  unit=" €"
+  data={[
+    { label: '0–25,000 €', value: 13.6 },
+    { label: '25–50,000 €', value: 30.1 },
+    { label: '50–100,000 €', value: 76.7 },
+    { label: '100,000 € +', value: 193.5, highlight: true },
+  ]}
+  caption="22,720, 6,815, 696 and 104 contracts in each band. The formula, the type of home and the occupant’s status all stay between €19.2 and €20.2 on average."
+/>
+
+```sql
+-- One GROUP BY returns every band of declared value, with its weight and its price
+SELECT Valeur_declaree_biens,
+       COUNT(*)                                AS contracts,
+       ROUND(AVG(Prix_cotisation_mensuel), 1)  AS average_premium
+FROM contrat
+GROUP BY Valeur_declaree_biens
+ORDER BY average_premium;
+```
+
+That also explains the ranking of departments by premium. Paris comes first, at €36.40 a month against €16.10 elsewhere, but not because insuring a home in Paris is expensive in itself: 72% of Parisian contracts declare more than €25,000 of contents, against 16% in the rest of France. Within the same value band, a Parisian contract costs only 5% to 19% more.
+
+| Declared value | Paris | Rest of France |
+| -------------- | ----- | -------------- |
+| 0–25,000 €     | €16.0 | €13.4          |
+| 25–50,000 €    | €33.0 | €28.0          |
+| 50–100,000 €   | €77.5 | €73.7          |
+| 100,000 € +    | €195.0 | €182.0        |
+
+<Takeaway label="Key finding">The price of a policy follows what is insured, not where or how: Paris pays more because it insures more.</Takeaway>
+
+## What a second look revealed
+
+When I came back to this project, I checked the data before trusting the results, and found three things my original queries had missed.
+
+**Nine contracts disappeared from every join.** The contracts table has 30,335 rows, but the count by region only adds up to 30,326. Nine contracts in La Réunion carry their postcode (97434, 97460, 97470) where the commune code should be, so they match no commune and every inner join drops them without warning: La Réunion shows 8 contracts instead of 17. The foreign key did not stop them, because SQLite only enforces foreign keys once they are switched on. One command lists them:
+
+```sql
+PRAGMA foreign_key_check;   -- returns the 9 contracts whose commune does not exist
+```
+
+**One value band was missing.** My original answer to the question on declared values listed three bands, written as three separate queries. Their totals left out 104 contracts: the band above €100,000, which turned out to be the most important one for the price. A single `GROUP BY` makes this impossible, since it returns every value present in the column.
+
+**Commune names are not unique.** The reference table holds 38,916 communes but only 35,572 different names: there are fourteen Sainte-Colombe, for example. My query on communes with at least 150 contracts grouped by name. It happened to give the right answer, but it now groups by commune code, which is the only safe key.
+
+## Limits
+
+- **A single snapshot:** the data has no dates, so it says nothing about how the portfolio or the prices evolve.
+- **Declared values come in bands,** not amounts, which limits how finely the premium can be explained.
+- **The nine orphan contracts are kept as they are** and documented. Matching their postcodes to communes would need an external reference.
+
+## What I learned
+
+[In your own voice, two or three sentences: for example, what designing the schema before the queries brought, what the missing value band taught you about checking totals, or why a foreign key is not a guarantee until it is enforced.]
