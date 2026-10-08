@@ -21,7 +21,7 @@ export const en = {
   'nav.home': 'Home',
   'nav.about': 'About',
   'nav.works': 'Works',
-  'nav.blog': 'Blog',
+  'nav.blog': 'Notes',
   'nav.search': 'Search',
   'nav.label': 'Main navigation',
   'nav.brandHome': '{site} home',
@@ -46,41 +46,41 @@ export const en = {
   'home.worksEmpty':
     'Add works under <code>src/content/works</code> to surface the latest projects here.',
   'home.latestBlogEyebrow': 'Latest blog',
-  'home.allPosts': 'All posts',
+  'home.allPosts': 'All notes',
   'home.postsEmpty':
     'Add blog entries under <code>src/content/blog</code> to surface the latest notes here.',
 
   // Blog index
-  'blog.title': 'Blog',
-  'blog.titlePaged': 'Blog · Page {page}',
-  'blog.eyebrow': 'Blog',
-  'blog.listLabel': 'Blog posts',
+  'blog.title': 'Notes',
+  'blog.titlePaged': 'Notes · Page {page}',
+  'blog.eyebrow': 'Notes',
+  'blog.listLabel': 'Notes',
   'blog.tagsEyebrow': 'Tags',
-  'blog.tagsNavLabel': 'Blog tags',
+  'blog.tagsNavLabel': 'Note tags',
 
   // Tag archive — every string here is generated from the tag, so it stays
   // in the dictionary even though it reads like page copy.
-  'tag.title': 'Posts tagged “{tag}”',
-  'tag.titlePaged': 'Posts tagged “{tag}” · Page {page}',
-  'tag.description': 'Blog posts tagged {tag} on {site}.',
+  'tag.title': 'Notes tagged “{tag}”',
+  'tag.titlePaged': 'Notes tagged “{tag}” · Page {page}',
+  'tag.description': 'Notes tagged {tag} on {site}.',
   'tag.eyebrow': 'Tag',
   'tag.lead': 'Notes collected under the {tag} tag.',
-  'tag.listLabel': '{tag} posts',
+  'tag.listLabel': '{tag} notes',
   'tag.moreTagsEyebrow': 'More tags',
-  'tag.otherTagsNavLabel': 'Other blog tags',
-  'tag.allPosts': 'All posts',
+  'tag.otherTagsNavLabel': 'Other note tags',
+  'tag.allPosts': 'All notes',
 
   // Blog post
-  'post.eyebrow': 'Blog',
+  'post.eyebrow': 'Note',
   'post.readingTime': '{minutes} min read',
   'post.tocLabel': 'Table of contents',
   'post.contentsEyebrow': 'Contents',
-  'post.adjacentLabel': 'Adjacent posts',
+  'post.adjacentLabel': 'Adjacent notes',
   'post.previous': 'Previous',
   'post.next': 'Next',
   'post.relatedEyebrow': 'Related',
   'post.breadcrumbHome': 'Home',
-  'post.breadcrumbBlog': 'Blog',
+  'post.breadcrumbBlog': 'Notes',
 
   // Comments (rendered only when GISCUS.enabled)
   'comments.eyebrow': 'Comments',
@@ -110,7 +110,7 @@ export const en = {
   'search.eyebrow': 'Search',
   'search.sectionLabel': 'Site search',
   'search.fallback':
-    'The search index is generated at build time. Run <code>npm run build</code> and preview the site to try it — it is not available on the dev server.',
+    'Search is loading. If nothing appears, browse the <a href="/works/">projects</a> or the <a href="/blog/">notes</a>.',
 
   // 404 — a theme-owned page, so its copy belongs here
   'notFound.title': 'Page not found',
@@ -121,8 +121,8 @@ export const en = {
     'The address may have moved, or it never existed. The keel lines below lead back to steady water.',
   'notFound.linksLabel': 'Recovery links',
   'notFound.home': 'Back home',
-  'notFound.blog': 'Read the blog',
-  'notFound.works': 'Browse works',
+  'notFound.blog': 'Read the notes',
+  'notFound.works': 'Browse projects',
 };
 
 /** The shape every dictionary must implement. */

@@ -106,6 +106,7 @@ const fields = ['E-commerce', 'Real estate', 'Food security', 'Market research',
       <div class="cta-actions">
         <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">Let's talk on LinkedIn</a>
         {HOME.cv && <a class="btn btn-white" href={withBase(HOME.cv)} download>Download my CV</a>}
+        {HOME.email && <a class="btn btn-ghost-light" href={`mailto:${HOME.email}`}>Email me</a>}
         <a class="btn btn-ghost-light" href={HOME.github} target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>
     </section>

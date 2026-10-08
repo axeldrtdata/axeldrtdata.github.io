@@ -1,0 +1,50 @@
+---
+title: 'The analytical trap behind a reassuring percentage'
+description: 'A Power BI dashboard for 104 IT and marketing projects, and the trap it revealed: a 7.3% budget gap that looked fine on paper hid more than €4 million of overrun.'
+publishDate: 2026-09-10
+tags: ['power-bi', 'dataviz', 'kpi']
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+
+On my latest project, I came across an analytical trap that I think is common, and that can cost companies millions without them ever noticing.
+
+## The context
+
+Sanitoral is an international oral care company active in 52 countries, running a portfolio of 104 IT and marketing projects across 4 regions. With that number of projects spread across so many teams, leadership was flying half blind. There was no unified way to know which projects were drifting on cost, time or delivery until it was too late. Just as importantly, there was no easy way to spot the projects that were performing: the ones worth studying and replicating as models for the rest.
+
+The goal was to build an interactive Power BI dashboard for three levels of decision makers. The CEO, the regional directors and the country directors needed a clear read on three critical KPIs, costs, delays and deliverables, with a visual alert triggered when a KPI crosses the 15% threshold.
+
+## What I built
+
+I built a multi-page Power BI report (global view, costs, delays, deliverables, map) with Row-Level Security: each user only sees their own scope. I added a bilingual natural-language Q&A engine and a dynamic KPI selector to explore the data without multiplying visuals.
+
+<KeyFigures
+  items={[
+    { value: '104', label: 'IT and marketing projects in 52 countries' },
+    { value: '7.3%', label: 'overall budget gap, under the 15% alert threshold' },
+    { value: '€4M+', label: 'of unplanned overrun behind that 7.3%' },
+    { value: '7 of 8', label: 'critically delayed projects also over budget' },
+  ]}
+/>
+
+## The business takeaways
+
+- **A "reassuring" percentage gap can hide a massive absolute amount**, so always read both together. The portfolio's overall budget gap was just 7.3%, comfortably under the 15% alert threshold, so on paper everything looked fine. But in euros, that 7.3% meant over €4 million in unplanned overrun.
+- **7 of the 8 critically delayed projects were also over budget**: delays and costs are strongly correlated.
+- **The most profitable projects were all delivered ahead of schedule.**
+- **The testing phase systematically overruns**, a structural red flag for the client.
+- **The IT/Marketing paradox.** Marketing projects drove almost all the overrun, yet 4 of the 5 worst-performing projects were IT. IT is healthier on average, but when it derails, it derails hard: isolated cases, high impact.
+- **Only 9 projects were critically under-delivering.** That might be reassuring at first glance, but only 1 project fully hit its delivery targets: 94 of 104 sat in a "slightly under" zone. A diffuse problem is harder to fix precisely than a concentrated one.
+
+## The roadblocks, and the lessons inside them
+
+- **A Treemap that refuses negative values**: rethink the measure instead of forcing the visual.
+- **Gaps of +1,300% caused by 1-day planned durations**: learning to spot and neutralise outliers.
+- **The inverted logic of Deliverables**, where a negative gap is bad: being rigorous about what a metric actually means changes the whole interpretation.
+
+## My Monday-morning visual
+
+The dual-line chart. It flags a delay before it becomes a cost overrun. One chart, two KPIs under control.
+
+Built as part of my Data Analyst training, this project taught me a lot. What's the analytical trap that surprised you most on yours?

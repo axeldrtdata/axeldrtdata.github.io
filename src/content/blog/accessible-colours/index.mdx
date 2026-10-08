@@ -1,0 +1,58 @@
+---
+title: 'The most useful feedback I got was about my colours'
+description: 'A panel told me my Tableau dashboard was not accessible. Five lessons on palettes, gradients and contrast, and the before and after of all three pages.'
+publishDate: 2026-09-17
+tags: ['dataviz', 'accessibility', 'tableau']
+---
+
+import Figure from '../../../components/case/Figure.astro';
+import worldImg from './before-after-world.png';
+import countriesImg from './before-after-countries.png';
+import citiesImg from './before-after-cities.png';
+
+The most useful feedback I got on my last project was about something I'd never considered: my colours.
+
+Three dashboard pages, weeks of work, an analysis I was proud of. Then the panel told me my visuals weren't accessible.
+
+It stings for about an hour. Then you look into it and realise you missed something basic.
+
+## What I learned
+
+1. **A pretty palette isn't a readable one.** My five shades of pink varied in hue but barely in brightness. Elegant on screen, unreadable for someone colourblind or on a badly calibrated projector.
+2. **A gradient has to mean something.** My bar charts faded from dark to light across the bars, and that gradient encoded absolutely nothing. The bar length already carried the value. All the colour did was suggest a second variable that didn't exist. If a gradient doesn't add information, it adds confusion. One flat colour was the better answer.
+3. **The test that changes everything: convert your charts to greyscale.** If you can't tell the categories apart in black and white, neither can everyone else. Free, instant, brutal.
+4. **Colour should never carry information alone.** Direct labels, position, legend: always give a second channel.
+5. **Text contrast below 4.5:1 fails WCAG AA.** That standard exists for a reason.
+
+## What I changed
+
+So I rebuilt every palette around even steps in brightness rather than variations in hue, and stripped the decorative gradients out entirely.
+
+Accessibility isn't an aesthetic constraint. It decides whether your work is readable by everyone, or only by people who see the way you do.
+
+## Before and after
+
+The before and after are below. The difference is more obvious than I expected.
+
+<Figure
+  src={worldImg}
+  title="Page 1 · The world market"
+  alt="Before and after of the first dashboard page. Before: pale pinks and lavenders of similar brightness, a bar chart fading from dark to light, a map in muted purples. After: a single flat colour for the bars, ring charts and a map in clearly separated shades from dark plum to light pink."
+  caption="The bar chart loses its meaningless gradient for one flat colour, and the ring charts and the map move to shades that run from very dark to very light."
+/>
+
+<Figure
+  src={countriesImg}
+  title="Page 2 · Comparing cities"
+  alt="Before and after of the second dashboard page. Before: lavender and pink stacked bars of similar brightness and a top 10 fading in colour. After: stacked bars in even steps from dark plum to light pink and a top 10 in one flat colour."
+  caption="The slider is not set at the same value in the two captures, so the figures differ: only the colours are being compared here."
+/>
+
+<Figure
+  src={citiesImg}
+  title="Page 3 · Zooming in on a city"
+  alt="Before and after of the third dashboard page. Before: lines and bars mixing lavender and pink of similar brightness. After: lines and bars in shades of plum that range from very dark to very light."
+  caption="The five cities now run from a very dark plum to a very light pink, instead of five colours of similar brightness."
+/>
+
+The full dashboard and the analysis behind it are in the [Airbnb case study](/works/airbnb-investment-dashboard/).

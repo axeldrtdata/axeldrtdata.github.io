@@ -29,6 +29,7 @@ export interface SocialLink {
 export const SOCIAL_LINKS: readonly SocialLink[] = [
   { label: 'GitHub', href: 'https://github.com/axeldrtdata', icon: 'github' },
   { label: 'LinkedIn', href: 'https://www.linkedin.com/in/axel-derobert-5717463b1/', icon: 'linkedin' },
+  { label: 'Email', href: 'mailto:axel.derobert.data@gmail.com', icon: 'email' },
   { label: 'RSS feed', href: '/rss.xml', icon: 'rss' },
 ];
 
@@ -112,7 +113,7 @@ export const HOME = {
   linkedin: 'https://www.linkedin.com/in/axel-derobert-5717463b1/',
   github: 'https://github.com/axeldrtdata',
   /** Contact email. Leave '' to hide the email button. */
-  email: '',
+  email: 'axel.derobert.data@gmail.com',
   /** CV placed in `public/`, e.g. '/cv-axel-derobert.pdf'. Leave '' to hide the button. */
   cv: '/cv-axel-derobert.pdf',
 };

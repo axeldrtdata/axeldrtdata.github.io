@@ -3,26 +3,32 @@ import { getCollection, render } from 'astro:content';
 import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import Pagination from '../../../../components/Pagination.astro';
-import { withBase } from '../../../../lib/url';
+import NoteCard from '../../../../components/NoteCard.astro';
+import NoteTagFilter from '../../../../components/NoteTagFilter.astro';
 import { SITE } from '../../../../consts';
-import { formatDate, readingTime, t } from '../../../../i18n';
+import { readingTime, t } from '../../../../i18n';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getCollection('blog', ({ data }) => !data.draft);
-  const allTags = [...new Set(posts.flatMap((post) => post.data.tags))];
-  return allTags.flatMap((tag) => {
+  const allTags = [...new Set(posts.flatMap((post) => post.data.tags))]
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({ name, count: posts.filter((post) => post.data.tags.includes(name)).length }));
+  return allTags.flatMap(({ name: tag }) => {
     const taggedPosts = posts
       .filter((post) => post.data.tags.includes(tag))
       .sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
-    const otherTags = allTags.filter((item) => item !== tag).sort((a, b) => a.localeCompare(b));
-    return paginate(taggedPosts, { params: { tag }, pageSize: 10, props: { otherTags } });
+    return paginate(taggedPosts, {
+      params: { tag },
+      pageSize: 10,
+      props: { allTags, total: posts.length },
+    });
   });
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
 const { tag } = Astro.params;
-const { page, otherTags } = Astro.props;
+const { page, allTags, total } = Astro.props;
 const taggedPosts = page.data;
 
 const readingTimes = new Map(
@@ -41,42 +47,31 @@ const pageTitle =
 ---
 
 <BaseLayout title={pageTitle} description={t('tag.description', { tag, site: SITE.title })}>
-  <section class="page-head section">
-    <p class="eyebrow">{t('tag.eyebrow')}</p>
-    <h1>{tag}</h1>
-    <p class="lead">{t('tag.lead', { tag })}</p>
-  </section>
+  <div class="page-wrap">
+    <header class="notes-head">
+      <span class="mono-label">{t('blog.eyebrow')} · {t('tag.eyebrow')}</span>
+      <h1 class="page-title">Notes on <span class="accent">{tag}</span>.</h1>
+      <p class="page-lead">
+        {page.total} {page.total === 1 ? 'note' : 'notes'} tagged “{tag}”. Pick another tag below, or
+        go back to all notes.
+      </p>
+    </header>
 
-  <section class="section content-index" aria-label={t('tag.listLabel', { tag })}>
-    <div class="index-sidebar">
-      <p class="eyebrow">{t('tag.moreTagsEyebrow')}</p>
-      <nav class="tag-cloud" aria-label={t('tag.otherTagsNavLabel')}>
-        <a href={withBase('/blog/')}>{t('tag.allPosts')}</a>
-        {otherTags.map((item) => <a href={withBase(`/blog/tags/${item}/`)}>{item}</a>)}
-      </nav>
-    </div>
+    <NoteTagFilter tags={allTags} total={total} active={tag} />
 
-    <div>
-      <div class="entry-list">
-        {
-          taggedPosts.map((post) => (
-            <article class="entry-card">
-              <div class="entry-meta">
-                <time datetime={post.data.publishDate.toISOString()}>
-                  {formatDate(post.data.publishDate, 'short')}
-                </time>
-                <span>{readingTimes.get(post.id)}</span>
-                <span>{post.data.tags.join(' / ')}</span>
-              </div>
-              <h2>
-                <a href={withBase(`/blog/${post.id}/`)}>{post.data.title}</a>
-              </h2>
-              <p>{post.data.description}</p>
-            </article>
-          ))
-        }
-      </div>
-      <Pagination page={page} />
-    </div>
-  </section>
+    <section class="bento" aria-label={t('tag.listLabel', { tag })}>
+      {taggedPosts.map((post) => <NoteCard post={post} readingTime={readingTimes.get(post.id)} />)}
+    </section>
+
+    <Pagination page={page} />
+  </div>
 </BaseLayout>
+
+<style>
+  .notes-head {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-block: 2rem 1rem;
+  }
+</style>
