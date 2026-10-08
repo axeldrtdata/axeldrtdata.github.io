@@ -12,11 +12,11 @@ export async function getStaticPaths() {
   );
   return entries.map((entry, index) => ({
     params: { slug: entry.id },
-    props: { entry, number: index + 1, next: entries[(index + 1) % entries.length] },
+    props: { entry, next: entries[(index + 1) % entries.length] },
   }));
 }
 
-const { entry, number, next } = Astro.props;
+const { entry, next } = Astro.props;
 const { Content } = await render(entry);
 const category = PROJECT_CATEGORIES.find((item) => item.key === entry.data.category);
 const year = entry.data.publishDate.getFullYear();
@@ -35,7 +35,7 @@ const year = entry.data.publishDate.getFullYear();
       <div class="card glass case-intro">
         <div class="case-top">
           <span class="mono-label">
-            Case study {String(number).padStart(2, '0')}{category && ` · ${category.label}`}
+            Case study{category && ` · ${category.label}`}
           </span>
           {
             entry.data.icon && (
