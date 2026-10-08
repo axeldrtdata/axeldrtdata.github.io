@@ -49,7 +49,7 @@ const year = entry.data.publishDate.getFullYear();
           {
             entry.data.repo && (
               <a class="btn btn-royal" href={entry.data.repo} target="_blank" rel="noopener noreferrer">
-                View the notebook on GitHub ↗
+                {entry.data.category === 'sql' ? 'View the code on GitHub ↗' : 'View the notebook on GitHub ↗'}
               </a>
             )
           }
