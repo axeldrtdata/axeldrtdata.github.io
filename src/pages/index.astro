@@ -89,7 +89,7 @@ const websiteSchema = {
           </div>
 
           <h1 class="intro-title">
-            Curious by nature,
+            Curious by nature
             <span class="intro-highlight accent"
               >analytical by training<svg
                 aria-hidden="true"
@@ -100,8 +100,8 @@ const websiteSchema = {
             >
           </h1>
           <p class="intro-lead">
-            I turn raw data into clear decisions. Data Analyst trained with OpenClassrooms, using Python,
-            SQL and dataviz to help businesses understand what really drives their performance.
+            Before I trust a number, I look at what it hides, and that is usually where the real answer
+            is. Python, SQL, Power BI and Tableau are how I find it.
           </p>
         </div>
 
@@ -183,14 +183,15 @@ const websiteSchema = {
         </div>
         <div class="education-body">
           <span class="education-title">Data Analyst, <span class="accent">OpenClassrooms</span></span>
-          <span class="muted-small">RNCP Level 6, Bachelor's equivalent · 2025 – ongoing</span>
+          <span class="muted-small">RNCP Level 6, Bachelor's equivalent</span>
+          <span class="muted-small">October 2025 – ongoing</span>
         </div>
       </div>
 
       <div class="card glass toolkit">
         <div class="card-head">
           <h2 class="toolkit-title">My <span class="accent">toolkit</span></h2>
-          <span class="mono-small">import *</span>
+          <span class="mono-small toolkit-import">import *</span>
         </div>
         <ul class="pill-list">
           {toolkit.map((tool) => <li class:list={['pill', tool.tone]}>{tool.name}</li>)}
@@ -199,7 +200,13 @@ const websiteSchema = {
 
       <div class:list={['card', 'quote', quoteTone]}>
         <span class="quote-mark" aria-hidden="true">“</span>
-        <p class="quote-text">Finding the story behind the numbers.</p>
+        <div class="quote-body">
+          <p class="quote-text">Finding the story behind the numbers</p>
+          <p class="quote-teaser">
+            France, Australia, Sweden, the Netherlands: four countries taught me to figure out how
+            things work wherever I land. Data is where that curiosity found its playground.
+          </p>
+        </div>
         <a class="quote-link" href={withBase('/about/')}>
           Read my story
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
@@ -210,7 +217,7 @@ const websiteSchema = {
     <div class="section-head" id="projects">
       <div>
         <span class="mono-label">01 — Featured projects</span>
-        <h2>Analyses that answer real <span class="accent">business questions</span>.</h2>
+        <h2>Analyses that answer real <span class="accent">business questions</span></h2>
       </div>
       <a class="btn btn-outline" href={withBase('/works/')}>All projects ({allWorks.length})</a>
     </div>
@@ -225,7 +232,7 @@ const websiteSchema = {
     <div class="section-head" id="notes">
       <div>
         <span class="mono-label">02 — Notes</span>
-        <h2>What's <span class="accent">caught my curiosity</span> lately.</h2>
+        <h2>What's <span class="accent">caught my curiosity</span> lately</h2>
       </div>
       <a class="btn btn-outline" href={withBase('/blog/')}>All notes</a>
     </div>
@@ -463,15 +470,23 @@ const websiteSchema = {
 
   /* Staircase indent on the second line, only where there is room for it */
   @media (min-width: 1180px) {
+    .intro-title {
+      margin-left: -0.06em;
+    }
+
     .intro-highlight {
-      margin-left: 1.8em;
+      margin-left: 2.2em;
       white-space: nowrap;
     }
   }
 
   @media (min-width: 861px) and (max-width: 1179px) {
+    .intro-title {
+      margin-left: -0.06em;
+    }
+
     .intro-highlight {
-      margin-left: 0.7em;
+      margin-left: 0.9em;
       white-space: nowrap;
     }
   }
@@ -685,8 +700,13 @@ const websiteSchema = {
   .education-body {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     margin-block: auto;
+    padding-bottom: 28px;
+  }
+
+  .education-body .education-title {
+    margin-bottom: 4px;
   }
 
   .education-title {
@@ -706,8 +726,12 @@ const websiteSchema = {
   }
 
   .toolkit-title {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 700;
+  }
+
+  .toolkit-import {
+    font-size: 14px;
   }
 
   .toolkit-title .accent {
@@ -718,6 +742,7 @@ const websiteSchema = {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    margin-block: auto;
     font-family: var(--font-mono);
   }
 
@@ -747,7 +772,8 @@ const websiteSchema = {
   /* ---------- Quote card (two variants) ---------- */
   .quote {
     grid-column: span 3;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 20px;
     padding: 30px;
   }
 
@@ -770,15 +796,29 @@ const websiteSchema = {
   .quote-mark {
     font-family: var(--font-accent);
     font-style: italic;
-    font-size: 64px;
-    line-height: 0.5;
+    font-size: 120px;
+    line-height: 0.6;
+    height: 34px;
     color: var(--quote-mark);
+  }
+
+  .quote-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
 
   .quote-text {
     font-family: var(--font-accent);
     font-size: clamp(30px, 3.4vw, 40px);
     line-height: 1.15;
+  }
+
+  .quote-teaser {
+    max-width: 440px;
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: 0.85;
   }
 
   .quote-link,
