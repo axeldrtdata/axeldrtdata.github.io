@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import EmailCopyButton from '../components/EmailCopyButton.astro';
 import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
 import { SITE, HOME, PROJECT_CATEGORIES } from '../consts';
@@ -270,7 +271,7 @@ const websiteSchema = {
               </a>
             )
           }
-          {HOME.email && <a class="btn btn-ghost-light" href={`mailto:${HOME.email}`}>Email me</a>}
+          {HOME.email && <EmailCopyButton email={HOME.email} />}
           <a class="btn btn-ghost-light" href={HOME.github} target="_blank" rel="noopener noreferrer">
             GitHub
           </a>

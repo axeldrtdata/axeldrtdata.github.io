@@ -6,7 +6,7 @@ const LANGUAGES = ['python', 'sql', 'dax', 'r', 'm (power query)'];
 const LIBRARIES = ['pandas', 'numpy', 'scikit-learn', 'matplotlib', 'seaborn', 'plotly', 'scipy', 'statsmodels'];
 const TOOLS = [
   'vs code', 'jupyter', 'power bi', 'tableau', 'excel', 'git', 'github', 'mysql',
-  'postgresql', 'sqlite', 'snowflake', 'dbt', 'looker studio',
+  'postgresql', 'sqlite', 'snowflake', 'dbt', 'looker studio', 'power query',
 ];
 
 export function techTone(name: string): string {

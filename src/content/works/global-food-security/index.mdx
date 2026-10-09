@@ -11,7 +11,7 @@ tech:
   - VS Code
 category: python
 featured: true
-order: 7
+order: 8
 client: 'FAO, Food and Agriculture Organization of the United Nations (OpenClassrooms case)'
 role: 'Data Analyst, training project'
 repo: 'https://github.com/axeldrtdata/global-food-security'
@@ -129,12 +129,13 @@ dispo_alimentaire['Zone'] = dispo_alimentaire['Zone'].replace({
     'Royaume-Uni': "Royaume-Uni de Grande-Bretagne et d'Irlande du Nord",
     'Tchéquie (la)': 'Tchéquie',
 })
+aide_alimentaire['Pays bénéficiaire'] = aide_alimentaire['Pays bénéficiaire'].replace({'Swaziland': 'Eswatini'})
 print(sorted(set(dispo_alimentaire['Zone']) - set(population['Zone'])))   # → []
 ```
 
-**The undernourished total is a floor.** Countries with no estimate were counted as zero. That is reasonable for France or Germany, but the 116 countries without any estimate are home to **more than 3.3 billion people, 44% of the world**, and they include some of the hungriest places on earth: the Democratic Republic of the Congo, Yemen, Somalia, South Sudan, Syria, Zambia and Zimbabwe. The top 10 above only ranks countries that have an estimate.
+**The undernourished total is a floor.** Countries with no estimate were counted as zero. That is reasonable for France or Germany, but the 96 countries without any estimate are home to **more than 3.3 billion people, 44% of the world**, and they include some of the hungriest places on earth: the Democratic Republic of the Congo, Yemen, Somalia, South Sudan, Syria, Zambia and Zimbabwe. The top 10 above only ranks countries that have an estimate.
 
-**Food aid is not as disconnected from needs, nor as collapsed, as it first looked.** My original conclusion was that none of the countries with the highest undernourishment rates were among the top aid recipients. But six of the ten largest recipients have no undernourishment estimate at all, so they could never appear in the other ranking. Among the 48 recipients that do have one, aid clearly follows the **number** of undernourished people (Spearman ρ = 0.54, p < 0.001), but not their **share** (ρ = 0.25, not significant). Aid goes to large numbers of hungry people and to crises, rather than to the highest rates.
+**Food aid is not as disconnected from needs, nor as collapsed, as it first looked.** My original conclusion was that none of the countries with the highest undernourishment rates were among the top aid recipients. But six of the ten largest recipients have no undernourishment estimate at all, so they could never appear in the other ranking. Among the 49 recipients that do have one, aid clearly follows the **number** of undernourished people (Spearman ρ = 0.55, p < 0.001), but not their **share** (ρ = 0.28, not significant at the 5% level). Aid goes to large numbers of hungry people and to crises, rather than to the highest rates.
 
 The headline drop in world food aid, −82% between 2013 and 2016, was also mostly an artefact of coverage.
 

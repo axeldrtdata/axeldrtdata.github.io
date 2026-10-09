@@ -1,0 +1,70 @@
+---
+// "Email me" button that copies the address to the clipboard instead of opening a mail app,
+// which does nothing for visitors who use webmail. The label turns into "Copied ✓" for 2 seconds.
+interface Props {
+  email: string;
+  label?: string;
+}
+
+const { email, label = 'Email me' } = Astro.props;
+---
+
+<button
+  type="button"
+  class="btn btn-ghost-light copy-email"
+  data-copy-email={email}
+  data-label={label}
+  title={`Copy ${email}`}
+>
+  <span class="copy-email-label" aria-live="polite">{label}</span>
+</button>
+
+<script>
+  async function copyText(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback for browsers without the async clipboard API (or without permission)
+      const field = document.createElement('textarea');
+      field.value = text;
+      field.setAttribute('readonly', '');
+      field.style.position = 'fixed';
+      field.style.opacity = '0';
+      document.body.append(field);
+      field.select();
+      const ok = document.execCommand('copy');
+      field.remove();
+      return ok;
+    }
+  }
+
+  function initEmailCopy() {
+    document.querySelectorAll<HTMLButtonElement>('[data-copy-email]').forEach((button) => {
+      if (button.dataset.bound) return;
+      button.dataset.bound = 'true';
+      const label = button.querySelector<HTMLElement>('.copy-email-label');
+      let timer: number | undefined;
+      button.addEventListener('click', async () => {
+        const ok = await copyText(button.dataset.copyEmail ?? '');
+        if (!label) return;
+        label.textContent = ok ? 'Copied ✓' : (button.dataset.copyEmail ?? '');
+        window.clearTimeout(timer);
+        timer = window.setTimeout(() => {
+          label.textContent = button.dataset.label ?? 'Email me';
+        }, 2000);
+      });
+    });
+  }
+
+  // Runs on the first load and after every page change (the site uses view transitions)
+  document.addEventListener('astro:page-load', initEmailCopy);
+</script>
+
+<style>
+  .copy-email {
+    background: transparent;
+    min-width: 8.5rem;
+    justify-content: center;
+  }
+</style>
