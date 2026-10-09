@@ -136,4 +136,4 @@ resultats["Human check"] = np.where(ecart < seuil, "To check", "")
 
 ## What I learned
 
-[In your own voice, two or three sentences: for example, why the simplest model was the right call, what you now check to avoid data leakage, or what turning a notebook into a tool taught you.]
+I learned that the best model is not always the most powerful one. The random forest scored just as well, but logistic regression is the one someone at the agency can understand: one coefficient per measurement, so you can see why a note was flagged. Adding a human check for the notes the model is unsure about taught me that a good tool also knows its limits.

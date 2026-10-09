@@ -126,4 +126,4 @@ PRAGMA foreign_key_check;   -- returns the 9 contracts whose commune does not ex
 
 ## What I learned
 
-[In your own voice, two or three sentences: for example, what designing the schema before the queries brought, what the missing value band taught you about checking totals, or why a foreign key is not a guarantee until it is enforced.]
+This was my first SQL project, and coming back to it taught me to check that totals add up. My three separate queries had left out 104 contracts, the band that matters most for the price, and nine contracts from La Réunion vanished from every join. A single `GROUP BY` and `PRAGMA foreign_key_check` would have caught both: a foreign key is only a guarantee once it is enforced.

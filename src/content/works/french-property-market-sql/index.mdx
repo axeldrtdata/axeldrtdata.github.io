@@ -177,4 +177,4 @@ The contrasts are sharp even between neighbours: in the Alpes-Maritimes, Saint-J
 
 ## What I learned
 
-[In your own voice, two or three sentences: for example, what designing the schema before writing any query brought, what the data-type audit taught you, or why you chose not to use cascading deletes.]
+Writing the data dictionary and the schema before any query felt slow, but it made the twelve queries straightforward. Coming back to the project, I found that a query can run without error and still be wrong: dates stored as text and decimal commas failed silently. I now check data types before I trust a result.
