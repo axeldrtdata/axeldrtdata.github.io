@@ -1,0 +1,50 @@
+---
+title: 'Le piège analytique derrière un pourcentage rassurant'
+description: 'Un dashboard Power BI pour 104 projets IT et marketing, et le piège qu’il a révélé : un écart budgétaire de 7,3 % qui semblait acceptable sur le papier cachait plus de 4 millions d’euros de dépassement.'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+
+Sur mon dernier projet, je suis tombé sur un piège analytique que je crois courant, et qui peut coûter des millions aux entreprises sans qu’elles s’en rendent jamais compte.
+
+## Le contexte
+
+Sanitoral est une entreprise internationale de soins bucco-dentaires présente dans 52 pays, qui pilote un portefeuille de 104 projets IT et marketing répartis sur 4 régions. Avec autant de projets, éclatés entre autant d’équipes, la direction naviguait à moitié à l’aveugle. Aucun moyen unifié de savoir quels projets dérivaient sur les coûts, les délais ou les livrables avant qu’il ne soit trop tard. Et, tout aussi important, aucun moyen simple de repérer les projets performants : ceux qui méritent d’être étudiés et reproduits comme modèles pour les autres.
+
+L’objectif : construire un dashboard Power BI interactif pour trois niveaux de décideurs. Le directeur général, les directeurs régionaux et les directeurs pays avaient besoin d’une lecture claire de trois KPI critiques (coûts, délais et livrables), avec une alerte visuelle déclenchée dès qu’un KPI franchit le seuil de 15 %.
+
+## Ce que j’ai construit
+
+J’ai construit un rapport Power BI de plusieurs pages (vue globale, coûts, délais, livrables, carte) avec sécurité au niveau des lignes (Row-Level Security) : chaque utilisateur ne voit que son propre périmètre. J’ai ajouté une boîte de questions-réponses bilingue en langage naturel et un sélecteur de KPI dynamique pour explorer les données sans multiplier les visuels.
+
+<KeyFigures
+  items={[
+    { value: '104', label: 'projets IT et marketing dans 52 pays' },
+    { value: '7,3 %', label: 'd’écart budgétaire global, sous le seuil d’alerte de 15 %' },
+    { value: '4 M€+', label: 'de dépassement imprévu derrière ces 7,3 %' },
+    { value: '7 sur 8', label: 'projets en retard critique aussi en dépassement de budget' },
+  ]}
+/>
+
+## Les enseignements métier
+
+- **Un écart en pourcentage « rassurant » peut cacher un montant absolu énorme**, donc il faut toujours lire les deux ensemble. L’écart budgétaire global du portefeuille n’était que de 7,3 %, bien sous le seuil d’alerte de 15 % : sur le papier, tout allait bien. Mais en euros, ces 7,3 % représentaient plus de 4 millions d’euros de dépassement imprévu.
+- **7 des 8 projets en retard critique étaient aussi en dépassement de budget** : retards et coûts vont souvent de pair.
+- **Les projets les plus rentables ont tous été livrés en avance.**
+- **La phase de test est systématiquement en dépassement**, un signal d’alerte structurel pour le client.
+- **Le paradoxe IT/Marketing.** Les projets marketing concentraient presque tout le dépassement, et pourtant 4 des 5 projets les moins performants étaient des projets IT. L’IT est plus saine en moyenne, mais quand elle dérape, elle dérape fort : des cas isolés, à fort impact.
+- **Seuls 9 projets étaient en sous-livraison critique.** Rassurant à première vue, sauf qu’un seul projet a pleinement atteint ses objectifs de livrables : 94 sur 104 se situaient dans une zone « légèrement en dessous ». Un problème diffus est plus difficile à corriger précisément qu’un problème concentré.
+
+## Les obstacles, et les leçons qu’ils cachaient
+
+- **Un Treemap qui refuse les valeurs négatives** : repenser la mesure plutôt que forcer le visuel.
+- **Des écarts de +1 300 % causés par des durées planifiées de 1 jour** : apprendre à repérer et neutraliser les valeurs aberrantes.
+- **La logique inversée des livrables**, où un écart négatif est mauvais : être rigoureux sur ce qu’un indicateur mesure vraiment change toute l’interprétation.
+
+## Mon visuel du lundi matin
+
+Le graphique à double courbe. Il signale un retard avant qu’il ne devienne un dépassement de coûts. Un seul graphique, deux KPI sous contrôle.
+
+Réalisé dans le cadre de ma formation de Data Analyst, ce projet m’a beaucoup appris. Et vous, quel piège analytique vous a le plus surpris sur vos projets ?
+
+Le dashboard complet et un second regard sur ces enseignements sont dans l’[étude de cas](/fr/works/sanitoral-powerbi-dashboard/).

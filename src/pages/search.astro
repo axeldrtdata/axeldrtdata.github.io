@@ -2,18 +2,29 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { withBase } from '../lib/url';
 import { SITE } from '../consts';
-import { t } from '../i18n';
+import { getLang, useT } from '../i18n';
 
+// Used by /search/ and /fr/search/. Pagefind keeps one index per language (from <html lang>).
 const bundlePath = withBase('/pagefind/');
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
+const t = useT(lang);
 ---
 
-<BaseLayout title={t('search.title')} description={`Search the case studies and notes of ${SITE.title}, Data Analyst.`}>
+<BaseLayout
+  title={t('search.title')}
+  description={fr ? `Rechercher dans les études de cas et les notes de ${SITE.title}, Data Analyst.` : `Search the case studies and notes of ${SITE.title}, Data Analyst.`}
+>
   <link slot="head" rel="stylesheet" href={`${bundlePath}pagefind-ui.css`} />
   <section class="page-head section">
     <p class="eyebrow">{t('search.eyebrow')}</p>
-    <h1>Find a project or a note.</h1>
+    <h1>{fr ? 'Trouver un projet ou une note' : 'Find a project or a note'}</h1>
     <p class="lead">
-      Search every case study and note by tool, topic or figure: try “SQL”, “Tableau” or “clustering”.
+      {
+        fr
+          ? 'Cherchez dans toutes les études de cas et les notes par outil, sujet ou chiffre : essayez « SQL », « Tableau » ou « clustering ».'
+          : 'Search every case study and note by tool, topic or figure: try “SQL”, “Tableau” or “clustering”.'
+      }
     </p>
   </section>
 

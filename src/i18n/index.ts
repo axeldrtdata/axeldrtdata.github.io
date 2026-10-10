@@ -7,6 +7,8 @@
 import { SITE, type NavItem } from '../consts';
 import { en, type UIKey, type UIStrings } from './en';
 import { ja } from './ja';
+import { fr } from './fr';
+import { withBase } from '../lib/url';
 
 export type { UIKey, UIStrings };
 
@@ -14,7 +16,7 @@ export type { UIKey, UIStrings };
 export const DEFAULT_LOCALE = 'en';
 
 /** Registered dictionaries, keyed by BCP 47 language tag. */
-export const DICTIONARIES: Record<string, UIStrings> = { en, ja };
+export const DICTIONARIES: Record<string, UIStrings> = { en, fr, ja };
 
 /** The active locale, straight from `SITE.locale`. Also the value passed to
  *  `Intl`, `<html lang>`, and the RSS `<language>` element. */
@@ -69,3 +71,57 @@ export const formatDate = (date: Date, style: 'long' | 'short' = 'long'): string
  *  `labelKey`, so there is no unlabelled case to fall back from. */
 export const navLabel = (item: NavItem): string =>
   item.label !== undefined ? item.label : t(item.labelKey);
+
+// ---------------------------------------------------------------------------
+// Bilingual site: English at the root, French under /fr/.
+// Pages and components read the language from the URL, so the same templates
+// serve both versions.
+
+export type Lang = 'en' | 'fr';
+export const LANGS: readonly Lang[] = ['en', 'fr'];
+
+/** Intl tag used for dates and numbers in each language. */
+export const INTL: Record<Lang, string> = { en: 'en', fr: 'fr-FR' };
+
+const frRoot = withBase('/fr');
+
+/** Language of the page being rendered, from its URL. */
+export const getLang = (url: URL): Lang =>
+  url.pathname === frRoot || url.pathname.startsWith(`${frRoot}/`) ? 'fr' : 'en';
+
+/** `t()` bound to a language. */
+export const useT =
+  (lang: Lang) =>
+  (key: UIKey, params?: Record<string, string | number>): string => {
+    const value = (lang === 'fr' ? fr : en)[key];
+    if (!params) return value;
+    return value.replace(/\{(\w+)\}/g, (match, name: string) =>
+      name in params ? String(params[name]) : match,
+    );
+  };
+
+/** A site-root path (e.g. `/works/`) in the given language, with `base` applied. */
+export const localePath = (path: string, lang: Lang): string => {
+  const clean = path.startsWith('/') ? path : `/${path}`;
+  return withBase(lang === 'fr' ? (clean === '/' ? '/fr/' : `/fr${clean}`) : clean);
+};
+
+/** The same page in the other language: `/works/x/` <-> `/fr/works/x/`. */
+export const switchPath = (url: URL, target: Lang): string => {
+  const base = withBase('/');
+  let path = url.pathname.startsWith(base) ? url.pathname.slice(base.length - 1) : url.pathname;
+  if (path === '/fr' || path.startsWith('/fr/')) path = path.slice(3) || '/';
+  // The 404 page exists in one version only: send the switch to the home page.
+  if (path === '/404' || path.startsWith('/404')) return localePath('/', target);
+  return localePath(path, target) + url.hash;
+};
+
+/** Publish date in the given language. */
+export const formatDateIn = (date: Date, lang: Lang, style: 'long' | 'short' = 'long'): string =>
+  new Intl.DateTimeFormat(INTL[lang], { month: style, day: 'numeric', year: 'numeric' }).format(date);
+
+/** Reading time in the given language. */
+export const readingTimeIn = (minutesRead: unknown, lang: Lang): string =>
+  typeof minutesRead === 'number'
+    ? useT(lang)('post.readingTime', { minutes: minutesRead })
+    : String(minutesRead ?? '');

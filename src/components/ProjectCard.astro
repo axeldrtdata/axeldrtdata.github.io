@@ -1,7 +1,7 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
-import { withBase } from '../lib/url';
+import { getLang, localePath } from '../i18n';
 import { PROJECT_CATEGORIES } from '../consts';
 import { techTone } from '../lib/tech';
 
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const { work } = Astro.props;
+const lang = getLang(Astro.url);
 const category = PROJECT_CATEGORIES.find((item) => item.key === work.data.category);
 const tone = category?.tone ?? 'tone-powder';
 const placeholder = category?.visual ?? '[Key visual]';
@@ -19,7 +20,7 @@ const placeholder = category?.visual ?? '[Key visual]';
 
 <a
   class="card glass project-card"
-  href={withBase(`/works/${work.id}/`)}
+  href={localePath(`/works/${work.id}/`, lang)}
   data-category={work.data.category ?? 'none'}
 >
   <div class:list={['project-visual', tone]}>
@@ -43,7 +44,7 @@ const placeholder = category?.visual ?? '[Key visual]';
     }
     <h3>{work.data.title}</h3>
     <p>{work.data.description}</p>
-    <span class="project-cta">Read the case study →</span>
+    <span class="project-cta">{lang === 'fr' ? 'Lire l’étude de cas →' : 'Read the case study →'}</span>
   </div>
 </a>
 

@@ -1,0 +1,152 @@
+---
+title: 'Où une marque de volaille française doit-elle exporter en premier ?'
+description: 'Une étude de marchés internationaux sur 164 pays : 15 indicateurs PESTEL, une analyse en composantes principales et un clustering qui transforment des données publiques en feuille de route export en trois étapes.'
+client: 'La poule qui chante, producteur de volaille français (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import circleImg from './correlation-circle.png';
+import clustersImg from './clusters.png';
+import kImg from './choosing-k.png';
+import mapImg from './map.png';
+import radarImg from './radar.png';
+
+## La question
+
+La poule qui chante est un producteur de volaille français qui souhaite se développer à l’international. Son PDG demandait une réponse claire à une question large : **quels pays offrent les meilleures opportunités à l’export ?** L’étude devait couvrir au moins 100 pays et 60 % de la population mondiale, s’appuyer sur deux jeux de données de la FAO et réunir au moins huit indicateurs selon la grille PESTEL (facteurs politiques, économiques, sociaux, technologiques, environnementaux et légaux).
+
+Avec 164 pays et 15 indicateurs, personne ne peut comparer chaque pays sur chaque variable à l’œil nu. Ma démarche a été de laisser les données révéler leur propre structure : réduire les 15 indicateurs à quelques dimensions porteuses de sens grâce à une analyse en composantes principales, puis regrouper les pays similaires par clustering, et seulement ensuite décider où aller.
+
+<KeyFigures
+  items={[
+    { value: '164', label: 'pays analysés' },
+    { value: '95 %', label: 'de la population mondiale couverte' },
+    { value: '15', label: 'indicateurs répartis sur les 6 dimensions PESTEL' },
+    { value: '4', label: 'profils de pays, une cible claire' },
+  ]}
+/>
+
+## Construction du jeu de données
+
+J’ai croisé trois sources publiques : la FAO (production, importations et disponibilité de volaille par habitant, population), la Banque mondiale (indices de gouvernance, chômage, accès à internet, tourisme, performance logistique, groupe de revenu) et un jeu de données de distances entre capitales, pour mesurer l’éloignement de chaque marché par rapport à Paris. J’ai fusionné les fichiers dans Excel grâce à des tables de correspondance sur les codes pays ISO3 et FAO, afin que chaque pays n’apparaisse qu’une seule fois.
+
+| Dimension PESTEL | Indicateurs                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| Politique        | Stabilité politique, contrôle de la corruption                                                       |
+| Économique       | Production de volaille, importations de volaille, disponibilité de volaille par habitant, chômage    |
+| Social           | Population, croissance démographique, arrivées de touristes, croissance du tourisme                  |
+| Technologique    | Accès à internet, indice de performance logistique                                                   |
+| Environnemental  | Distance à Paris                                                                                     |
+| Légal            | État de droit, qualité de la réglementation                                                          |
+
+### Des données manquantes traitées pays par pays
+
+Seuls 105 des 181 pays avaient un profil complet. Je me suis fixé une règle stricte : un pays pouvait avoir **au maximum deux indicateurs manquants sur quinze**. Au-delà, son profil aurait reposé davantage sur des estimations que sur des données : 17 pays ont donc été exclus, représentant ensemble moins de 5 % de la population mondiale.
+
+Pour les valeurs manquantes restantes, l’imputation dépendait de ce que signifiait l’absence. Les valeurs nulles pour l’accès à internet ou le chômage ont été considérées comme manquantes plutôt que réelles, puis remplacées par la **médiane du groupe de revenu du pays** : un pays à faible revenu est comparé aux autres pays à faible revenu, pas à la moyenne mondiale. Les données de tourisme manquantes, en revanche, ont été fixées à zéro, car elles concernaient surtout des États instables ou très petits, où le tourisme est réellement négligeable.
+
+```python
+   # Fill gaps with the median of countries in the same income group (IC)
+   for col in ["Internet", "Chomage"]:
+       df_volaille[col] = df_volaille.groupby("IC")[col].transform(
+           lambda x: x.fillna(x.median())
+       )
+```
+
+### Dompter les géants
+
+La population, le tourisme, la production et les importations de volaille étaient très asymétriques : la Chine et l’Inde étirent à elles seules toutes les échelles. Plutôt que de retirer ces pays, qui sont de vrais marchés, j’ai appliqué une **transformation logarithmique** à ces quatre variables. Elle rapproche leurs distributions de la symétrie et empêche une poignée de géants de dominer l’analyse. Testée avec et sans, elle a permis à l’analyse en composantes principales de capter trois points de variance supplémentaires. J’ai ensuite standardisé les 15 variables, pour que chacune pèse autant quelle que soit son unité.
+
+## Réduire 15 indicateurs à 5 dimensions
+
+La matrice de corrélation faisait apparaître trois familles de variables : la gouvernance, la logistique et l’accès à internet évoluent ensemble ; la population, la production et les importations évoluent ensemble ; le chômage, la croissance du tourisme et la distance restent isolés. C’est précisément cette redondance qu’exploite une **analyse en composantes principales (ACP)**.
+
+<BarChart
+  title="Part de variance expliquée par chaque composante principale"
+  unit="%"
+  data={[
+    { label: 'F1', value: 40.8, highlight: true },
+    { label: 'F2', value: 15.09, highlight: true },
+    { label: 'F3', value: 8.81, highlight: true },
+    { label: 'F4', value: 7.5, highlight: true },
+    { label: 'F5', value: 6.89, highlight: true },
+    { label: 'F6', value: 4.79 },
+    { label: 'F7', value: 4.22 },
+  ]}
+  caption="Cinq composantes ont une valeur propre supérieure à 1 (critère de Kaiser) et conservent ensemble 79,1 % de l’information initiale."
+/>
+
+Trois méthodes s’accordaient pour retenir cinq composantes : le critère de Kaiser, le coude de l’éboulis des valeurs propres entre F5 et F6, et une variance cumulée de 79,1 %. Les deux premières composantes sont les plus faciles à lire :
+
+- **F1 (40,8 %) mesure la maturité institutionnelle et des infrastructures.** Les indices de gouvernance, la performance logistique et l’accès à internet y contribuent tous fortement (entre 0,78 et 0,94), tandis qu’une forte croissance démographique tire dans l’autre sens.
+- **F2 (15,1 %) mesure le poids démographique.** Elle est portée par la population (0,94) et la production de volaille (0,83), et sépare les grands marchés des petits, quel que soit leur niveau de développement.
+
+<Figure
+  src={circleImg}
+  title="Cercle des corrélations, premier plan factoriel (F1–F2)"
+  alt="Cercle des corrélations : la gouvernance, la logistique et l’accès à internet pointent le long de F1 ; la population et la production de volaille pointent le long de F2."
+  caption="Chaque flèche est un indicateur. Plus elle est longue et proche d’un axe, mieux cet axe le résume."
+/>
+
+Placés sur ces deux axes, les pays se répartissent en quatre zones naturelles : les grandes économies développées, les géants démographiques encore en développement, les petits États très développés et les petits pays vulnérables. Une structure aussi nette appelait un clustering.
+
+## Quatre profils de pays
+
+J’ai réalisé le clustering des pays sur leurs coordonnées dans les cinq composantes. Pour choisir le nombre de groupes, j’ai de nouveau croisé trois méthodes : un clustering hiérarchique selon la méthode de Ward, dont le dendrogramme suggérait une coupe à quatre groupes ; le coude de l’inertie intra-classe, entre trois et quatre ; et le score de silhouette.
+
+<Figure
+  src={kImg}
+  title="Choix du nombre de clusters"
+  alt="Courbe du coude qui s’infléchit entre trois et quatre clusters, et score de silhouette avec un premier pic à deux et un second pic à quatre."
+/>
+
+Le score de silhouette culminait en réalité à deux clusters (0,32), mais diviser le monde entre pays « développés » et « en développement » n’aurait éclairé aucune décision commerciale. Son second pic, à **quatre clusters (0,26)**, concordait avec les deux autres méthodes. Un k-means à cinq clusters a confirmé ce choix : il laissait trois groupes intacts et se contentait de scinder le quatrième en deux, sans apporter d’enseignement utile.
+
+<Figure
+  src={clustersImg}
+  title="Les 164 pays sur le premier plan factoriel, par cluster"
+  alt="Nuage de points des 164 pays sur les axes du développement et de la démographie, coloré par cluster, avec les économies développées à droite."
+/>
+
+| Profil                              | Pays | État de droit (0–100) | Importations de volaille | Distance à Paris |
+| ----------------------------------- | ---- | --------------------- | ------------------------ | ---------------- |
+| **Économies développées**           | 35   | **79,7**              | **213 kt**               | **3 537 km**     |
+| Grandes économies émergentes        | 38   | 49,3                  | 135 kt                   | 6 294 km         |
+| Petits pays à revenu intermédiaire  | 35   | 61,4                  | 18 kt                    | 6 567 km         |
+| Pays en développement               | 56   | 42,8                  | 37 kt                    | 6 301 km         |
+
+Les économies développées (voisins de la France, Amérique du Nord, Japon, Australie…) arrivent en tête sur 12 des 15 indicateurs : la gouvernance la plus solide, la meilleure logistique, la plus forte consommation de volaille par habitant, les plus grosses importations et la distance la plus courte avec la France. Sur une carte, elles forment un bloc remarquablement compact en Europe.
+
+<Figure
+  src={mapImg}
+  title="Les quatre profils de pays sur une carte"
+  alt="Carte du monde colorée par cluster : l’Europe, l’Amérique du Nord, le Japon et l’Océanie forment le cluster des économies développées."
+/>
+
+<Takeaway label="Recommandation">Cibler d’abord les économies développées, en commençant par l’Europe : ce sont elles qui achètent le plus de volaille, ce sont les marchés où il est le plus simple de commercer, et elles sont à nos portes.</Takeaway>
+
+<Figure
+  src={radarImg}
+  title="Chaque pays à sa distance de Paris"
+  alt="Graphique radial centré sur Paris : les pays sont placés à leur distance de Paris, avec une taille proportionnelle à leurs importations de volaille, le cluster cible étant le plus proche du centre."
+  caption="Distance de Paris à chaque capitale ; la taille de chaque point reflète les importations de volaille. Les grands importateurs ciblés se situent dans un rayon de quelques milliers de kilomètres."
+/>
+
+## Une feuille de route export en trois étapes
+
+1. **Court terme : l’Europe.** L’Allemagne, la Belgique, l’Italie et l’Espagne combinent une excellente gouvernance, une logistique parmi les meilleures au monde, de grands marchés de la volaille et des délais de livraison courts, ce qui compte pour un produit frais.
+2. **Moyen terme : le reste des économies développées.** Les États-Unis, le Canada, le Japon, l’Australie et la Nouvelle-Zélande offrent un fort pouvoir d’achat et une demande haut de gamme, mais leur éloignement rend le transport et la chaîne du froid bien plus coûteux.
+3. **Long terme : les grandes économies émergentes.** La Chine et l’Inde sont d’énormes marchés de la volaille, mais leurs indicateurs de gouvernance ne sécurisent pas encore les échanges à ce stade. Ce sont des marchés à surveiller, et à aborder une fois leur stabilité institutionnelle améliorée.
+
+## Pour aller plus loin
+
+- **Classer les pays au sein du cluster cible.** Le clustering indique *quel groupe* cibler ; un score pondéré construit à partir des importations, de la distance et de la logistique indiquerait *dans quel ordre* aborder chaque pays.
+- **Ajouter des données propres à chaque marché**, comme les prix de la volaille, les droits de douane à l’importation et les réglementations sanitaires, qui comptent énormément pour un produit alimentaire frais et que les indicateurs macroéconomiques ne captent pas.
+
+## Ce que j’en retiens
+
+Le score de silhouette culminait à deux clusters, et techniquement, c’était la bonne réponse. Mais « développés » contre « en développement » n’aurait pas aidé le client à choisir un marché. Le second pic, à quatre, concordait avec le dendrogramme et le coude, et donnait des groupes sur lesquels le client pouvait agir : un modèle n’a pas à gagner sur le papier, il doit éclairer une décision.

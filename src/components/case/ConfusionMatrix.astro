@@ -13,7 +13,12 @@ interface Props {
   caption?: string;
 }
 
+import { getLang } from '../../i18n';
 const { title, negative, positive, tn, fp, fn, tp, caption } = Astro.props;
+const fr = getLang(Astro.url) === 'fr';
+const L = fr
+  ? { predicted: 'Prédit', actually: 'Réellement', caught: 'bien détectés', slipped: 'passés entre les mailles', alarm: 'fausse alerte', cleared: 'bien validés' }
+  : { predicted: 'Predicted', actually: 'Actually', caught: 'correctly caught', slipped: 'slipped through', alarm: 'false alarm', cleared: 'correctly cleared' };
 ---
 
 <figure class="matrix glass">
@@ -21,25 +26,25 @@ const { title, negative, positive, tn, fp, fn, tp, caption } = Astro.props;
   <div class="matrix-grid" role="table" aria-label={title}>
     <div role="row" class="matrix-row">
       <span role="columnheader" class="corner"></span>
-      <span role="columnheader" class="col-head">Predicted {negative.toLowerCase()}</span>
-      <span role="columnheader" class="col-head">Predicted {positive.toLowerCase()}</span>
+      <span role="columnheader" class="col-head">{L.predicted} {negative.toLowerCase()}</span>
+      <span role="columnheader" class="col-head">{L.predicted} {positive.toLowerCase()}</span>
     </div>
     <div role="row" class="matrix-row">
-      <span role="rowheader" class="row-head">Actually {negative.toLowerCase()}</span>
+      <span role="rowheader" class="row-head">{L.actually} {negative.toLowerCase()}</span>
       <span role="cell" class="cell is-good">
-        <strong>{tn}</strong><small>correctly caught</small>
+        <strong>{tn}</strong><small>{L.caught}</small>
       </span>
       <span role="cell" class="cell is-bad">
-        <strong>{fp}</strong><small>slipped through</small>
+        <strong>{fp}</strong><small>{L.slipped}</small>
       </span>
     </div>
     <div role="row" class="matrix-row">
-      <span role="rowheader" class="row-head">Actually {positive.toLowerCase()}</span>
+      <span role="rowheader" class="row-head">{L.actually} {positive.toLowerCase()}</span>
       <span role="cell" class="cell is-warn">
-        <strong>{fn}</strong><small>false alarm</small>
+        <strong>{fn}</strong><small>{L.alarm}</small>
       </span>
       <span role="cell" class="cell is-good">
-        <strong>{tp}</strong><small>correctly cleared</small>
+        <strong>{tp}</strong><small>{L.cleared}</small>
       </span>
     </div>
   </div>

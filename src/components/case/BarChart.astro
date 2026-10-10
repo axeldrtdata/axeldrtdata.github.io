@@ -10,10 +10,15 @@ interface Props {
   decimals?: number;
 }
 
+import { getLang } from '../../i18n';
 const { title, data, unit = '', caption, decimals = 1 } = Astro.props;
+const fr = getLang(Astro.url) === 'fr';
 const max = Math.max(...data.map((item) => item.value));
-const format = (value: number) =>
-  `${value.toLocaleString('en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })}${unit}`;
+// French puts a narrow no-break space before % and €, and a comma before decimals.
+const format = (value: number) => {
+  const number = value.toLocaleString(fr ? 'fr-FR' : 'en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  return fr && unit.trim() ? `${number}\u202f${unit.trim()}` : `${number}${unit}`;
+};
 ---
 
 <figure class="chart glass">

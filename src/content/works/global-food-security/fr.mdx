@@ -1,0 +1,152 @@
+---
+title: 'Le monde produit-il assez pour nourrir toute sa population ?'
+description: 'Une étude de santé publique pour la FAO à partir de quatre jeux de données : combien de personnes sont en sous-nutrition, combien le monde pourrait en nourrir, où va réellement sa nourriture, et ce que change un second regard sur la couverture des données.'
+client: 'FAO, Organisation des Nations unies pour l’alimentation et l’agriculture (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import kcalImg from './calories-by-country.png';
+import aidImg from './food-aid-coverage.png';
+
+## La question
+
+La FAO, l’agence des Nations unies qui mène la lutte contre la faim, voulait dresser un premier état des lieux de la sécurité alimentaire mondiale à partir de ses propres données. La demande prenait la forme d’une liste de questions : combien de personnes sont en sous-nutrition, combien de personnes la nourriture disponible pourrait théoriquement nourrir, comment cette nourriture est utilisée, quels pays souffrent le plus, et où va l’aide alimentaire.
+
+Derrière cette liste se cache une seule question : **la faim est-elle un problème de production, ou de distribution ?**
+
+<KeyFigures
+  items={[
+    { value: '535 M', label: 'personnes en sous-nutrition en 2017, au minimum' },
+    { value: '8,8 Md', label: 'personnes que les calories disponibles pourraient nourrir' },
+    { value: '36 %', label: 'des céréales mondiales servent à l’alimentation animale' },
+    { value: '83 %', label: 'du manioc thaïlandais est exporté' },
+  ]}
+/>
+
+## Quatre fichiers de la FAO
+
+| Fichier | Contenu | Période | Pays |
+| ------- | ------- | ------- | ---- |
+| Population | Population par pays, en milliers | 2013–2018 | 236 |
+| Bilans alimentaires | Pour chaque pays et chaque produit : calories, protéines et matières grasses par personne, production, échanges et utilisations | 2017 | 174 |
+| Aide alimentaire | Tonnes d’aide reçues, par produit | 2013–2016 | 76 |
+| Sous-nutrition | Personnes en sous-nutrition, en millions, en moyennes sur trois ans | 2012–2014 à 2017–2019 | 203 |
+
+La préparation a surtout consisté à faire parler le même langage aux quatre fichiers. J’ai converti toutes les quantités dans les mêmes unités, transformé en nombres des valeurs texte comme `<0.1`, et retenu la moyenne 2016–2018 pour l’année 2017.
+
+## Le monde produit assez de nourriture
+
+En 2017, **535,7 millions de personnes étaient en sous-nutrition**, soit 7,1 % de la population mondiale : une personne sur 14.
+
+Pour estimer combien de personnes la nourriture mondiale pourrait nourrir, j’ai multiplié les calories disponibles par personne et par jour de chaque pays par sa population et par 365, puis divisé le total mondial par un besoin moyen de 2 400 kcal par jour, issu d’une source FAO. Les calories disponibles en 2017 pourraient nourrir **environ 8,8 milliards de personnes**, soit 1,3 milliard de plus que la population mondiale. Les produits végétaux à eux seuls pourraient nourrir 96 % de la population mondiale.
+
+<Takeaway label="Première réponse">Le monde ne manque pas de nourriture. La faim est une question d’accès : qui en reçoit.</Takeaway>
+
+## Où va la nourriture
+
+Sur les 9,8 milliards de tonnes de nourriture disponibles dans les pays, seule la moitié est consommée directement par les humains.
+
+<BarChart
+  title="Utilisation de la disponibilité alimentaire intérieure mondiale, 2017"
+  unit="%"
+  data={[
+    { label: 'Alimentation humaine', value: 49.5, highlight: true },
+    { label: 'Traitement industriel', value: 22.4 },
+    { label: 'Alimentation animale', value: 13.2 },
+    { label: 'Autres utilisations', value: 8.8 },
+    { label: 'Pertes', value: 4.6 },
+    { label: 'Semences', value: 1.6 },
+  ]}
+  caption="Les pertes semblent faibles en pourcentage, mais elles représentent 454 millions de tonnes de nourriture."
+/>
+
+Les céréales racontent la même histoire, de façon encore plus nette : les humains en consomment directement 43 %, et **36 % servent à l’alimentation animale**. Plus d’un tiers des céréales mondiales sert donc à produire de la viande, des œufs et des produits laitiers.
+
+## Des assiettes inégales
+
+Les moyennes cachent un large écart entre pays. Dans 29 des 174 pays, la nourriture disponible est inférieure au besoin quotidien.
+
+<Figure
+  src={kcalImg}
+  title="Calories disponibles par personne et par jour, 174 pays"
+  alt="Diagramme en barres de 174 pays classés par calories disponibles par personne et par jour, de 1 879 en République centrafricaine à 3 770 en Autriche ; 29 pays se situent sous la ligne des 2 400 kcal."
+  caption="Chaque barre est un pays. Les barres vides se situent sous le besoin quotidien moyen de 2 400 kcal."
+/>
+
+Les dix pays les mieux approvisionnés, dont six en Europe, disposent en moyenne de 3 625 kcal par personne et par jour, soit 1 225 de plus que le besoin. Les dix moins bien approvisionnés, dont sept en Afrique, en ont 2 060, soit un déficit de 340. En théorie, l’excédent d’une personne du premier groupe pourrait combler le manque de trois à quatre personnes du second.
+
+Là où la sous-nutrition est mesurée, elle touche près de la moitié de la population dans les pays les plus durement frappés.
+
+<BarChart
+  title="Part de la population en sous-nutrition, 2017 (pays disposant d’une estimation)"
+  unit="%"
+  data={[
+    { label: 'Haïti', value: 48.3, highlight: true },
+    { label: 'Corée du Nord', value: 47.2, highlight: true },
+    { label: 'Madagascar', value: 41.1, highlight: true },
+    { label: 'Libéria', value: 38.3 },
+    { label: 'Lesotho', value: 38.2 },
+    { label: 'Tchad', value: 38.0 },
+    { label: 'Rwanda', value: 35.1 },
+    { label: 'Mozambique', value: 32.8 },
+    { label: 'Timor-Leste', value: 32.2 },
+    { label: 'Afghanistan', value: 28.9 },
+  ]}
+/>
+
+La Thaïlande montre comment la nourriture peut quitter un pays où sévit la faim. En 2017, environ 9 % des Thaïlandais étaient en sous-nutrition, et pourtant la Thaïlande a exporté **25,2 millions de tonnes de manioc, 83 % de sa production**. Les données ne permettent pas de dire si ces exportations ont réduit ce que mangent les Thaïlandais, mais elles montrent une culture destinée avant tout à l’export.
+
+## Où va l’aide alimentaire
+
+Entre 2013 et 2016, la Syrie, l’Éthiopie et le Yémen ont reçu le plus d’aide alimentaire, devant le Soudan du Sud, le Soudan et le Kenya. Sept des dix principaux bénéficiaires sont en Afrique, les trois autres en Asie, et beaucoup faisaient face à une guerre ou à une crise majeure. L’aide a suivi les crises aiguës : elle a fortement chuté pour l’Éthiopie, le Soudan et le Soudan du Sud en 2015, tandis que celle du Yémen repartait à la hausse avec l’escalade de la guerre.
+
+## Ce qu’un second regard a révélé
+
+En reprenant ce projet pour mon portfolio, j’ai vérifié ce que couvrent les données avant de me fier à ce qu’elles disent. Trois constats ont changé la façon de lire les résultats.
+
+**Unités et jointures.** Les bilans alimentaires sont exprimés en milliers de tonnes : une fois multipliés par 1 000, ils sont en tonnes, pas en kilogrammes. Ma première version sous-estimait les pertes alimentaires et les exportations de manioc de la Thaïlande d’un facteur 1 000. Trois pays portaient aussi des noms différents d’un fichier à l’autre (le Royaume-Uni, la Tchéquie et l’Eswatini), si bien que les jointures les écartaient sans prévenir. Une fois les noms harmonisés, le nombre de personnes que le monde pourrait nourrir passe de 8,7 à 8,8 milliards.
+
+```python
+# Harmonise country names before any join, then check nothing is left unmatched
+dispo_alimentaire['Zone'] = dispo_alimentaire['Zone'].replace({
+    'Royaume-Uni': "Royaume-Uni de Grande-Bretagne et d'Irlande du Nord",
+    'Tchéquie (la)': 'Tchéquie',
+})
+aide_alimentaire['Pays bénéficiaire'] = aide_alimentaire['Pays bénéficiaire'].replace({'Swaziland': 'Eswatini'})
+print(sorted(set(dispo_alimentaire['Zone']) - set(population['Zone'])))   # → []
+```
+
+**Le total des personnes en sous-nutrition est un minimum.** Les pays sans estimation ont été comptés à zéro. C’est raisonnable pour la France ou l’Allemagne, mais les 96 pays sans aucune estimation abritent **plus de 3,3 milliards de personnes, 44 % de la population mondiale**, et comptent parmi eux certains des pays les plus touchés par la faim au monde : la République démocratique du Congo, le Yémen, la Somalie, le Soudan du Sud, la Syrie, la Zambie et le Zimbabwe. Le top 10 ci-dessus ne classe que les pays qui disposent d’une estimation.
+
+**L’aide alimentaire n’est ni aussi déconnectée des besoins, ni en aussi forte chute qu’il y paraissait.** Ma conclusion initiale était qu’aucun des pays aux plus forts taux de sous-nutrition ne figurait parmi les principaux bénéficiaires de l’aide. Mais six des dix principaux bénéficiaires n’ont aucune estimation de sous-nutrition : ils ne pouvaient donc pas apparaître dans l’autre classement. Parmi les 49 bénéficiaires qui en ont une, l’aide suit nettement le **nombre** de personnes en sous-nutrition (ρ de Spearman = 0,55, p < 0,001), mais pas leur **part** (ρ = 0,28, non significatif au seuil de 5 %). L’aide va aux pays qui comptent beaucoup de personnes souffrant de la faim et aux crises, plutôt qu’aux taux les plus élevés.
+
+La chute spectaculaire de l’aide alimentaire mondiale, −82 % entre 2013 et 2016, était elle aussi surtout un effet de couverture des données.
+
+<Figure
+  src={aidImg}
+  title="L’aide alimentaire enregistrée et les pays derrière les chiffres"
+  alt="Diagramme en barres groupées : l’aide alimentaire enregistrée passe de 4,17 à 0,74 million de tonnes entre 2013 et 2016, tandis que le nombre de pays enregistrés passe de 72 à 26 ; pour les 25 mêmes pays enregistrés les deux années, l’aide passe de 1,51 à 0,74 million de tonnes."
+  caption="72 pays ont une aide enregistrée en 2013, seulement 26 en 2016. Sur les 25 mêmes pays, l’aide a été divisée par deux : un vrai recul, mais pas un effondrement."
+/>
+
+<Takeaway label="Constat clé">Le monde produit assez de nourriture pour tous. Les vrais manques se trouvent dans sa répartition, et dans les données qui mesurent qui a faim.</Takeaway>
+
+## Ce que je ferais ensuite
+
+- **Utiliser les séries FAOSTAT complètes**, pour suivre les mêmes pays dans le temps au lieu de comparer une seule année.
+- **Compléter les données d’aide avec les chiffres du Programme alimentaire mondial**, pour distinguer une vraie baisse de l’aide d’un pays qui a simplement cessé de déclarer.
+- **Pondérer le calcul théorique par les besoins réels**, qui varient selon l’âge, le sexe et l’activité, plutôt que par une moyenne unique de 2 400 kcal.
+
+## Limites
+
+- **Les estimations de sous-nutrition manquent** pour 44 % de la population mondiale : tout total ou classement qui s’appuie dessus est donc incomplet.
+- **Disponibilité alimentaire ne veut pas dire consommation :** les calories disponibles incluent ce qui est gaspillé à la maison et dans les commerces.
+- **Le calcul théorique laisse de côté** le transport, le stockage, les prix et la politique, qui sont précisément ce qui décide de qui mange.
+
+## Ce que j’en retiens
+
+Ma première version annonçait un effondrement de −82 % de l’aide alimentaire et un total de personnes en sous-nutrition comme s’ils couvraient le monde entier. En y revenant, j’ai appris à regarder ce qui manque avant ce qui est là : 96 pays n’avaient aucune estimation, et l’essentiel de la baisse de l’aide venait de la baisse du nombre de pays déclarés. Une erreur d’unité et trois noms de pays orthographiés différemment d’un fichier à l’autre m’ont aussi appris à vérifier les unités et les jointures avant tout total.

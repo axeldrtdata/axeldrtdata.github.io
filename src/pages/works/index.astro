@@ -1,15 +1,14 @@
 ---
-import { getCollection } from 'astro:content';
+// Used by /works/ and /fr/works/ (src/pages/fr/works/index.astro).
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { SITE, PROJECT_CATEGORIES } from '../../consts';
+import { getWorks } from '../../lib/content';
+import { getLang } from '../../i18n';
 
-const works = (await getCollection('works')).sort((a, b) => {
-  const orderA = a.data.order ?? Number.MAX_SAFE_INTEGER;
-  const orderB = b.data.order ?? Number.MAX_SAFE_INTEGER;
-  if (orderA !== orderB) return orderA - orderB;
-  return b.data.publishDate.valueOf() - a.data.publishDate.valueOf();
-});
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
+const works = await getWorks(lang);
 
 // Only show a filter when at least one project uses that category.
 const filters = PROJECT_CATEGORIES.map((category) => ({
@@ -18,22 +17,34 @@ const filters = PROJECT_CATEGORIES.map((category) => ({
 })).filter((category) => category.count > 0);
 ---
 
-<BaseLayout title="Projects" description={`Data analysis projects and case studies by ${SITE.title}.`}>
+<BaseLayout
+  title={fr ? 'Projets' : 'Projects'}
+  description={fr ? `Projets et études de cas en analyse de données, par ${SITE.title}.` : `Data analysis projects and case studies by ${SITE.title}.`}
+>
   <div class="page-wrap">
     <header class="works-head">
-      <span class="mono-label">Projects</span>
-      <h1 class="page-title">Every analysis, <span class="accent">start to finish</span></h1>
+      <span class="mono-label">{fr ? 'Projets' : 'Projects'}</span>
+      {
+        fr ? (
+          <h1 class="page-title">Chaque analyse, <span class="accent">de bout en bout</span></h1>
+        ) : (
+          <h1 class="page-title">Every analysis, <span class="accent">start to finish</span></h1>
+        )
+      }
       <p class="page-lead">
-        {works.length} projects across Python, SQL and data visualisation. Each one starts from a business
-        question and ends with something a team can act on.
+        {
+          fr
+            ? `${works.length} projets en Python, SQL et data visualisation. Chacun part d’une question métier et se termine par une réponse sur laquelle une équipe peut agir.`
+            : `${works.length} projects across Python, SQL and data visualisation. Each one starts from a business question and ends with something a team can act on.`
+        }
       </p>
     </header>
 
     {
       filters.length > 0 && (
-        <div class="filters" role="group" aria-label="Filter projects">
+        <div class="filters" role="group" aria-label={fr ? 'Filtrer les projets' : 'Filter projects'}>
           <button class="filter" type="button" data-filter="all" aria-pressed="true">
-            All <span>{works.length}</span>
+            {fr ? 'Tous' : 'All'} <span>{works.length}</span>
           </button>
           {filters.map((category) => (
             <button class="filter" type="button" data-filter={category.key} aria-pressed="false">
@@ -44,7 +55,7 @@ const filters = PROJECT_CATEGORIES.map((category) => ({
       )
     }
 
-    <section class="bento" aria-label="All projects">
+    <section class="bento" aria-label={fr ? 'Tous les projets' : 'All projects'}>
       {works.map((work, index) => <ProjectCard work={work} number={index + 1} />)}
     </section>
   </div>

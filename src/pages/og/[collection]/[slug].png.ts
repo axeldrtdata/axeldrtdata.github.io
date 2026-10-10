@@ -6,6 +6,7 @@ import path from 'node:path';
 import satori from 'satori';
 import sharp from 'sharp';
 import { PROJECT_CATEGORIES } from '../../../consts';
+import { getWorks, getPosts } from '../../../lib/content';
 
 // Share images (Open Graph) generated at build time for every case study and note,
 // in the portfolio's own palette. When a case study has an icon.png next to its
@@ -32,7 +33,31 @@ const iconNextTo = async (filePath?: string) => {
 export const getStaticPaths = (async () => {
   const blog = await getCollection('blog', ({ data }) => !data.draft);
   const works = await getCollection('works');
+  // French share images (/og/fr-works/…, /og/fr-blog/…), from the translated titles.
+  const worksFr = await getWorks('fr');
+  const blogFr = await getPosts('fr');
+  const french = [
+    ...blogFr.map((entry) => ({
+      params: { collection: 'fr-blog', slug: entry.id },
+      props: { title: entry.data.title, description: entry.data.description, kind: 'Note' } satisfies OgProps,
+    })),
+    ...(await Promise.all(
+      worksFr.map(async (entry) => {
+        const category = PROJECT_CATEGORIES.find((item) => item.key === entry.data.category);
+        return {
+          params: { collection: 'fr-works', slug: entry.id },
+          props: {
+            title: entry.data.title,
+            description: entry.data.description,
+            kind: category ? `Étude de cas · ${category.label}` : 'Étude de cas',
+            iconPath: await iconNextTo(entry.filePath),
+          } satisfies OgProps,
+        };
+      }),
+    )),
+  ];
   return [
+    ...french,
     ...blog.map((entry) => ({
       params: { collection: 'blog', slug: entry.id },
       props: { title: entry.data.title, description: entry.data.description, kind: 'Note' } satisfies OgProps,

@@ -1,0 +1,169 @@
+---
+title: 'Comment le marché immobilier français a-t-il tenu début 2020 ?'
+description: 'Une base de données relationnelle construite à partir des ventes immobilières publiques, des données INSEE et géographiques, puis douze requêtes SQL sur les volumes, les prix et les dynamiques locales au premier semestre 2020, premier confinement compris.'
+client: 'Laplace Immo, réseau national d’agences immobilières (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import schemaImg from './schema.png';
+
+## La question
+
+Laplace Immo, un réseau national d’agences immobilières, voulait une preuve de concept : une base de données relationnelle des ventes immobilières que ses équipes pourraient interroger pour comprendre le marché. Le périmètre était le **premier semestre 2020**, une période qui inclut, par coïncidence, le premier confinement lié au COVID-19, du 17 mars au 11 mai.
+
+Ma mission consistait à concevoir et construire la base, puis à répondre en SQL à douze questions métier : combien d’appartements vendus, où, à quel prix au mètre carré, et comment le marché a réagi à la crise.
+
+<KeyFigures
+  items={[
+    { value: '34 169', label: 'ventes immobilières, de janvier à juin 2020' },
+    { value: '4', label: 'tables dans un schéma normalisé' },
+    { value: '12', label: 'questions métier traitées en SQL' },
+    { value: '+3,7 %', label: 'de ventes du T1 au T2, malgré le confinement' },
+  ]}
+/>
+
+## Construire la base de données
+
+Trois sources publiques ont alimenté la base : les fichiers **DVF** (*Demandes de Valeurs Foncières*), le registre officiel des ventes immobilières avec, pour chaque bien, son type, sa surface, son nombre de pièces, son prix et sa localisation ; les données du recensement de l’**INSEE** pour la population de chaque commune ; et le référentiel géographique de **data.gouv** pour les codes et noms des régions, départements et communes.
+
+Avant de construire quoi que ce soit, j’ai rédigé un **dictionnaire de données** qui recense chaque champ avec son type, sa longueur, sa nature et ses règles de gestion, pour que n’importe qui puisse reprendre le projet. J’ai ensuite conçu un schéma normalisé de quatre tables reliées par des clés étrangères, ce qui évite de dupliquer les informations d’une commune sur chaque vente.
+
+<Figure
+  src={schemaImg}
+  wide
+  title="Le schéma relationnel"
+  alt="Quatre tables reliées par des clés étrangères : ventes pointe vers biens via id_bien, biens vers commune via coddep_codcom, et commune vers region via reg_code."
+/>
+
+Côté **RGPD**, les données sont publiques et officielles, et seuls les champs nécessaires à l’analyse ont été conservés. Pour la version publique de la base, j’ai également retiré les adresses : associée à un prix et à une date, une adresse peut permettre d’identifier une personne. J’ai aussi préparé, dès la conception, une requête prête à l’emploi pour le droit à l’effacement (article 17). Volontairement, elle ne repose pas sur des suppressions en cascade : les lignes sont supprimées explicitement, dans le bon ordre, pour que rien ne disparaisse par accident.
+
+```sql
+-- Right to erasure: delete one sale, then its property only if nothing else refers to it
+DELETE FROM ventes WHERE id_vente = 'v001';
+
+DELETE FROM biens
+WHERE id_bien = 'b001'
+  AND NOT EXISTS (SELECT 1 FROM ventes WHERE ventes.id_bien = 'b001');
+```
+
+### Ce qu’un second regard sur les données a révélé
+
+En revenant sur ce projet pour mon portfolio, j’ai audité les types de données de la base et trouvé trois problèmes silencieux. Les dates étaient stockées en texte avec des barres obliques (`2020/01/02`), si bien qu’un filtre standard comme `BETWEEN '2020-01-01' AND '2020-06-30'` ne renvoie rien. La plupart des surfaces Carrez, ainsi que 237 montants de vente, étaient stockés en texte avec une virgule décimale : SQLite lit `'48,22'` comme 48 dans un calcul, et trie les valeurs texte au-dessus des nombres. C’est à cause de ce dernier point que la requête des « appartements les plus chers » ne donne la bonne réponse qu’avec un `CAST` explicite.
+
+J’ai corrigé ces trois problèmes avec un seul script de migration, exécuté une fois avant toute analyse, puis relancé les douze requêtes. Les chiffres ci-dessous viennent de la base corrigée : la plupart des résultats varient de 1 à 2 % au plus, et toutes les conclusions tiennent.
+
+```sql
+UPDATE ventes SET date = replace(date, '/', '-');
+
+UPDATE biens
+SET surface_carrez = CAST(replace(surface_carrez, ',', '.') AS REAL)
+WHERE typeof(surface_carrez) = 'text';
+```
+
+## Où se sont vendus les appartements
+
+**31 378 appartements** ont été vendus au premier semestre 2020, et l’Île-de-France en représente à elle seule 45 %, près de quatre fois plus que la région suivante.
+
+<BarChart
+  title="Ventes d’appartements par région, premier semestre 2020 (top 6)"
+  decimals={0}
+  data={[
+    { label: 'Île-de-France', value: 13995, highlight: true },
+    { label: 'Provence-Alpes-Côte d’Azur', value: 3649 },
+    { label: 'Auvergne-Rhône-Alpes', value: 3253 },
+    { label: 'Nouvelle-Aquitaine', value: 1932 },
+    { label: 'Occitanie', value: 1640 },
+    { label: 'Pays de la Loire', value: 1357 },
+  ]}
+/>
+
+Le marché est porté par les petites et moyennes surfaces : les deux-pièces arrivent en tête avec 31,2 % des ventes, devant les trois-pièces (28,6 %) et les une-pièce (21,5 %). Ensemble, **les appartements d’une à trois pièces représentent 81 % des ventes**, une demande façonnée par les primo-accédants et l’investissement locatif.
+
+<BarChart
+  title="Part des ventes d’appartements par nombre de pièces"
+  unit="%"
+  decimals={1}
+  data={[
+    { label: '1 pièce', value: 21.5 },
+    { label: '2 pièces', value: 31.2, highlight: true },
+    { label: '3 pièces', value: 28.6 },
+    { label: '4 pièces', value: 14.2 },
+    { label: '5 pièces', value: 3.6 },
+  ]}
+/>
+
+## Les prix : une carte des inégalités
+
+<BarChart
+  title="Top 10 des départements par prix moyen au m²"
+  unit=" €"
+  decimals={0}
+  data={[
+    { label: 'Paris', value: 12049, highlight: true },
+    { label: 'Hauts-de-Seine', value: 7219 },
+    { label: 'Val-de-Marne', value: 5339 },
+    { label: 'Alpes-Maritimes', value: 4698 },
+    { label: 'Haute-Savoie', value: 4667 },
+    { label: 'Seine-Saint-Denis', value: 4337 },
+    { label: 'Yvelines', value: 4223 },
+    { label: 'Rhône', value: 4059 },
+    { label: 'Corse-du-Sud', value: 4015 },
+    { label: 'Gironde', value: 3764 },
+  ]}
+  caption="Moyenne des prix au m² de chaque vente, calculés sur la surface Carrez."
+/>
+
+Paris dépasse les 12 000 € le m², environ trois fois le prix dans le Rhône ou en Corse-du-Sud, et les trois premiers départements sont tous en Île-de-France. Sur l’ensemble des départements, le prix moyen au m² va d’environ 1 000 € à 12 000 €. L’écart se maintient pour les grands logements : un appartement de cinq pièces ou plus coûte 8 750 € le m² en Île-de-France, quatre fois plus que dans les Hauts-de-France. Une maison en Île-de-France, à environ 4 000 € le m², reste bien plus abordable qu’un appartement parisien.
+
+La taille compte aussi : un trois-pièces coûte **12 % de moins au m²** qu’un deux-pièces. Les petites surfaces se paient plus cher, tant la demande est forte dans les zones tendues.
+
+Les moyennes de prix au m² sont sensibles aux valeurs extrêmes, et DVF en contient : l’« appartement » le plus cher du semestre est enregistré à 9,1 m² pour 9 millions d’euros, très probablement un immeuble entier rattaché à un seul lot. J’ai donc vérifié les classements de prix avec la **médiane** : les quatre premiers départements sont identiques, et les trois-pièces restent moins chers au m² que les deux-pièces : 14 % de moins avec les médianes, contre 12 % avec les moyennes.
+
+## Le marché face au confinement
+
+```sql
+WITH quarters AS (
+    SELECT
+        COUNT(CASE WHEN date BETWEEN '2020-01-01' AND '2020-03-31' THEN 1 END) AS sales_q1,
+        COUNT(CASE WHEN date BETWEEN '2020-04-01' AND '2020-06-30' THEN 1 END) AS sales_q2
+    FROM ventes
+)
+SELECT sales_q1, sales_q2,
+       ROUND((sales_q2 - sales_q1) * 100.0 / sales_q1, 2) AS growth_pct
+FROM quarters;
+```
+
+Les ventes sont passées de 16 776 au premier trimestre à 17 393 au deuxième : **+3,7 %**, alors que le confinement a couvert la moitié du deuxième trimestre. Pas d’effondrement, donc, mais une nuance importante s’impose : DVF enregistre la date de l’acte authentique, généralement signé deux à trois mois après l’accord entre acheteur et vendeur. Beaucoup d’actes du deuxième trimestre correspondent donc à des compromis de vente signés avant le confinement, finalisés une fois que les notaires ont pu reprendre leur activité. Les chiffres montrent que le flux de ventes en cours a tenu ; ils ne permettent pas encore de mesurer l’effet du confinement sur les nouveaux compromis, qui n’apparaîtrait qu’aux trimestres suivants.
+
+<Takeaway label="Constat clé">L’Île-de-France domine à la fois les volumes et les prix, et les ventes se sont poursuivies pendant le premier confinement.</Takeaway>
+
+## Les dynamiques locales
+
+À l’échelle des communes, 48 communes ont enregistré au moins 50 ventes au premier trimestre, emmenées par les 17e, 15e et 18e arrondissements de Paris ; sept des dix premières sont des arrondissements parisiens, aux côtés de Nice, Bordeaux et Nantes.
+
+Le volume brut favorise les grandes villes, j’ai donc aussi rapporté les ventes à la population. Parmi les communes de plus de 10 000 habitants, le marché le plus actif par habitant est le **2e arrondissement de Paris**, avec 5,84 ventes pour 1 000 habitants. Trois pôles regroupent 17 des 20 premières : le centre de Paris (8 communes), le littoral méditerranéen (5) et la côte atlantique (4), qui relèvent de deux logiques : l’investissement urbain dense et les résidences secondaires en bord de mer.
+
+Pour classer les communes au sein de chaque département, j’ai utilisé une fonction de fenêtrage :
+
+```sql
+ROW_NUMBER() OVER (
+    PARTITION BY biens.code_dep
+    ORDER BY AVG(ventes.montant) DESC
+) AS rank_in_department
+```
+
+Les contrastes sont marqués même entre voisins : dans les Alpes-Maritimes, Saint-Jean-Cap-Ferrat arrive en tête avec une valeur moyenne de vente de 969 000 €, loin devant toutes les communes des Bouches-du-Rhône voisines.
+
+## Limites
+
+- **Un seul semestre**, et un semestre inhabituel : le confinement rend difficile la distinction entre un effet saisonnier et un effet de crise, et le délai entre compromis et acte masque l’impact réel du confinement sur les nouvelles ventes.
+- **Les moyennes sont sensibles aux valeurs aberrantes de DVF**, comme les ventes en bloc ; les médianes confirment les classements, mais une règle de nettoyage des prix au m² extrêmes rendrait toutes les moyennes plus robustes.
+- **La comparaison trimestrielle compte tous les types de biens**, maisons comprises.
+
+## Ce que j’en retiens
+
+Rédiger le dictionnaire de données et le schéma avant la moindre requête m’a semblé long, mais cela a rendu les douze requêtes simples à écrire. En revenant sur le projet, j’ai découvert qu’une requête peut s’exécuter sans erreur et pourtant être fausse : des dates stockées en texte et des virgules décimales échouaient en silence. Je vérifie désormais les types de données avant de faire confiance à un résultat.

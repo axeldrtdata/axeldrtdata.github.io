@@ -4,7 +4,7 @@
 // `currentColor`, so they follow the light/dark palettes automatically.
 import { SOCIAL_LINKS, type SocialIcon } from '../consts';
 import { withBase } from '../lib/url';
-import { t } from '../i18n';
+import { getLang, useT } from '../i18n';
 
 const ICONS: Record<SocialIcon, string> = {
   github:
@@ -17,6 +17,7 @@ const ICONS: Record<SocialIcon, string> = {
 };
 
 const isInternal = (href: string) => href.startsWith('/');
+const t = useT(getLang(Astro.url));
 ---
 
 {

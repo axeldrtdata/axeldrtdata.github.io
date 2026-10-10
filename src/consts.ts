@@ -13,6 +13,14 @@ export const SITE = {
   footerText: 'Designed and built in Lyon with Astro.',
 } as const;
 
+/** French versions of the site-wide texts above (pages under /fr/). */
+export const SITE_FR = {
+  description:
+    'Data Analyst à Lyon. Python, SQL et dataviz pour aider les entreprises à comprendre ce qui fait leur performance.',
+  footerText: 'Conçu et développé à Lyon avec Astro.',
+  status: 'Ouvert à un stage data · Lyon ou hybride',
+} as const;
+
 /** Icons bundled with the theme — see `src/components/SocialLinks.astro`. */
 export type SocialIcon = 'github' | 'x' | 'linkedin' | 'rss' | 'email';
 
@@ -95,9 +103,9 @@ export type NavItem =
  *  localize through the UI dictionary; give a page you add yourself a literal
  *  `label` instead — one of the two is required. */
 export const NAV_ITEMS: readonly NavItem[] = [
-  { href: '/works/', label: 'Projects' },
-  { href: '/blog/', label: 'Notes' },
-  { href: '/about/', label: 'About' },
+  { href: '/works/', labelKey: 'nav.works' },
+  { href: '/blog/', labelKey: 'nav.blog' },
+  { href: '/about/', labelKey: 'nav.about' },
 ];
 
 /** Homepage settings. `style` switches the two hero layouts:
@@ -116,6 +124,8 @@ export const HOME = {
   email: 'axel.derobert.data@gmail.com',
   /** CV placed in `public/`, e.g. '/cv-axel-derobert.pdf'. Leave '' to hide the button. */
   cv: '/cv-axel-derobert.pdf',
+  /** French CV for the /fr/ pages. Leave '' to offer the English CV there too. */
+  cvFr: '',
 };
 
 /** Project categories — drive the homepage chart and the filters on /works/.

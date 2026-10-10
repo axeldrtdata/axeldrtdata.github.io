@@ -1,0 +1,16 @@
+---
+// French notes list: same template as /blog/, fed with the French notes.
+import type { GetStaticPaths } from 'astro';
+import NotesPage from '../../blog/[...page].astro';
+import { getPosts } from '../../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPosts('fr');
+  const allTags = [...new Set(posts.flatMap((post) => post.data.tags))]
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({ name, count: posts.filter((post) => post.data.tags.includes(name)).length }));
+  return paginate(posts, { pageSize: 10, props: { allTags, total: posts.length } });
+}) satisfies GetStaticPaths;
+---
+
+<NotesPage {...Astro.props} />

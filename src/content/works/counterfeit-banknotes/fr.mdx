@@ -1,0 +1,126 @@
+---
+title: 'Détecter les faux billets à partir de six mesures'
+description: 'Comparer quatre modèles de machine learning pour distinguer les vrais billets en euros des faux à partir de leur seule géométrie, puis livrer le meilleur sous forme de script prêt à l’emploi.'
+client: 'ONCFM, organisme de lutte contre le faux-monnayage (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import ConfusionMatrix from '../../../components/case/ConfusionMatrix.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+
+## La question
+
+L’ONCFM lutte contre la contrefaçon des billets en euros. Chaque billet qui arrive à l’organisme passe dans une machine qui relève six mesures : sa longueur, sa diagonale, sa hauteur de chaque côté et les deux marges entre le bord et l’image imprimée. Au fil des années, l’organisme a remarqué que les faux diffèrent légèrement des vrais par leurs dimensions, de quelques fractions de millimètre invisibles à l’œil nu.
+
+La commande : construire un algorithme capable de distinguer un vrai billet d’un faux à partir de ces six mesures seulement, comparer quatre méthodes (régression logistique, k-means, k plus proches voisins et forêt aléatoire), puis livrer la meilleure sous forme de script capable de traiter un fichier de nouveaux billets. Une priorité avant tout : **laisser passer le moins de faux billets possible**.
+
+<KeyFigures
+  items={[
+    { value: '1 500', label: 'billets pour l’apprentissage, dont 500 faux' },
+    { value: '6', label: 'mesures par billet, en millimètres' },
+    { value: '99 %', label: 'des billets de test correctement classés' },
+    { value: '98/100', label: 'faux billets détectés dans le jeu de test' },
+  ]}
+/>
+
+## Comprendre les mesures
+
+Avant toute modélisation, j’ai regardé le comportement de chaque mesure. Quatre d’entre elles (la diagonale, les deux hauteurs et la marge haute) suivent de belles courbes en cloche où vrais et faux billets se chevauchent. Deux racontent une autre histoire : la **marge basse** est asymétrique à droite, et la **longueur** présente deux pics distincts, la signature de deux populations qui se mélangent à peine.
+
+Les corrélations avec l’authenticité l’ont confirmé. Les vrais billets sont plus longs et ont des marges plus petites.
+
+<BarChart
+  title="Force du lien avec l’authenticité (corrélation en valeur absolue)"
+  decimals={2}
+  data={[
+    { label: 'Longueur (+)', value: 0.85, highlight: true },
+    { label: 'Marge basse (−)', value: 0.78, highlight: true },
+    { label: 'Marge haute (−)', value: 0.61 },
+  ]}
+  caption="Les hauteurs sont des signaux bien plus faibles, et la diagonale n’a presque aucun lien avec l’authenticité."
+/>
+
+Certains billets sortaient nettement de la plage habituelle, surtout sur la marge basse. Je les ai gardés volontairement : ces dimensions inhabituelles sont très probablement les faux eux-mêmes. Les supprimer aurait fait disparaître le signal même dont les modèles ont besoin.
+
+## Préparer les données
+
+**37 billets n’avaient pas de marge basse.** Plutôt que de combler ces trous avec une médiane, j’ai utilisé une régression linéaire sur les cinq autres mesures, car la marge basse est fortement liée à la longueur (−0,67). Tous les billets ont été conservés, et l’étiquette d’authenticité n’a jamais servi à combler les valeurs manquantes.
+
+J’ai ensuite séparé les données en un jeu d’entraînement et un jeu de test, puis standardisé les mesures pour qu’aucune variable ne pèse plus que les autres du seul fait de son échelle.
+
+```python
+# 80/20 split, keeping the 2:1 genuine/fake ratio in both sets
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=y
+)
+
+# The scale is learned on training notes only
+scaler = StandardScaler()
+x_train_scaled = scaler.fit_transform(X_train)
+x_test_scaled = scaler.transform(X_test)
+```
+
+## Quatre modèles, un même cadre d’évaluation
+
+Chaque modèle a été entraîné sur les mêmes 1 200 billets et jugé sur les mêmes 300 qu’il n’avait jamais vus, avec les mêmes outils : une matrice de confusion pour compter chaque type d’erreur, l’accuracy (taux de bonnes prédictions), et la courbe ROC avec son score AUC pour vérifier la capacité du modèle à bien classer les billets quel que soit le seuil.
+
+| Modèle                  | Apprentissage | Accuracy | Erreurs / 300 | AUC    |
+| ----------------------- | ------------- | -------- | ------------- | ------ |
+| Régression logistique   | Supervisé     | 99,0 %   | 3             | 0,9995 |
+| Forêt aléatoire         | Supervisé     | 99,0 %   | 3             | 0,9994 |
+| K plus proches voisins  | Supervisé     | 98,7 %   | 4             | 0,9972 |
+| K-means (2 clusters)    | Non supervisé | 98,7 %   | 4             | —      |
+
+Le résultat du k-means est le plus parlant. Sans qu’on lui ait jamais indiqué quels billets étaient faux, il les a répartis en deux groupes qui correspondent à la réalité dans 98,7 % des cas. Vrais et faux billets forment deux populations naturellement distinctes, ce qui explique les excellentes performances de tous les modèles.
+
+<ConfusionMatrix
+  title="Régression logistique sur les 300 billets de test"
+  negative="Faux"
+  positive="Vrai"
+  tn={98}
+  fp={2}
+  fn={1}
+  tp={199}
+  caption="Deux faux billets sur 100 sont passés entre les mailles, et un seul vrai billet a été signalé à tort."
+/>
+
+## Pourquoi le modèle le plus simple l’a emporté
+
+La régression logistique et la forêt aléatoire ont terminé à égalité : même matrice de confusion, même accuracy, et des scores AUC à 0,0001 d’écart. Quand deux modèles sont aussi proches, c’est tout le reste qui les départage.
+
+Les classes sont presque linéairement séparables : la puissance supplémentaire de cent arbres de décision n’apporte donc rien ici. C’est le principe de parcimonie, plus connu sous le nom de **rasoir d’Ockham** : à performances égales, le modèle le plus simple doit l’emporter. La régression logistique est plus rapide, moins sujette au surapprentissage et surtout **explicable** : chaque mesure reçoit un coefficient, si bien que n’importe qui à l’organisme peut comprendre pourquoi un billet a été signalé.
+
+<Takeaway label="Rasoir d’Ockham">À performances égales, le modèle le plus simple l’emporte toujours.</Takeaway>
+
+## Du notebook à l’outil opérationnel
+
+Le modèle final est sauvegardé sous forme d’un pipeline unique qui regroupe la standardisation et la régression logistique : les nouveaux billets peuvent ainsi être évalués directement à partir des mesures brutes, sans refaire aucune étape de préparation.
+
+Le script charge un fichier de nouveaux billets et renvoie, pour chacun, un verdict et la probabilité d’être vrai. J’ai ajouté une fonctionnalité qui ne figurait pas dans la commande : les billets sur lesquels le modèle hésite sont **signalés pour une vérification humaine** au lieu d’être tranchés à l’aveugle.
+
+```python
+# Flag uncertain notes for a human check
+confiance = modele.predict_proba(df_taille_billets)[:, 1]   # probability of being genuine
+ecart = np.abs(confiance - 0.5) * 2                          # 0 = coin toss, 1 = fully certain
+seuil = 0.30
+resultats["Human check"] = np.where(ecart < seuil, "To check", "")
+```
+
+| Billet | Verdict | Probabilité d’être vrai |
+| ------ | ------- | ----------------------- |
+| B_1    | Vrai    | 0,995                   |
+| B_2    | Faux    | 0,003                   |
+| B_3    | Vrai    | 0,999                   |
+| B_4    | Faux    | 0,000                   |
+| B_5    | Faux    | 0,011                   |
+
+## Pour aller plus loin
+
+- **Ajuster le seuil de décision pour mieux détecter les faux.** Un faux billet non détecté coûte bien plus cher qu’une fausse alerte : exiger une probabilité plus élevée avant de déclarer un billet vrai laisserait moins de faux en circulation, au prix de quelques vérifications supplémentaires.
+- **Confirmer le classement par validation croisée.** Avec seulement trois ou quatre erreurs sur 300 billets, les écarts entre modèles restent dans la marge du hasard sur un seul découpage.
+
+## Ce que j’en retiens
+
+J’ai appris que le meilleur modèle n’est pas toujours le plus puissant. La forêt aléatoire a obtenu le même score, mais la régression logistique est celle qu’une personne de l’organisme peut comprendre : un coefficient par mesure, ce qui permet de voir pourquoi un billet a été signalé. Ajouter une vérification humaine pour les billets sur lesquels le modèle hésite m’a appris qu’un bon outil connaît aussi ses limites.

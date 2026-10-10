@@ -3,15 +3,108 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import StructuredData from '../components/StructuredData.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import EmailCopyButton from '../components/EmailCopyButton.astro';
-import { getCollection } from 'astro:content';
 import { withBase } from '../lib/url';
-import { SITE, HOME, PROJECT_CATEGORIES } from '../consts';
-import { formatDate } from '../i18n';
+import { SITE, SITE_FR, HOME, PROJECT_CATEGORIES } from '../consts';
+import { getLang, localePath, formatDateIn } from '../i18n';
+import { getWorks, getPosts } from '../lib/content';
+
+// Used by / and /fr/ (src/pages/fr/index.astro): every text below comes from `c`.
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
+const cv = fr && HOME.cvFr ? HOME.cvFr : HOME.cv;
+
+const COPY = {
+  en: {
+    intro: 'Introduction',
+    status: HOME.status,
+    portrait: 'Portrait of Axel Derobert',
+    titleA: 'Curious by nature',
+    titleB: 'analytical by training',
+    lead: 'Before I trust a number, I look at what it hides, and that is usually where the real answer is. Python, SQL, Power BI and Tableau are how I find it.',
+    viewProjects: 'View my projects',
+    talk: "Let's talk",
+    cv: 'Download my CV',
+    basedIn: 'Based in',
+    hybrid: 'Open to hybrid work',
+    calledHome: 'Called home',
+    countries: '4 countries',
+    journey: ['France, where it started', 'Australia', 'Sweden', 'The Netherlands', 'Back in Lyon, today'],
+    fluent: 'Fluent in French and English',
+    mixCaption: 'projects, from exploratory analysis to dashboards',
+    mixLabel: 'Project mix',
+    education: 'Education',
+    rncp: "RNCP Level 6, Bachelor's equivalent",
+    since: 'October 2025 – ongoing',
+    toolkitA: 'My',
+    toolkitB: 'toolkit',
+    quote: 'Finding the story behind the numbers',
+    teaser: 'France, Australia, Sweden, the Netherlands: four countries taught me to figure out how things work wherever I land. Data is where that curiosity found its playground.',
+    story: 'Read my story',
+    featuredEyebrow: '01 — Featured projects',
+    featuredA: 'Analyses that answer real ',
+    featuredB: 'business questions',
+    allProjects: 'All projects',
+    featuredLabel: 'Featured projects',
+    notesEyebrow: '02 — Notes',
+    notesA: "What's ",
+    notesB: 'caught my curiosity',
+    notesC: ' lately',
+    allNotes: 'All notes',
+    notesLabel: 'Latest notes',
+    readNote: 'Read the note →',
+    contactA: 'Got a question your data ',
+    contactB: "hasn't answered yet?",
+    contactFallback: 'Lyon, France · open to hybrid',
+    linkedin: "Let's talk on LinkedIn",
+  },
+  fr: {
+    intro: 'Présentation',
+    status: SITE_FR.status,
+    portrait: 'Portrait d’Axel Derobert',
+    titleA: 'Curieux de nature',
+    titleB: 'analyste par formation',
+    lead: 'Avant de faire confiance à un chiffre, je regarde ce qu’il cache : c’est souvent là que se trouve la vraie réponse. Python, SQL, Power BI et Tableau sont mes outils pour la trouver.',
+    viewProjects: 'Voir mes projets',
+    talk: 'Discutons',
+    cv: 'Télécharger mon CV',
+    basedIn: 'Basé à',
+    hybrid: 'Ouvert au travail hybride',
+    calledHome: 'Là où j’ai vécu',
+    countries: '4 pays',
+    journey: ['La France, là où tout a commencé', 'Australie', 'Suède', 'Pays-Bas', 'De retour à Lyon, aujourd’hui'],
+    fluent: 'Bilingue français et anglais',
+    mixCaption: 'projets, de l’analyse exploratoire aux dashboards',
+    mixLabel: 'Répartition des projets',
+    education: 'Formation',
+    rncp: 'Titre RNCP niveau 6, équivalent Bac+3',
+    since: 'Depuis octobre 2025',
+    toolkitA: 'Ma',
+    toolkitB: 'boîte à outils',
+    quote: 'Trouver l’histoire derrière les chiffres',
+    teaser: 'France, Australie, Suède, Pays-Bas : quatre pays m’ont appris à comprendre comment les choses fonctionnent, où que j’arrive. La data est devenue le terrain de jeu de cette curiosité.',
+    story: 'Lire mon parcours',
+    featuredEyebrow: '01 — Projets à la une',
+    featuredA: 'Des analyses qui répondent à de vraies ',
+    featuredB: 'questions métier',
+    allProjects: 'Tous les projets',
+    featuredLabel: 'Projets à la une',
+    notesEyebrow: '02 — Notes',
+    notesA: 'Ce qui a ',
+    notesB: 'piqué ma curiosité',
+    notesC: ' ces derniers temps',
+    allNotes: 'Toutes les notes',
+    notesLabel: 'Dernières notes',
+    readNote: 'Lire la note →',
+    contactA: 'Une question à laquelle vos données ',
+    contactB: 'n’ont pas encore répondu ?',
+    contactFallback: 'Lyon, France · ouvert à l’hybride',
+    linkedin: 'Discutons sur LinkedIn',
+  },
+};
+const c = COPY[lang];
 
 // Projects: featured ones first (max 3), otherwise the first three by order.
-const allWorks = (await getCollection('works')).sort(
-  (a, b) => (a.data.order ?? 999) - (b.data.order ?? 999),
-);
+const allWorks = await getWorks(lang);
 const featuredWorks = allWorks.filter((work) => work.data.featured);
 const showcase = (featuredWorks.length > 0 ? featuredWorks : allWorks).slice(0, 3);
 
@@ -22,20 +115,17 @@ const mix = PROJECT_CATEGORIES.map((category) => ({
 }));
 const mixLabel = mix.map((item) => `${item.count} ${item.label}`).join(', ');
 
-const posts = (await getCollection('blog'))
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.publishDate.getTime() - a.data.publishDate.getTime())
-  .slice(0, 2);
+const posts = (await getPosts(lang)).slice(0, 2);
 
 const heroTone = HOME.style === 'dark' ? 'is-dark' : 'is-light';
 const quoteTone = HOME.style === 'dark' ? 'is-light' : 'is-dark';
 
 const journey = [
-  { code: 'FR', label: 'France, where it started' },
-  { code: 'AU', label: 'Australia' },
-  { code: 'SE', label: 'Sweden' },
-  { code: 'NL', label: 'The Netherlands' },
-  { code: 'FR', label: 'Back in Lyon, today', now: true },
+  { code: 'FR', label: c.journey[0] },
+  { code: 'AU', label: c.journey[1] },
+  { code: 'SE', label: c.journey[2] },
+  { code: 'NL', label: c.journey[3] },
+  { code: 'FR', label: c.journey[4], now: true },
 ];
 
 const toolkit = [
@@ -60,16 +150,17 @@ const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: SITE.title,
-  description: SITE.description,
-  url: new URL(withBase('/'), site).href,
+  description: fr ? SITE_FR.description : SITE.description,
+  url: new URL(localePath('/', lang), site).href,
+  inLanguage: lang,
 };
 ---
 
-<BaseLayout description={SITE.description}>
+<BaseLayout description={fr ? SITE_FR.description : SITE.description}>
   <StructuredData slot="head" schema={websiteSchema} />
 
   <div class="page-wrap">
-    <section class="bento" aria-label="Introduction">
+    <section class="bento" aria-label={c.intro}>
       <div class:list={['card', 'intro', heroTone]}>
         <div class="intro-glow" aria-hidden="true"></div>
         <div class="intro-body">
@@ -77,11 +168,11 @@ const websiteSchema = {
             <div class="identity-text">
               <span class="identity-name">Axel Derobert</span>
               <span class="identity-role">DATA ANALYST · LYON</span>
-              <span class="status"><span class="status-dot"></span>{HOME.status}</span>
+              <span class="status"><span class="status-dot"></span>{c.status}</span>
             </div>
             {
               HOME.photo ? (
-                <img class="photo" src={withBase(HOME.photo)} alt="Portrait of Axel Derobert" width="336" height="384" />
+                <img class="photo" src={withBase(HOME.photo)} alt={c.portrait} width="336" height="384" />
               ) : (
                 <div class="photo photo-placeholder">Photo</div>
               )
@@ -89,9 +180,9 @@ const websiteSchema = {
           </div>
 
           <h1 class="intro-title">
-            Curious by nature
+            {c.titleA}
             <span class="intro-highlight accent"
-              >analytical by training<svg
+              >{c.titleB}<svg
                 aria-hidden="true"
                 viewBox="0 0 300 16"
                 preserveAspectRatio="none"
@@ -99,40 +190,37 @@ const websiteSchema = {
               ></span
             >
           </h1>
-          <p class="intro-lead">
-            Before I trust a number, I look at what it hides, and that is usually where the real answer
-            is. Python, SQL, Power BI and Tableau are how I find it.
-          </p>
+          <p class="intro-lead">{c.lead}</p>
         </div>
 
         <div class="intro-actions">
-          <a class="btn btn-primary" href={withBase('/works/')}>
-            View my projects
+          <a class="btn btn-primary" href={localePath('/works/', lang)}>
+            {c.viewProjects}
             <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
           </a>
           <a class="btn btn-secondary" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">
             <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M8 11v5"></path><path d="M8 8v.01"></path><path d="M12 16v-5"></path><path d="M16 16v-3a2 2 0 0 0-4 0"></path></svg>
-            Let's talk
+            {c.talk}
           </a>
-          {HOME.cv && <a class="btn btn-ghost" href={withBase(HOME.cv)} download>Download my CV</a>}
+          {cv && <a class="btn btn-ghost" href={withBase(cv)} download>{c.cv}</a>}
         </div>
       </div>
 
       <div class="card glass geo">
         <div class="card-head">
-          <span class="mono-label">Based in</span>
+          <span class="mono-label">{c.basedIn}</span>
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
         </div>
         <div class="geo-city">
           <span class="geo-name">Lyon<span class="accent-italic">, France</span></span>
           <span class="mono-small">45.76° N · 4.84° E</span>
-          <span class="muted-small">Open to hybrid work</span>
+          <span class="muted-small">{c.hybrid}</span>
         </div>
         <div class="divider"></div>
         <div class="journey">
           <div class="journey-head">
-            <span class="mono-label">Called home</span>
-            <span class="accent-italic journey-count">4 countries</span>
+            <span class="mono-label">{c.calledHome}</span>
+            <span class="accent-italic journey-count">{c.countries}</span>
           </div>
           <ol class="journey-list">
             {
@@ -146,18 +234,18 @@ const websiteSchema = {
             }
           </ol>
         </div>
-        <span class="muted-small">Fluent in French and English</span>
+        <span class="muted-small">{c.fluent}</span>
       </div>
 
       <div class="card glass mix">
         <div class="mix-head">
           <div class="mix-total">
             <span class="mix-number">{allWorks.length}</span>
-            <span class="mix-caption">projects, from exploratory analysis to dashboards</span>
+            <span class="mix-caption">{c.mixCaption}</span>
           </div>
           <span class="mono-small">portfolio.describe()</span>
         </div>
-        <div class="mix-bar" role="img" aria-label={`Project mix: ${mixLabel}`}>
+        <div class="mix-bar" role="img" aria-label={`${c.mixLabel}: ${mixLabel}`}>
           {
             mix
               .filter((item) => item.count > 0)
@@ -178,19 +266,19 @@ const websiteSchema = {
 
       <div class="card tone-bone education">
         <div class="card-head">
-          <span class="mono-label">Education</span>
+          <span class="mono-label">{c.education}</span>
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5z"></path><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"></path></svg>
         </div>
         <div class="education-body">
           <span class="education-title">Data Analyst, <span class="accent">OpenClassrooms</span></span>
-          <span class="muted-small">RNCP Level 6, Bachelor's equivalent</span>
-          <span class="muted-small">October 2025 – ongoing</span>
+          <span class="muted-small">{c.rncp}</span>
+          <span class="muted-small">{c.since}</span>
         </div>
       </div>
 
       <div class="card glass toolkit">
         <div class="card-head">
-          <h2 class="toolkit-title">My <span class="accent">toolkit</span></h2>
+          <h2 class="toolkit-title">{c.toolkitA} <span class="accent">{c.toolkitB}</span></h2>
           <span class="mono-small toolkit-import">import *</span>
         </div>
         <ul class="pill-list">
@@ -201,14 +289,11 @@ const websiteSchema = {
       <div class:list={['card', 'quote', quoteTone]}>
         <span class="quote-mark" aria-hidden="true">“</span>
         <div class="quote-body">
-          <p class="quote-text">Finding the story behind the numbers</p>
-          <p class="quote-teaser">
-            France, Australia, Sweden, the Netherlands: four countries taught me to figure out how
-            things work wherever I land. Data is where that curiosity found its playground.
-          </p>
+          <p class="quote-text">{c.quote}</p>
+          <p class="quote-teaser">{c.teaser}</p>
         </div>
-        <a class="quote-link" href={withBase('/about/')}>
-          Read my story
+        <a class="quote-link" href={localePath('/about/', lang)}>
+          {c.story}
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg>
         </a>
       </div>
@@ -216,13 +301,13 @@ const websiteSchema = {
 
     <div class="section-head" id="projects">
       <div>
-        <span class="mono-label">01 — Featured projects</span>
-        <h2>Analyses that answer real <span class="accent">business questions</span></h2>
+        <span class="mono-label">{c.featuredEyebrow}</span>
+        <h2>{c.featuredA}<span class="accent">{c.featuredB}</span></h2>
       </div>
-      <a class="btn btn-outline" href={withBase('/works/')}>All projects ({allWorks.length})</a>
+      <a class="btn btn-outline" href={localePath('/works/', lang)}>{c.allProjects} ({allWorks.length})</a>
     </div>
 
-    <section class="bento" aria-label="Featured projects">
+    <section class="bento" aria-label={c.featuredLabel}>
       {showcase.map((work, index) => <ProjectCard work={work} number={index + 1} />)}
     </section>
 
@@ -231,26 +316,26 @@ const websiteSchema = {
         <>
     <div class="section-head" id="notes">
       <div>
-        <span class="mono-label">02 — Notes</span>
-        <h2>What's <span class="accent">caught my curiosity</span> lately</h2>
+        <span class="mono-label">{c.notesEyebrow}</span>
+        <h2>{c.notesA}<span class="accent">{c.notesB}</span>{c.notesC}</h2>
       </div>
-      <a class="btn btn-outline" href={withBase('/blog/')}>All notes</a>
+      <a class="btn btn-outline" href={localePath('/blog/', lang)}>{c.allNotes}</a>
     </div>
 
-    <section class="bento" aria-label="Latest notes">
+    <section class="bento" aria-label={c.notesLabel}>
       {
         posts.map((post) => (
           <article class="card glass note">
             <div class="note-meta">
-              {formatDate(post.data.publishDate, 'short')}
+              {formatDateIn(post.data.publishDate, lang, 'short')}
               {post.data.tags[0] && ` · ${post.data.tags[0]}`}
             </div>
             <h3>
-              <a href={withBase(`/blog/${post.id}/`)}>{post.data.title}</a>
+              <a href={localePath(`/blog/${post.id}/`, lang)}>{post.data.title}</a>
             </h3>
             <p>{post.data.description}</p>
-            <a class="note-link" href={withBase(`/blog/${post.id}/`)}>
-              Read the note →
+            <a class="note-link" href={localePath(`/blog/${post.id}/`, lang)}>
+              {c.readNote}
             </a>
           </article>
         ))
@@ -263,18 +348,18 @@ const websiteSchema = {
     <section class="contact" id="contact" aria-labelledby="contact-title">
       <span class="mono-label">{posts.length > 0 ? '03' : '02'} — Contact</span>
       <h2 id="contact-title">
-        Got a question your data <span class="accent">hasn't answered yet?</span>
+        {c.contactA}<span class="accent">{c.contactB}</span>
       </h2>
       <div class="contact-row">
-        <span class="mono-small">{HOME.email || 'Lyon, France · open to hybrid'}</span>
+        <span class="mono-small">{HOME.email || c.contactFallback}</span>
         <div class="contact-actions">
           <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">
-            Let's talk on LinkedIn
+            {c.linkedin}
           </a>
           {
-            HOME.cv && (
-              <a class="btn btn-white" href={withBase(HOME.cv)} download>
-                Download my CV
+            cv && (
+              <a class="btn btn-white" href={withBase(cv)} download>
+                {c.cv}
               </a>
             )
           }

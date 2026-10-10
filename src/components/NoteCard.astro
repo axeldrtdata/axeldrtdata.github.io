@@ -1,8 +1,7 @@
 ---
 // One note in the notes list (/blog/ and the tag pages), in the same card style as the homepage.
 import type { CollectionEntry } from 'astro:content';
-import { withBase } from '../lib/url';
-import { formatDate } from '../i18n';
+import { getLang, localePath, formatDateIn } from '../i18n';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -10,18 +9,19 @@ interface Props {
 }
 
 const { post, readingTime } = Astro.props;
-const href = withBase(`/blog/${post.id}/`);
+const lang = getLang(Astro.url);
+const href = localePath(`/blog/${post.id}/`, lang);
 ---
 
 <article class="card glass note-card">
   <div class="note-card-meta">
-    <time datetime={post.data.publishDate.toISOString()}>{formatDate(post.data.publishDate, 'short')}</time>
+    <time datetime={post.data.publishDate.toISOString()}>{formatDateIn(post.data.publishDate, lang, 'short')}</time>
     {readingTime && <span>· {readingTime}</span>}
   </div>
   <h2 class="note-card-title"><a href={href}>{post.data.title}</a></h2>
   <p class="note-card-text">{post.data.description}</p>
   {post.data.tags.length > 0 && <ul class="tag-row">{post.data.tags.map((tag) => <li>{tag}</li>)}</ul>}
-  <a class="note-card-link" href={href}>Read the note →</a>
+  <a class="note-card-link" href={href}>{lang === 'fr' ? 'Lire la note →' : 'Read the note →'}</a>
 </article>
 
 <style>

@@ -1,15 +1,17 @@
 ---
-import { getCollection, render } from 'astro:content';
-import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+// Used by /blog/tags/<tag>/ and /fr/blog/tags/<tag>/.
+import { render } from 'astro:content';
+import type { GetStaticPaths, Page } from 'astro';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import Pagination from '../../../../components/Pagination.astro';
 import NoteCard from '../../../../components/NoteCard.astro';
 import NoteTagFilter from '../../../../components/NoteTagFilter.astro';
 import { SITE } from '../../../../consts';
-import { readingTime, t } from '../../../../i18n';
+import { getLang, useT, readingTimeIn } from '../../../../i18n';
+import { getPosts, type Post } from '../../../../lib/content';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  const posts = await getPosts('en');
   const allTags = [...new Set(posts.flatMap((post) => post.data.tags))]
     .sort((a, b) => a.localeCompare(b))
     .map((name) => ({ name, count: posts.filter((post) => post.data.tags.includes(name)).length }));
@@ -25,17 +27,24 @@ export const getStaticPaths = (async ({ paginate }) => {
   });
 }) satisfies GetStaticPaths;
 
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+interface Props {
+  page: Page<Post>;
+  allTags: { name: string; count: number }[];
+  total: number;
+}
 
 const { tag } = Astro.params;
 const { page, allTags, total } = Astro.props;
 const taggedPosts = page.data;
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
+const t = useT(lang);
 
 const readingTimes = new Map(
   await Promise.all(
     taggedPosts.map(async (post) => {
-      const { remarkPluginFrontmatter } = await render(post);
-      return [post.id, readingTime(remarkPluginFrontmatter.minutesRead)] as const;
+      const { remarkPluginFrontmatter } = await render(post.contentEntry);
+      return [post.id, readingTimeIn(remarkPluginFrontmatter.minutesRead, lang)] as const;
     }),
   ),
 );
@@ -50,10 +59,19 @@ const pageTitle =
   <div class="page-wrap">
     <header class="notes-head">
       <span class="mono-label">{t('blog.eyebrow')} · {t('tag.eyebrow')}</span>
-      <h1 class="page-title">Notes on <span class="accent">{tag}</span>.</h1>
+      {
+        fr ? (
+          <h1 class="page-title">Notes sur <span class="accent">{tag}</span></h1>
+        ) : (
+          <h1 class="page-title">Notes on <span class="accent">{tag}</span></h1>
+        )
+      }
       <p class="page-lead">
-        {page.total} {page.total === 1 ? 'note' : 'notes'} tagged “{tag}”. Pick another tag below, or
-        go back to all notes.
+        {
+          fr
+            ? `${page.total} ${page.total === 1 ? 'note classée' : 'notes classées'} sous « ${tag} ». Choisissez un autre thème ci-dessous, ou revenez à toutes les notes.`
+            : `${page.total} ${page.total === 1 ? 'note' : 'notes'} tagged “${tag}”. Pick another tag below, or go back to all notes.`
+        }
       </p>
     </header>
 

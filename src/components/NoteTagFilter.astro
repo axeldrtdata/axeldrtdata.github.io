@@ -1,7 +1,7 @@
 ---
 // Tag pills above the notes list, in the same style as the project filters on /works/.
 // Each pill is a link to the tag page; the current one is highlighted.
-import { withBase } from '../lib/url';
+import { getLang, localePath } from '../i18n';
 
 interface Props {
   tags: { name: string; count: number }[];
@@ -10,17 +10,19 @@ interface Props {
 }
 
 const { tags, total, active } = Astro.props;
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
 ---
 
-<nav class="note-filters" aria-label="Filter notes by tag">
-  <a class="note-filter" href={withBase('/blog/')} aria-current={active ? undefined : 'page'}>
-    All <span>{total}</span>
+<nav class="note-filters" aria-label={fr ? 'Filtrer les notes par thème' : 'Filter notes by tag'}>
+  <a class="note-filter" href={localePath('/blog/', lang)} aria-current={active ? undefined : 'page'}>
+    {fr ? 'Toutes' : 'All'} <span>{total}</span>
   </a>
   {
     tags.map((tag) => (
       <a
         class="note-filter"
-        href={withBase(`/blog/tags/${tag.name}/`)}
+        href={localePath(`/blog/tags/${tag.name}/`, lang)}
         aria-current={tag.name === active ? 'page' : undefined}
       >
         {tag.name} <span>{tag.count}</span>

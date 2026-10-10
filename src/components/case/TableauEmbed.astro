@@ -5,6 +5,7 @@
 //   <TableauEmbed workbook="AirbnbInvestmentDashboard" view="World" profile="axel.derobert" poster={img} alt="…" />
 import { Image } from 'astro:assets';
 import type { ImageMetadata } from 'astro';
+import { getLang } from '../../i18n';
 
 interface Props {
   workbook: string;
@@ -18,26 +19,27 @@ interface Props {
   height?: number;
 }
 
-const { workbook, view, profile, poster, alt, title = 'Live dashboard', width = 1400, height = 900 } = Astro.props;
+const fr = getLang(Astro.url) === 'fr';
+const { workbook, view, profile, poster, alt, title = fr ? 'Dashboard interactif' : 'Live dashboard', width = 1400, height = 900 } = Astro.props;
 // Tabs bar above the dashboard and toolbar below it, added by Tableau Public.
 const chrome = 62;
 const embedUrl = `https://public.tableau.com/views/${workbook}/${view}?:showVizHome=no&:embed=true&:tabs=yes&:toolbar=yes&:device=desktop&:language=en-US`;
 const pageUrl = `https://public.tableau.com/app/profile/${profile}/viz/${workbook}/${view}`;
 ---
 
-<figure class="tableau glass" data-tableau-embed data-src={embedUrl} data-width={width} data-height={height + chrome}>
+<figure class="tableau glass" data-tableau-embed data-src={embedUrl} data-width={width} data-height={height + chrome} data-iframe-title={fr ? 'Dashboard Tableau interactif' : 'Interactive Tableau dashboard'}>
   <figcaption class="tableau-head">
     <span class="tableau-title">{title}</span>
-    <a class="tableau-open" href={pageUrl} target="_blank" rel="noopener noreferrer">Open on Tableau Public ↗</a>
+    <a class="tableau-open" href={pageUrl} target="_blank" rel="noopener noreferrer">{fr ? 'Ouvrir sur Tableau Public ↗' : 'Open on Tableau Public ↗'}</a>
   </figcaption>
   <div class="tableau-stage">
     <Image class="tableau-poster" src={poster} alt={alt} widths={[700, 1100, 1600, 2200]} sizes="(min-width: 1200px) 1160px, 100vw" />
     <button class="tableau-launch" type="button" data-tableau-launch>
       <span class="launch-dot" aria-hidden="true"></span>
-      Launch the interactive dashboard
+      {fr ? 'Lancer le dashboard interactif' : 'Launch the interactive dashboard'}
     </button>
   </div>
-  <p class="tableau-note">Filters, slider and tabs all work. Best viewed on a computer.</p>
+  <p class="tableau-note">{fr ? 'Filtres, curseur et onglets fonctionnent. À voir de préférence sur ordinateur.' : 'Filters, slider and tabs all work. Best viewed on a computer.'}</p>
 </figure>
 
 <script>
@@ -52,7 +54,7 @@ const pageUrl = `https://public.tableau.com/app/profile/${profile}/viz/${workboo
         const height = Number(embed.dataset.height);
         const iframe = document.createElement('iframe');
         iframe.src = embed.dataset.src ?? '';
-        iframe.title = 'Interactive Tableau dashboard';
+        iframe.title = embed.dataset.iframeTitle ?? 'Interactive Tableau dashboard';
         iframe.allowFullscreen = true;
         iframe.width = String(width);
         iframe.height = String(height);

@@ -5,7 +5,7 @@ import { z } from 'astro/zod';
 // Astro 7 Content Layer API: each collection declares a `loader`.
 // Authors add Markdown/MDX files under the `base` directories below.
 const works = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/works' }),
+  loader: glob({ pattern: '**/index.{md,mdx}', base: './src/content/works' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -25,7 +25,7 @@ const works = defineCollection({
 });
 
 const blog = defineCollection({
-  loader: glob({ pattern: '**/[^_]*.{md,mdx}', base: './src/content/blog' }),
+  loader: glob({ pattern: '**/index.{md,mdx}', base: './src/content/blog' }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),
@@ -37,4 +37,27 @@ const blog = defineCollection({
     }),
 });
 
-export const collections = { works, blog };
+// French versions: a `fr.mdx` (or `fr.md`) next to each English `index.mdx`.
+// Only the translated fields live in its front matter; everything else (images,
+// stack, order, dates…) is taken from the English entry with the same folder name.
+const folderId = ({ entry }: { entry: string }) => entry.split('/')[0];
+
+const worksFr = defineCollection({
+  loader: glob({ pattern: '**/fr.{md,mdx}', base: './src/content/works', generateId: folderId }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    client: z.string().optional(),
+    role: z.string().optional(),
+  }),
+});
+
+const blogFr = defineCollection({
+  loader: glob({ pattern: '**/fr.{md,mdx}', base: './src/content/blog', generateId: folderId }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+  }),
+});
+
+export const collections = { works, blog, worksFr, blogFr };

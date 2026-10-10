@@ -1,0 +1,143 @@
+---
+title: 'Dans quelles villes investir sur Airbnb ?'
+description: 'Un dashboard Tableau de trois pages qui mène un investisseur du marché mondial jusqu’à un quartier précis, construit sur 478 000 annonces nettoyées dans 16 pays.'
+client: 'Investisseurs en location courte durée (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import TableauEmbed from '../../../components/case/TableauEmbed.astro';
+import worldImg from './dashboard-world.png';
+import countriesImg from './dashboard-countries.png';
+import citiesImg from './dashboard-cities.png';
+
+## La question
+
+Imaginez une personne qui dispose d’assez d’argent pour acheter un bien et le louer sur Airbnb, sans contrainte géographique : elle pourrait acheter à Lisbonne, Melbourne ou Berlin. La question est simple à poser et difficile à trancher : **dans quelle ville acheter ?**
+
+Concrètement, elle se décompose en trois questions posées dans l’ordre. Combien puis-je facturer la nuit ? Combien de nuits par an vais-je louer ? Et au final, cela fait-il un revenu intéressant ? Le prix, le taux d’occupation et le revenu annuel estimé forment la colonne vertébrale du dashboard, et ils apparaissent à chaque niveau.
+
+Mais le revenu seul ne suffit pas pour décider. Un investisseur doit aussi savoir qui sont ses concurrents (particuliers ou professionnels), ce qui se loue vraiment (logements entiers ou chambres privées), et ce qui grignote la marge une fois sur le marché : frais de ménage, durées minimales de séjour, conditions d’annulation strictes. Ce sont ces critères qui départagent deux villes affichant le même revenu.
+
+<KeyFigures
+  items={[
+    { value: '478 000', label: 'annonces après nettoyage, de 2008 à 2017' },
+    { value: '16', label: 'pays' },
+    { value: '986', label: 'villes avec assez d’annonces pour être comparées' },
+    { value: '3', label: 'pages de dashboard, du monde au quartier' },
+  ]}
+/>
+
+Un principe traverse tout le dashboard : **aucun chiffre ne se lit seul**. Une ville à 130 $ la nuit ne veut rien dire tant qu’on ne sait pas si c’est au-dessus ou en dessous de son marché. Chaque indicateur est comparé à une référence : la ville médiane sur les graphiques, la moyenne nationale sur les cartes KPI. On ne lit jamais une valeur, on lit un écart.
+
+## À vous de tester
+
+Le dashboard est publié sur Tableau Public. Lancez-le ci-dessous pour déplacer le curseur, filtrer un pays ou comparer des villes, exactement comme le ferait un investisseur.
+
+<TableauEmbed
+  workbook="AirbnbInvestmentDashboard"
+  view="World"
+  profile="axel.derobert"
+  width={1600}
+  height={1000}
+  poster={worldImg}
+  alt="Aperçu de la page World (Monde) du dashboard d’investissement Airbnb."
+/>
+
+## Rendre 500 000 annonces comparables
+
+Les données viennent d’Inside Airbnb, qui collecte ville par ville les pages publiques des annonces Airbnb. Le fichier brut comptait près de 500 000 annonces et 89 variables.
+
+La partie la plus longue du nettoyage a porté sur les noms de villes. Le champ était en texte libre, saisi par les hôtes eux-mêmes : une même ville apparaissait donc sous plusieurs orthographes, avec ou sans accents, dans différentes langues et différents alphabets. Hong Kong à elle seule apparaissait sous 26 libellés. Plutôt qu’une normalisation automatique, qui aurait pu fusionner silencieusement des villes différentes, je les ai harmonisées pays par pays avec des dictionnaires de correspondance explicites, pour que chaque décision reste visible dans le notebook.
+
+J’ai ensuite enrichi les données avec deux sources externes :
+
+- **Les taux de change de la Banque mondiale** pour 2017, afin de convertir tous les prix en dollars américains. Sans cela, aucune comparaison entre pays n’est possible.
+- **OurAirports**, pour calculer la distance de chaque annonce au grand aéroport international le plus proche, à l’aide d’un BallTree qui mesure les distances réelles à la surface du globe.
+
+```python
+# Nearest large international airport for every listing (great-circle distance)
+tree = BallTree(
+    np.radians(df_airport[["latitude_deg", "longitude_deg"]].values), metric="haversine"
+)
+dist, idx = tree.query(np.radians(df[["Latitude", "Longitude"]].values), k=1)
+df["distance_aeroport_km"] = (dist[:, 0] * 6371).round(2)   # radians → km
+```
+
+### Quatre décisions qui conditionnent chaque chiffre
+
+| Décision | Pourquoi |
+| -------- | -------- |
+| **Pays + ville comme clé**, jamais la ville seule | Sinon, Venise en Italie et Venice en Californie fusionnent en un seul point au milieu de l’Atlantique |
+| **Annonces dormantes filtrées dans Tableau, pas supprimées en Python** | 20 % des annonces n’avaient aucune disponibilité et très peu d’avis. Elles sont exclues du calcul de rentabilité, mais restent comptées dans la taille du marché |
+| **Un nombre minimum d’annonces par ville**, réglé avec un curseur | Un revenu moyen calculé sur huit annonces est instable. Le curseur rend visible l’arbitrage entre couverture et robustesse |
+| **Croissance des hôtes arrêtée fin 2016** | Les données s’arrêtent en juin 2017 : garder cette année aurait fait apparaître une baisse d’activité qui n’a jamais eu lieu |
+
+## Page 1 : le marché mondial en un coup d’œil
+
+<Figure
+  src={worldImg}
+  wide
+  title="Page 1 — Monde"
+  alt="Page du dashboard Tableau montrant la part d’hôtes multi-annonces par pays, une carte du monde des annonces, le nombre d’annonces, le revenu annuel moyen et trois graphiques en anneau pour le type de logement, la capacité et le type de bien."
+  caption="Chaque visuel filtre les autres : cliquer sur un pays de la carte met à jour toute la page."
+/>
+
+La première page plante le décor. Les logements entiers représentent près des deux tiers de l’offre, les appartements 75 % des biens, et plus de la moitié des annonces n’accueillent qu’un ou deux voyageurs. Les États-Unis dominent avec environ 130 000 annonces, devant le Royaume-Uni (60 000) et la France (56 000).
+
+Le chiffre le plus utile pour un investisseur est la **part d’hôtes multi-annonces**, qui va d’environ 15 % au Danemark à près de 70 % en Italie. Un marché à 70 % n’est plus fait de particuliers qui arrondissent leurs fins de mois : c’est un secteur professionnel, avec une concurrence organisée, mais aussi une rentabilité éprouvée.
+
+## Page 2 : ce qui rend une ville intéressante
+
+<Figure
+  src={countriesImg}
+  wide
+  title="Page 2 — Pays"
+  alt="Page du dashboard Tableau avec un nuage de points croisant taux d’occupation et prix par ville, un nuage de points croisant distance à l’aéroport et prix, un top 10 des villes par revenu estimé avec un curseur, des cartes KPI et un diagramme en barres empilées par pays."
+  caption="Filtrée ici sur l’Australie, avec le curseur à 130 annonces (l’analyse de Sydney ci-dessous utilise 120). Chaque point est une ville, dimensionné selon son nombre d’annonces ; les lignes pointillées marquent le prix médian des villes et le taux d’occupation moyen."
+/>
+
+Cette page teste les facteurs qui pourraient faire d’une ville un bon investissement. Le premier graphique croise le prix et le taux d’occupation, découpé en quatre quadrants par le prix médian et le taux d’occupation moyen. On s’attendrait à ce que les villes chères se remplissent moins. **Ce n’est pas le cas** : d’une ville à l’autre, la corrélation entre prix et taux d’occupation est quasi nulle (0,01). Le quadrant en haut à droite, où les villes facturent plus cher *et* se remplissent davantage, existe bel et bien, et c’est là qu’il faut chercher.
+
+Le second graphique teste une intuition : être proche d’un aéroport devrait permettre de facturer plus cher. La relation est plate. Un résultat négatif reste un résultat : la distance à l’aéroport n’est pas un critère de sélection, et mieux vaut écarter un facteur preuves à l’appui que ne jamais le tester.
+
+Le curseur est le garde-fou de toute la page. Sans lui, les villes les plus rentables étaient de petits villages avec une poignée d’annonces. En le relevant, on ne garde que les marchés où le chiffre est fiable, et le classement change complètement. Enfin, un diagramme en barres empilées bascule entre capacité, type de logement et type de bien grâce à un seul paramètre : trois lectures de la même question sans trois graphiques.
+
+## Page 3 : choisir entre plusieurs villes
+
+<Figure
+  src={citiesImg}
+  wide
+  title="Page 3 — Villes"
+  alt="Page du dashboard Tableau comparant quatre quartiers de Sydney : cartes KPI nationales, courbe des nouveaux hôtes par an, tableau comparatif et histogramme de la distribution des prix."
+  caption="Jusqu’à cinq villes peuvent être comparées à la fois. Les cartes KPI restent au niveau national, à titre de référence."
+/>
+
+La dernière page zoome sur quelques villes : l’arrivée de nouveaux hôtes chaque année (signe de maturité ou de saturation), la distribution des prix par tranches de 50 $, exprimée en pourcentage pour qu’une grande ville n’écrase pas une petite, et un tableau des frictions cachées : frais de ménage, durées minimales de séjour et conditions d’annulation strictes.
+
+## La méthode en pratique : Sydney
+
+Pour montrer la méthode de bout en bout, je l’ai appliquée à un marché que je connais bien. En Australie, en ne gardant que les villes d’au moins 120 annonces actives, **les dix lieux les plus rentables sont tous des quartiers de Sydney, et six d’entre eux se trouvent dans les Eastern Suburbs** : Clovelly, Bronte, North Bondi, Paddington, Rose Bay et Bondi Beach. Ce n’est pas une ville qui se démarque, c’est un corridor côtier de quelques kilomètres. J’y ai vécu, et les données correspondent à ce que j’ai vu : des plages accessibles à pied les unes depuis les autres, le centre-ville à huit kilomètres, l’aéroport à une dizaine, et une demande qui tient toute l’année.
+
+| Quartier    | Annonces | Prix / nuit | Occupation | Revenu annuel estimé |
+| ----------- | -------- | ----------- | ---------- | -------------------- |
+| Bondi Beach | 954      | 155 $       | 56 %       | 31 200 $             |
+| Bronte      | 217      | 200 $       | 51 %       | 38 653 $             |
+| Rose Bay    | 129      | 167 $       | 54 %       | 31 585 $             |
+| **Clovelly**| **123**  | **229 $**   | **54 %**   | **49 053 $**         |
+
+Clovelly compte huit fois moins d’annonces que Bondi Beach, mais facture 229 $ la nuit au lieu de 155 $ pour un taux d’occupation presque identique. Résultat : un revenu estimé à 49 000 $ par an au lieu de 31 000 $, soit près de 60 % de plus par bien. Cela confirme, à l’échelle du quartier, ce que montrait le nuage de points de la page 2 : facturer plus cher ne fait pas mécaniquement baisser le taux d’occupation.
+
+<Takeaway label="Ce que le dashboard apporte">Pas une ville, mais une méthode : une façon d’arriver à une décision, et de la justifier.</Takeaway>
+
+## Les limites, en toute transparence
+
+- **Le taux d’occupation est une approximation.** Il est déduit de la disponibilité du calendrier, pas des réservations réelles : un hôte qui bloque des dates sans louer est compté comme s’il avait loué. Le revenu estimé est donc une borne haute, utile pour comparer les villes entre elles, pas pour prévoir un chiffre d’affaires.
+- **La saisonnalité est lissée.** Deux villes au même revenu annuel peuvent avoir des saisons très différentes. Le fichier calendrier d’Inside Airbnb, avec les prix jour par jour, serait la suite logique.
+- **Les données s’arrêtent en 2017.** Plusieurs de ces villes ont depuis durci leur réglementation sur la location courte durée. Le dashboard décrit un état du marché, pas une prévision.
+
+## Ce que j’en retiens
+
+J’ai construit le dashboard autour des questions de l’investisseur, pas autour des données dont je disposais. Le curseur en est le meilleur exemple : au lieu de fixer moi-même un nombre minimum d’annonces, je laisse l’investisseur le régler, car un seuil est une décision, pas un détail technique. Et les retours du jury sur mes couleurs m’ont appris qu’un dashboard n’est terminé que lorsque tout le monde peut le lire.

@@ -9,8 +9,8 @@ import '../styles/chrome.css';
 import '../styles/bento.css';
 import { ClientRouter } from 'astro:transitions';
 import { withBase } from '../lib/url';
-import { SITE, NAV_ITEMS } from '../consts';
-import { locale, navLabel, t } from '../i18n';
+import { SITE, SITE_FR, NAV_ITEMS } from '../consts';
+import { getLang, useT, localePath, switchPath } from '../i18n';
 import CodeCopy from '../components/CodeCopy.astro';
 import SocialLinks from '../components/SocialLinks.astro';
 
@@ -21,13 +21,21 @@ interface Props {
   image?: string;
 }
 
+const lang = getLang(Astro.url);
+const t = useT(lang);
+const fr = lang === 'fr';
 const siteName = SITE.title;
 const hasNotes = (await getCollection('blog', ({ data }) => !data.draft)).length > 0;
 const navItems = NAV_ITEMS.filter((item) => hasNotes || item.href !== '/blog/');
 const [firstName, ...lastNames] = siteName.split(' ');
-const lastRefresh = new Date().toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+const lastRefresh = new Date().toLocaleDateString(fr ? 'fr-FR' : 'en-GB', { month: 'short', year: 'numeric' });
 
-const { title = siteName, description = SITE.description, ogType = 'website', image } = Astro.props;
+const {
+  title = siteName,
+  description = fr ? SITE_FR.description : SITE.description,
+  ogType = 'website',
+  image,
+} = Astro.props;
 
 // `Astro.site` comes from `site` in astro.config.mjs; fall back to the
 // request URL during dev so canonical/OG links still resolve.
@@ -38,13 +46,15 @@ const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
 
 const currentPath = Astro.url.pathname;
 const isActive = (href: string) => {
-  const full = withBase(href);
+  const full = localePath(href, lang);
   return href === '/' ? currentPath === full : currentPath.startsWith(full);
 };
+const enURL = new URL(switchPath(Astro.url, 'en'), siteBase);
+const frURL = new URL(switchPath(Astro.url, 'fr'), siteBase);
 ---
 
 <!doctype html>
-<html lang={locale}>
+<html lang={lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
@@ -53,6 +63,9 @@ const isActive = (href: string) => {
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <link rel="icon" href={withBase('/favicon.ico')} />
     <link rel="canonical" href={canonicalURL} />
+    <link rel="alternate" hreflang="en" href={enURL} />
+    <link rel="alternate" hreflang="fr" href={frURL} />
+    <link rel="alternate" hreflang="x-default" href={enURL} />
     <link rel="sitemap" href={withBase('/sitemap-index.xml')} />
     <link rel="alternate" type="application/rss+xml" title={siteName} href={withBase('/rss.xml')} />
     <title>{fullTitle}</title>
@@ -65,7 +78,8 @@ const isActive = (href: string) => {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     {/* Open Graph wants `ja_JP`, not the `ja-JP` of `<html lang>`. */}
-    <meta property="og:locale" content={locale.replace('-', '_')} />
+    <meta property="og:locale" content={fr ? 'fr_FR' : 'en_GB'} />
+    <meta property="og:locale:alternate" content={fr ? 'en_GB' : 'fr_FR'} />
     {imageURL && <meta property="og:image" content={imageURL} />}
 
     {/* Twitter */}
@@ -90,25 +104,41 @@ const isActive = (href: string) => {
   </head>
   <body>
     <header class="site-header">
-      <a class="brand" href={withBase('/')} aria-label={t('nav.brandHome', { site: siteName })}>
+      <a class="brand" href={localePath('/', lang)} aria-label={t('nav.brandHome', { site: siteName })}>
         <span class="brand-first">{firstName}</span>
         <span class="brand-last">{lastNames.join(' ')}</span>
       </a>
       <nav class="site-nav" aria-label={t('nav.label')}>
         {
           navItems.map((item) => (
-            <a href={withBase(item.href)} aria-current={isActive(item.href) ? 'page' : undefined}>
-              {navLabel(item)}
+            <a href={localePath(item.href, lang)} aria-current={isActive(item.href) ? 'page' : undefined}>
+              {item.labelKey ? t(item.labelKey) : item.label}
             </a>
           ))
         }
       </nav>
       <div class="header-actions">
-        <div class="lang-switch" role="group" aria-label="Language">
-          <a class="lang is-active" href={withBase('/')} aria-current="true">EN</a>
-          <span class="lang is-soon" title="French version coming soon">FR</span>
+        <div class="lang-switch" role="group" aria-label={fr ? 'Langue' : 'Language'}>
+          <a
+            class:list={['lang', { 'is-active': !fr }]}
+            href={switchPath(Astro.url, 'en')}
+            hreflang="en"
+            lang="en"
+            aria-current={fr ? undefined : 'true'}
+            title="English version"
+            data-astro-reload
+          >EN</a>
+          <a
+            class:list={['lang', { 'is-active': fr }]}
+            href={switchPath(Astro.url, 'fr')}
+            hreflang="fr"
+            lang="fr"
+            aria-current={fr ? 'true' : undefined}
+            title="Version française"
+            data-astro-reload
+          >FR</a>
         </div>
-        <a class="header-cta" href={withBase('/#contact')}>Contact me</a>
+        <a class="header-cta" href={`${localePath('/', lang)}#contact`}>{fr ? 'Me contacter' : 'Contact me'}</a>
       </div>
     </header>
 
@@ -117,10 +147,10 @@ const isActive = (href: string) => {
     </main>
 
     <footer class="site-footer">
-      <p>© {new Date().getFullYear()} {siteName} · {SITE.footerText}</p>
+      <p>© {new Date().getFullYear()} {siteName} · {fr ? SITE_FR.footerText : SITE.footerText}</p>
       <p class="footer-status">
         <span class="footer-dot" aria-hidden="true"></span>
-        Last refresh: {lastRefresh} · all pipelines green
+        {fr ? `Dernière mise à jour : ${lastRefresh} · tous les pipelines au vert` : `Last refresh: ${lastRefresh} · all pipelines green`}
       </p>
       <SocialLinks />
     </footer>

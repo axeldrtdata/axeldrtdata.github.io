@@ -1,0 +1,19 @@
+---
+// French notes: same template as /blog/<slug>/, fed with the French entries.
+import NotePage from '../../blog/[slug].astro';
+import { getPosts } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getPosts('fr');
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      newer: entries[index - 1] ?? null,
+      older: entries[index + 1] ?? null,
+    },
+  }));
+}
+---
+
+<NotePage {...Astro.props} />

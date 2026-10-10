@@ -1,4 +1,5 @@
 ---
+import { getLang } from '../i18n';
 // "Email me" button that copies the address to the clipboard instead of opening a mail app,
 // which does nothing for visitors who use webmail. The label turns into "Copied ✓" for 2 seconds.
 interface Props {
@@ -6,7 +7,9 @@ interface Props {
   label?: string;
 }
 
-const { email, label = 'Email me' } = Astro.props;
+const fr = getLang(Astro.url) === 'fr';
+const { email, label = fr ? 'M’écrire' : 'Email me' } = Astro.props;
+const copied = fr ? 'Copié ✓' : 'Copied ✓';
 ---
 
 <button
@@ -14,7 +17,8 @@ const { email, label = 'Email me' } = Astro.props;
   class="btn btn-ghost-light copy-email"
   data-copy-email={email}
   data-label={label}
-  title={`Copy ${email}`}
+  data-copied={copied}
+  title={fr ? `Copier ${email}` : `Copy ${email}`}
 >
   <span class="copy-email-label" aria-live="polite">{label}</span>
 </button>
@@ -48,7 +52,7 @@ const { email, label = 'Email me' } = Astro.props;
       button.addEventListener('click', async () => {
         const ok = await copyText(button.dataset.copyEmail ?? '');
         if (!label) return;
-        label.textContent = ok ? 'Copied ✓' : (button.dataset.copyEmail ?? '');
+        label.textContent = ok ? (button.dataset.copied ?? 'Copied ✓') : (button.dataset.copyEmail ?? '');
         window.clearTimeout(timer);
         timer = window.setTimeout(() => {
           label.textContent = button.dataset.label ?? 'Email me';

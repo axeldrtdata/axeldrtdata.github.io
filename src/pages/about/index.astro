@@ -1,52 +1,153 @@
 ---
+// Used by /about/ and /fr/about/ (src/pages/fr/about/index.astro): every text below comes from `c`.
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import EmailCopyButton from '../../components/EmailCopyButton.astro';
 import { withBase } from '../../lib/url';
 import { HOME } from '../../consts';
+import { getLang, localePath } from '../../i18n';
 
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
+const cv = fr && HOME.cvFr ? HOME.cvFr : HOME.cv;
 const projectCount = (await getCollection('works')).length;
 
+const COPY = {
+  en: {
+    title: 'About',
+    description: 'Axel Derobert, Data Analyst in Lyon: finding the story behind the numbers.',
+    sectionLabel: 'About Axel',
+    eyebrow: 'About',
+    h1A: 'Finding the ',
+    h1B: 'story',
+    h1C: ' behind the numbers',
+    intro: 'Born and raised in France, I left right after high school to live abroad: Australia, then Sweden, then the Netherlands. Those years away made me fluent in English, taught me real independence, and left me with a lasting curiosity: figuring out how things work wherever I land.',
+    portrait: 'Portrait of Axel Derobert',
+    today: 'Today',
+    todayText: 'That curiosity has found its playground: <strong>data</strong>. I am training as a Data Analyst with OpenClassrooms, learning to turn raw, messy data into clear decisions a team can act on.',
+    toolkit: 'My toolkit',
+    toolkitA: 'Python, SQL, Power BI, Tableau: ',
+    toolkitB: 'whatever it takes to make data talk.',
+    fieldsEyebrow: 'End-to-end analyses',
+    onSite: 'on this site',
+    fieldsText: 'Across my OpenClassrooms projects, I have run analyses from raw data to recommendation in very different fields.',
+    fields: ['Fraud detection', 'Rental investment', 'Market research', 'Education', 'Project management', 'E-commerce', 'Retail', 'Real estate', 'Food security', 'Insurance'],
+    seeCases: 'See the case studies →',
+    calledHome: 'Called home',
+    countries: '4 countries',
+    journey: ['France, where I grew up', 'Australia', 'Sweden', 'The Netherlands', 'Back in Lyon, today'],
+    languages: 'Native French, fluent English',
+    how: 'How I work',
+    howTitle: 'Curious first, rigorous always',
+    howText: 'I start with questions: what is the data really saying, and what might it be leaving out? Then I check before I conclude. I recompute the key figures from the source and look at units, joins and missing values. Coming back to my projects for this portfolio, that habit sharpened several of my conclusions, and each case study shows how.',
+    steps: [
+      ['Question', 'What does the business really need to know?'],
+      ['Clean', 'Units, joins and gaps, fixed before any chart.'],
+      ['Explore', 'Patterns and outliers, tested, not assumed.'],
+      ['Story', 'One clear answer a team can act on.'],
+    ],
+    offscreen: 'Off-screen',
+    music: ['Music', 'Listening to it, and making it.'],
+    football: ['Football', 'Watching the game, and reading the numbers behind it.'],
+    travel: ['Travel', 'Discovering new places, a habit four countries left me with.'],
+    notes: 'Notes',
+    notesText: 'What my projects taught me, from analytical traps to working with AI',
+    readNotes: 'Read the notes →',
+    lookingFor: "What I'm looking for",
+    ctaA: 'A data internship in Lyon or hybrid. If you need someone ',
+    ctaB: 'curious and rigorous',
+    ctaC: ", let's talk.",
+    linkedin: "Let's talk on LinkedIn",
+    cv: 'Download my CV',
+  },
+  fr: {
+    title: 'À propos',
+    description: 'Axel Derobert, Data Analyst à Lyon : trouver l’histoire derrière les chiffres.',
+    sectionLabel: 'À propos d’Axel',
+    eyebrow: 'À propos',
+    h1A: 'Trouver l’',
+    h1B: 'histoire',
+    h1C: ' derrière les chiffres',
+    intro: 'Né et élevé en France, je suis parti vivre à l’étranger juste après le lycée : l’Australie, puis la Suède, puis les Pays-Bas. Ces années m’ont rendu bilingue en anglais, m’ont appris la vraie autonomie et m’ont laissé une curiosité durable : comprendre comment les choses fonctionnent, où que j’arrive.',
+    portrait: 'Portrait d’Axel Derobert',
+    today: 'Aujourd’hui',
+    todayText: 'Cette curiosité a trouvé son terrain de jeu : <strong>la data</strong>. Je me forme au métier de Data Analyst avec OpenClassrooms, et j’apprends à transformer des données brutes et désordonnées en décisions claires sur lesquelles une équipe peut agir.',
+    toolkit: 'Ma boîte à outils',
+    toolkitA: 'Python, SQL, Power BI, Tableau : ',
+    toolkitB: 'tout ce qu’il faut pour faire parler les données.',
+    fieldsEyebrow: 'Des analyses de bout en bout',
+    onSite: 'sur ce site',
+    fieldsText: 'Au fil de mes projets OpenClassrooms, j’ai mené des analyses de la donnée brute jusqu’à la recommandation, dans des domaines très différents.',
+    fields: ['Détection de fraude', 'Investissement locatif', 'Étude de marché', 'Éducation', 'Gestion de projet', 'E-commerce', 'Commerce de détail', 'Immobilier', 'Sécurité alimentaire', 'Assurance'],
+    seeCases: 'Voir les études de cas →',
+    calledHome: 'Là où j’ai vécu',
+    countries: '4 pays',
+    journey: ['La France, où j’ai grandi', 'Australie', 'Suède', 'Pays-Bas', 'De retour à Lyon, aujourd’hui'],
+    languages: 'Français natif, anglais courant',
+    how: 'Ma façon de travailler',
+    howTitle: 'La curiosité d’abord, la rigueur toujours',
+    howText: 'Je commence par des questions : que disent vraiment les données, et que laissent-elles de côté ? Puis je vérifie avant de conclure. Je recalcule les chiffres clés à partir de la source et je contrôle les unités, les jointures et les valeurs manquantes. En revenant sur mes projets pour ce portfolio, cette habitude a affiné plusieurs de mes conclusions, et chaque étude de cas montre comment.',
+    steps: [
+      ['Questionner', 'Qu’est-ce que le métier a vraiment besoin de savoir ?'],
+      ['Nettoyer', 'Unités, jointures et valeurs manquantes, réglées avant le moindre graphique.'],
+      ['Explorer', 'Tendances et valeurs aberrantes, testées, pas supposées.'],
+      ['Raconter', 'Une réponse claire sur laquelle une équipe peut agir.'],
+    ],
+    offscreen: 'Hors écran',
+    music: ['Musique', 'L’écouter, et en faire.'],
+    football: ['Football', 'Regarder les matchs, et lire les chiffres derrière.'],
+    travel: ['Voyage', 'Découvrir de nouveaux endroits, une habitude héritée de quatre pays.'],
+    notes: 'Notes',
+    notesText: 'Ce que mes projets m’ont appris, des pièges d’analyse au travail avec l’IA',
+    readNotes: 'Lire les notes →',
+    lookingFor: 'Ce que je recherche',
+    ctaA: 'Un stage data à Lyon ou en hybride. Si vous cherchez quelqu’un de ',
+    ctaB: 'curieux et rigoureux',
+    ctaC: ', discutons.',
+    linkedin: 'Discutons sur LinkedIn',
+    cv: 'Télécharger mon CV',
+  },
+};
+const c = COPY[lang];
+
 const journey = [
-  { code: 'FR', label: 'France, where I grew up' },
-  { code: 'AU', label: 'Australia' },
-  { code: 'SE', label: 'Sweden' },
-  { code: 'NL', label: 'The Netherlands' },
-  { code: 'FR', label: 'Back in Lyon, today', now: true },
+  { code: 'FR', label: c.journey[0] },
+  { code: 'AU', label: c.journey[1] },
+  { code: 'SE', label: c.journey[2] },
+  { code: 'NL', label: c.journey[3] },
+  { code: 'FR', label: c.journey[4], now: true },
 ];
 
 // One field per case study, in the same order as the Projects page; each tag links to its case study.
-const fields = [
-  { label: 'Fraud detection', slug: 'counterfeit-banknotes' },
-  { label: 'Rental investment', slug: 'airbnb-investment-dashboard' },
-  { label: 'Market research', slug: 'poultry-export-markets' },
-  { label: 'Education', slug: 'student-demographics-dbt' },
-  { label: 'Project management', slug: 'sanitoral-powerbi-dashboard' },
-  { label: 'E-commerce', slug: 'online-bookshop-sales' },
-  { label: 'Retail', slug: 'bottleneck-stock-sales' },
-  { label: 'Real estate', slug: 'french-property-market-sql' },
-  { label: 'Food security', slug: 'global-food-security' },
-  { label: 'Insurance', slug: 'home-insurance-sql' },
+const slugs = [
+  'counterfeit-banknotes',
+  'airbnb-investment-dashboard',
+  'poultry-export-markets',
+  'student-demographics-dbt',
+  'sanitoral-powerbi-dashboard',
+  'online-bookshop-sales',
+  'bottleneck-stock-sales',
+  'french-property-market-sql',
+  'global-food-security',
+  'home-insurance-sql',
 ];
+const fields = slugs.map((slug, index) => ({ label: c.fields[index], slug }));
+const steps = c.steps.map(([title, text], index) => ({ num: String(index + 1).padStart(2, '0'), title, text }));
 ---
 
-<BaseLayout title="About" description="Axel Derobert, Data Analyst in Lyon: finding the story behind the numbers.">
+<BaseLayout title={c.title} description={c.description}>
   <div class="page-wrap">
-    <section class="bento" aria-label="About Axel">
+    <section class="bento" aria-label={c.sectionLabel}>
       <div class="card glass about-intro">
-        <span class="mono-label">About</span>
-        <h1 class="page-title">Finding the <span class="accent">story</span> behind the numbers</h1>
-        <p class="page-lead">
-          Born and raised in France, I left right after high school to live abroad: Australia, then
-          Sweden, then the Netherlands. Those years away made me fluent in English, taught me real
-          independence, and left me with a lasting curiosity: figuring out how things work wherever I land.
-        </p>
+        <span class="mono-label">{c.eyebrow}</span>
+        <h1 class="page-title">{c.h1A}<span class="accent">{c.h1B}</span>{c.h1C}</h1>
+        <p class="page-lead">{c.intro}</p>
       </div>
 
       <div class="card portrait-card">
         {
           HOME.photo ? (
-            <img class="portrait" src={withBase(HOME.photo)} alt="Portrait of Axel Derobert" width="480" height="480" />
+            <img class="portrait" src={withBase(HOME.photo)} alt={c.portrait} width="480" height="480" />
           ) : (
             <div class="portrait portrait-placeholder">[Your photo]</div>
           )
@@ -54,46 +155,39 @@ const fields = [
       </div>
 
       <div class="card tone-powder today">
-        <span class="mono-label">Today</span>
-        <p class="today-text">
-          That curiosity has found its playground: <strong>data</strong>. I am training as a Data
-          Analyst with OpenClassrooms, learning to turn raw, messy data into clear decisions a team can
-          act on.
-        </p>
+        <span class="mono-label">{c.today}</span>
+        <p class="today-text" set:html={c.todayText} />
       </div>
 
       <div class="card tone-bone toolkit-card">
-        <span class="mono-label">My toolkit</span>
+        <span class="mono-label">{c.toolkit}</span>
         <p class="toolkit-text">
-          Python, SQL, Power BI, Tableau: <span class="accent">whatever it takes to make data talk.</span>
+          {c.toolkitA}<span class="accent">{c.toolkitB}</span>
         </p>
       </div>
 
       <div class="card glass fields">
         <div class="card-head">
-          <span class="mono-label">End-to-end analyses</span>
-          <span class="mono-small">{projectCount} on this site</span>
+          <span class="mono-label">{c.fieldsEyebrow}</span>
+          <span class="mono-small">{projectCount} {c.onSite}</span>
         </div>
-        <p class="fields-text">
-          Across my OpenClassrooms projects, I have run analyses from raw data to recommendation in
-          very different fields.
-        </p>
+        <p class="fields-text">{c.fieldsText}</p>
         <ul class="tag-row big-tags">
           {
             fields.map((field) => (
               <li>
-                <a href={withBase(`/works/${field.slug}/`)}>{field.label}</a>
+                <a href={localePath(`/works/${field.slug}/`, lang)}>{field.label}</a>
               </li>
             ))
           }
         </ul>
-        <a class="fields-link" href={withBase('/works/')}>See the case studies →</a>
+        <a class="fields-link" href={localePath('/works/', lang)}>{c.seeCases}</a>
       </div>
 
       <div class="card glass journey-card">
         <div class="card-head">
-          <span class="mono-label">Called home</span>
-          <span class="accent-italic journey-count">4 countries</span>
+          <span class="mono-label">{c.calledHome}</span>
+          <span class="accent-italic journey-count">{c.countries}</span>
         </div>
         <ol class="journey-list">
           {
@@ -106,52 +200,36 @@ const fields = [
             ))
           }
         </ol>
-        <span class="muted-small">Native French, fluent English</span>
+        <span class="muted-small">{c.languages}</span>
       </div>
 
       <div class="card tone-bone method">
-        <span class="mono-label">How I work</span>
-        <p class="method-title">Curious first, rigorous always</p>
-        <p class="method-text">
-          I start with questions: what is the data really saying, and what might it be leaving out?
-          Then I check before I conclude. I recompute the key figures from the source and look at
-          units, joins and missing values. Coming back to my projects for this portfolio, that habit
-          sharpened several of my conclusions, and each case study shows how.
-        </p>
+        <span class="mono-label">{c.how}</span>
+        <p class="method-title">{c.howTitle}</p>
+        <p class="method-text">{c.howText}</p>
         <ol class="method-steps">
-          <li>
-            <span class="method-step-num">01</span>
-            <span class="method-step-title">Question</span>
-            <span class="method-step-text">What does the business really need to know?</span>
-          </li>
-          <li>
-            <span class="method-step-num">02</span>
-            <span class="method-step-title">Clean</span>
-            <span class="method-step-text">Units, joins and gaps, fixed before any chart.</span>
-          </li>
-          <li>
-            <span class="method-step-num">03</span>
-            <span class="method-step-title">Explore</span>
-            <span class="method-step-text">Patterns and outliers, tested, not assumed.</span>
-          </li>
-          <li>
-            <span class="method-step-num">04</span>
-            <span class="method-step-title">Story</span>
-            <span class="method-step-text">One clear answer a team can act on.</span>
-          </li>
+          {
+            steps.map((step) => (
+              <li>
+                <span class="method-step-num">{step.num}</span>
+                <span class="method-step-title">{step.title}</span>
+                <span class="method-step-text">{step.text}</span>
+              </li>
+            ))
+          }
         </ol>
       </div>
 
       <div class="card glass offscreen">
-        <span class="mono-label">Off-screen</span>
+        <span class="mono-label">{c.offscreen}</span>
         <ul class="offscreen-list">
           <li>
             <span class="offscreen-icon" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
             </span>
             <span>
-              <span class="offscreen-title">Music</span>
-              <span class="offscreen-text">Listening to it, and making it.</span>
+              <span class="offscreen-title">{c.music[0]}</span>
+              <span class="offscreen-text">{c.music[1]}</span>
             </span>
           </li>
           <li>
@@ -159,8 +237,8 @@ const fields = [
               <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 7l4.5 3.3-1.7 5.2H9.2L7.5 10.3z"></path></svg>
             </span>
             <span>
-              <span class="offscreen-title">Football</span>
-              <span class="offscreen-text">Watching the game, and reading the numbers behind it.</span>
+              <span class="offscreen-title">{c.football[0]}</span>
+              <span class="offscreen-text">{c.football[1]}</span>
             </span>
           </li>
           <li>
@@ -168,29 +246,28 @@ const fields = [
               <svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18"></path><path d="M12 3a14 14 0 0 0 0 18"></path></svg>
             </span>
             <span>
-              <span class="offscreen-title">Travel</span>
-              <span class="offscreen-text">Discovering new places, a habit four countries left me with.</span>
+              <span class="offscreen-title">{c.travel[0]}</span>
+              <span class="offscreen-text">{c.travel[1]}</span>
             </span>
           </li>
         </ul>
       </div>
 
-      <a class="card glass notes-card" href={withBase('/blog/')}>
-        <span class="mono-label">Notes</span>
-        <p class="notes-text">What my projects taught me, from analytical traps to working with AI</p>
-        <span class="notes-link">Read the notes →</span>
+      <a class="card glass notes-card" href={localePath('/blog/', lang)}>
+        <span class="mono-label">{c.notes}</span>
+        <p class="notes-text">{c.notesText}</p>
+        <span class="notes-link">{c.readNotes}</span>
       </a>
     </section>
 
     <section class="cta" aria-labelledby="cta-title">
-      <span class="mono-label">What I'm looking for</span>
+      <span class="mono-label">{c.lookingFor}</span>
       <h2 id="cta-title">
-        A data internship in Lyon or hybrid. If you need someone <span class="accent">curious and rigorous</span>,
-        let's talk.
+        {c.ctaA}<span class="accent">{c.ctaB}</span>{c.ctaC}
       </h2>
       <div class="cta-actions">
-        <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">Let's talk on LinkedIn</a>
-        {HOME.cv && <a class="btn btn-white" href={withBase(HOME.cv)} download>Download my CV</a>}
+        <a class="btn btn-powder" href={HOME.linkedin} target="_blank" rel="noopener noreferrer">{c.linkedin}</a>
+        {cv && <a class="btn btn-white" href={withBase(cv)} download>{c.cv}</a>}
         {HOME.email && <EmailCopyButton email={HOME.email} />}
         <a class="btn btn-ghost-light" href={HOME.github} target="_blank" rel="noopener noreferrer">GitHub</a>
       </div>

@@ -1,0 +1,15 @@
+---
+// French case studies: same template as the English page, fed with the French entries.
+import WorkPage from '../../works/[slug].astro';
+import { getWorks } from '../../../lib/content';
+
+export async function getStaticPaths() {
+  const entries = await getWorks('fr');
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: { entry, next: entries[(index + 1) % entries.length] },
+  }));
+}
+---
+
+<WorkPage {...Astro.props} />

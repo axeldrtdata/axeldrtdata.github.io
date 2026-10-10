@@ -1,0 +1,56 @@
+---
+title: 'Le retour le plus utile qu’on m’ait fait portait sur mes couleurs'
+description: 'Un jury m’a dit que mon dashboard Tableau n’était pas accessible. Cinq leçons sur les palettes, les dégradés et le contraste, et l’avant/après de ses trois pages.'
+---
+
+import Figure from '../../../components/case/Figure.astro';
+import worldImg from './before-after-world.png';
+import countriesImg from './before-after-countries.png';
+import citiesImg from './before-after-cities.png';
+
+Le retour le plus utile qu’on m’ait fait sur mon dernier projet portait sur quelque chose auquel je n’avais jamais pensé : mes couleurs.
+
+Trois pages de dashboard, des semaines de travail, une analyse dont j’étais fier. Puis le jury m’a dit que mes visuels n’étaient pas accessibles.
+
+Ça pique pendant une heure environ. Puis on se renseigne et on se rend compte qu’on est passé à côté de quelque chose de basique.
+
+## Ce que j’en retiens
+
+1. **Une jolie palette n’est pas une palette lisible.** Mes cinq nuances de rose variaient en teinte, mais à peine en luminosité. Élégantes à l’écran, illisibles pour une personne daltonienne ou sur un vidéoprojecteur mal calibré.
+2. **Un dégradé doit avoir un sens.** Mes diagrammes en barres passaient du foncé au clair d’une barre à l’autre, et ce dégradé n’encodait absolument rien. La longueur des barres portait déjà la valeur. La couleur ne faisait que suggérer une seconde variable qui n’existait pas. Si un dégradé n’ajoute pas d’information, il ajoute de la confusion. Une seule couleur unie était la meilleure réponse.
+3. **Le test qui change tout : passer ses graphiques en niveaux de gris.** Si vous ne distinguez pas les catégories en noir et blanc, les autres non plus. Gratuit, instantané, implacable.
+4. **La couleur ne doit jamais porter l’information seule.** Étiquettes directes, position, légende : toujours prévoir un second canal.
+5. **Un contraste de texte inférieur à 4,5:1 n’atteint pas le niveau AA des WCAG.** Cette norme existe pour une bonne raison.
+
+## Ce que j’ai changé
+
+J’ai donc reconstruit chaque palette autour de paliers de luminosité réguliers plutôt que de variations de teinte, et j’ai supprimé complètement les dégradés décoratifs.
+
+L’accessibilité n’est pas une contrainte esthétique. Elle détermine si votre travail est lisible par tout le monde, ou seulement par ceux qui voient comme vous.
+
+## Avant et après
+
+L’avant/après est ci-dessous. La différence est plus flagrante que je ne l’imaginais.
+
+<Figure
+  src={worldImg}
+  title="Page 1 · Le marché mondial"
+  alt="Avant/après de la première page du dashboard. Avant : des roses pâles et des lavandes de luminosité proche, un diagramme en barres qui passe du foncé au clair, une carte dans des violets ternes. Après : une seule couleur unie pour les barres, des graphiques en anneau et une carte dans des nuances bien séparées, du prune foncé au rose clair."
+  caption="Le diagramme en barres perd son dégradé sans signification au profit d’une seule couleur unie, et les graphiques en anneau comme la carte passent à des nuances qui vont du très foncé au très clair."
+/>
+
+<Figure
+  src={countriesImg}
+  title="Page 2 · Comparer les villes"
+  alt="Avant/après de la deuxième page du dashboard. Avant : des barres empilées lavande et rose de luminosité proche et un top 10 en dégradé de couleur. Après : des barres empilées en paliers réguliers du prune foncé au rose clair et un top 10 d’une couleur unie."
+  caption="Le curseur n’est pas réglé sur la même valeur dans les deux captures, d’où des chiffres différents : seules les couleurs sont comparées ici."
+/>
+
+<Figure
+  src={citiesImg}
+  title="Page 3 · Zoom sur une ville"
+  alt="Avant/après de la troisième page du dashboard. Avant : des courbes et des barres mêlant lavande et rose de luminosité proche. Après : des courbes et des barres dans des nuances de prune allant du très foncé au très clair."
+  caption="Les cinq villes vont désormais d’un prune très foncé à un rose très clair, au lieu de cinq couleurs de luminosité proche."
+/>
+
+Le dashboard complet et l’analyse qui le sous-tend sont dans l’[étude de cas Airbnb](/fr/works/airbnb-investment-dashboard/).

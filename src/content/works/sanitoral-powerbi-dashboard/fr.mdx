@@ -1,0 +1,218 @@
+---
+title: 'Un dépassement budgétaire de 7,3 % est-il sous contrôle ?'
+description: 'Un dashboard Power BI qui suit 104 projets IT et Marketing d’une entreprise de soins bucco-dentaires dans 52 pays sur les coûts, les délais et les livrables, pour trois niveaux de direction, et ce qu’un second regard sur les données a changé.'
+client: 'Bureau de gestion des projets (PMO) de Sanitoral, entreprise de soins bucco-dentaires (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import BarChart from '../../../components/case/BarChart.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import scatterImg from './cost-vs-delay.png';
+import itImg from './it-phase-budgets.png';
+import costsImg from './dashboard-costs.png';
+import delaysImg from './dashboard-delays.png';
+import crossoverImg from './delays-crossover.png';
+import deliverablesImg from './dashboard-deliverables.png';
+import mapImg from './dashboard-map.png';
+
+## La question
+
+Sanitoral est une entreprise internationale de soins bucco-dentaires. Son bureau de gestion des projets pilotait 104 projets IT et Marketing dans 52 pays, sans vision commune pour repérer ceux qui dérapaient. Chaque projet était suivi sur trois indicateurs : **coûts, délais et livrables**. La règle était simple : un écart de 15 % ou plus entre le prévu et le réel, sur n’importe lequel des trois, devait alerter la direction.
+
+Trois niveaux de direction devaient lire les mêmes données différemment. Le directeur général décide de poursuivre ou d’arrêter un projet, et a besoin de tout le portefeuille. Les directeurs régionaux interviennent auprès des directeurs pays de leur zone. Les directeurs pays mettent en place les actions correctives sur leurs propres projets.
+
+La question était donc : **quels projets dérapent, sur quoi, et où ?**
+
+<KeyFigures
+  items={[
+    { value: '104', label: 'projets dans 52 pays et 4 régions, de 2018 à 2022' },
+    { value: '7,3 %', label: 'de dépassement global des coûts, sous le seuil d’alerte de 15 %' },
+    { value: '4,1 M€', label: 'dépensés au-delà du budget derrière ces 7,3 %' },
+    { value: '89,5 %', label: 'des livrables prévus réellement livrés' },
+  ]}
+/>
+
+## Six tables, une clé
+
+Les données étaient fournies dans un classeur Excel : une feuille pour le prévu, trois feuilles pour le réel et trois feuilles de référence.
+
+| Table | Contenu | Lignes |
+| ----- | ------- | ---- |
+| Projects_plans | Coût, durée et livrables prévus pour chaque phase, avec sa date de début | 520 |
+| Actual_Costs, Actual_Duration, Actual_Delivrable | Ce que chaque phase a réellement coûté, duré et livré | 520 chacune |
+| Project type | IT (déploiement d’un CRM) ou Marketing (lancement de produit) | 104 |
+| Projects_Locations, Country_Profiles | Pays de chaque projet, puis région de chaque pays | 104 et 52 |
+
+Les projets Marketing comptent quatre phases, numérotées de 1 à 4, et les projets IT six, nommées de A à F. Une ligne du prévu ne correspond à sa ligne du réel que sur un projet **et** une phase : dans Power Query, j’ai donc créé une clé `Project ID - Phase` dans les quatre tables. Cette clé porte les relations 1-à-1 entre le prévu et les trois tables du réel ; l’identifiant de projet relie le prévu à son type et à son pays, et le pays à sa région.
+
+## Le dashboard
+
+J’ai construit un rapport Power BI de plusieurs pages : une page d’accueil qui présente le portefeuille et renvoie vers chaque page, une page par indicateur (coûts, délais, livrables) et une carte du monde, suivies des user stories et du modèle de données, à titre de référence.
+
+Comme tout le cas, issu de ma formation OpenClassrooms, le rapport est en français. Les captures ci-dessous reprennent ses libellés : *Coûts*, *Délais* et *Livrables*, *Prévus* et *Réels* ; un projet y est *Critique*, en *Attention* ou *Rentable* (sous le budget).
+
+<Figure
+  src={costsImg}
+  wide
+  title="La page Coûts"
+  alt="Page Power BI avec des segments pour le projet, le type, la région et la période ; un graphique en barres groupées des coûts prévus et réels par phase ; des cartes indiquant 104 projets, 28 critiques, 33 à surveiller, 43 sous le budget, un écart de 7,29 % et 4 millions d’euros ; un tableau par phase avec l’écart supérieur à 15 % en rouge ; un donut des coûts réels par phase ; un graphique en cascade de l’écart par phase ; et deux tableaux des cinq meilleurs et des cinq pires projets."
+  caption="Tout le portefeuille, sans filtre : 7,29 % au-dessus du prévu, soit 4 M€. Le graphique en cascade, en bas à gauche, montre où l’écart se forme, phase par phase."
+/>
+
+| Choix | Pourquoi |
+| ------ | --- |
+| **Une page par indicateur, les mêmes filtres sur chaque page** | Les segments Projet, Type, Région, Pays et Période sont synchronisés : un directeur qui filtre sur l’Égypte sur la page Coûts retrouve l’Égypte déjà sélectionnée sur la page Délais |
+| **Chaque écart affiché en % et en euros ou en jours** | La règle des 15 % est en pourcentage, mais l’argent est en euros. La page Coûts affiche les deux côte à côte |
+| **Trois statuts par indicateur, avec les mêmes couleurs partout** | Critique (15 % ou plus), à surveiller (entre 0 et 15 %), dans l’objectif (sous le prévu). Rouge, blanc et vert dans les tableaux, pour qu’une alerte ressorte avant même de lire un chiffre |
+| **Sécurité au niveau des lignes (Row-Level Security)** | Un rôle pour chacun des quatre directeurs régionaux et pour les directeurs pays : chaque utilisateur ne voit que son périmètre |
+| **Un sélecteur de KPI sur la carte** | Une carte au lieu de trois : une table déconnectée permet de basculer la carte entre coûts, délais et livrables |
+| **Une boîte de questions-réponses avec des synonymes en français et en anglais** | Les directeurs peuvent taper « projets en retard » ou « cost by country » et obtenir un visuel sans toucher au rapport |
+
+<Figure
+  src={mapImg}
+  wide
+  title="La page Carte"
+  alt="Carte du monde dans Power BI avec Délais sélectionné : une bulle par pays, vertes pour la plupart, quelques jaunes, et des rouges autour de la Méditerranée orientale. Une info-bulle sur le Canada affiche un écart de délais de −16,90 % et les projets 30 et 91."
+  caption="Délais sélectionné, comme le demandait la note de cadrage : vert en avance sur le prévu, jaune en retard mais sous le seuil, rouge 15 % de retard ou plus. Le survol d’un pays affiche son écart global sur l’indicateur choisi et les projets concernés : ici le Canada, 16,9 % en avance sur les projets 30 et 91."
+/>
+
+Chaque écart est un ratio de sommes, pas une moyenne de ratios. Dans le projet 14, une phase était prévue sur une seule journée et en a pris quatorze : un écart de +1 300 %. En faisant la moyenne avec ses autres phases, le projet paraîtrait en retard de 303 % ; en sommant d’abord, il a fini 26 % **en avance** sur le prévu, ce qui correspond bien à la réalité.
+
+```dax
+ecart_couts_% =
+DIVIDE(
+    SUM(Actual_Costs[Actual_Cost]) - SUM(Projects_plans[Planned_Cost]),
+    SUM(Projects_plans[Planned_Cost]),
+    0
+)
+
+-- Number of projects 15% or more over budget, in the current filter context
+couts+15% =
+0 + COUNTROWS(FILTER(VALUES(Projects_plans[Project ID]), [ecart_couts_%] >= 0.15))
+```
+
+Le `0 +` permet à la carte d’afficher 0 plutôt qu’une valeur vide quand un filtre ne laisse aucun projet critique.
+
+## Ce que montre le dashboard
+
+### Coûts : un pourcentage rassurant
+
+Le portefeuille était budgété à 56,1 M€ et a coûté 60,2 M€ : **7,3 % de dépassement**, confortablement sous le seuil d’alerte de 15 %. Sur le papier, tout allait bien. En valeur, ce sont **4,1 millions d’euros** que personne n’avait budgétés.
+
+Projet par projet, 28 sont critiques, 33 dépassent leur budget sans atteindre le seuil, et 43 ont coûté moins que prévu. Le dépassement est concentré :
+
+| Région | Projets | Écart de coûts | Dépassement (M€) | Projets critiques |
+| ------ | -------- | -------- | ------- | ----------------- |
+| Europe centrale et orientale, Moyen-Orient, Afrique | 56 | +9,1 % | +2,46 | 18 |
+| Europe de l’Ouest | 33 | +5,6 % | +1,37 | 6 |
+| Amérique du Nord et Amérique latine | 5 | +9,4 % | +0,36 | 2 |
+| Asie-Pacifique | 10 | −10,6 % | −0,10 | 2 |
+
+La première région porte 60 % du dépassement et 18 des 28 projets critiques. Son volume en explique une partie, mais pas tout : son écart est aussi supérieur à celui du portefeuille. Par type, **les projets Marketing portent la totalité du dépassement** (+4,46 M€), tandis que les projets IT ont coûté 362 000 € de moins que prévu. Et une seule phase, la Phase 4 Manufacturing du Marketing, absorbe 55 % de toutes les dépenses : 1 % d’économie sur cette phase, soit 332 000 €, vaut plus que 20 % d’économie sur n’importe quelle phase IT, sauf Deployment.
+
+### Délais : l’indicateur le mieux maîtrisé
+
+Les délais sont l’indicateur que Sanitoral maîtrise le mieux : seuls 8 projets ont 15 % de retard ou plus, 16 sont légèrement en retard, et **80 ont fini en avance sur le prévu**. Sur l’ensemble du portefeuille, les projets ont pris 13 % de jours en moins que prévu.
+
+Sur cette page, le visuel clé est un graphique à double courbe des durées prévue et réelle, phase par phase. Le point où la courbe réelle passe au-dessus de la courbe prévue montre la phase où un projet commence à déraper, assez tôt pour agir avant la fin. Le projet 4, en Égypte, en est l’exemple le plus net : en avance sur Planning, il bascule à la phase Initiation, et à partir de là chaque phase dure plus longtemps que prévu, jusqu’à 84 jours de plus sur Implementation.
+
+<Figure
+  src={delaysImg}
+  wide
+  title="La page Délais, filtrée sur le projet 4 (Égypte)"
+  alt="Page Power BI filtrée sur le projet 4 : des cartes indiquant 1 projet critique et 143 jours de retard ; un nuage de points avec un seul point rouge ; un treemap dominé par Implementation et Manufacturing ; et un graphique à double courbe où la durée réelle est sous le prévu sur Planning (17 jours contre 31), passe au-dessus sur Initiation (25 contre 13), puis atteint 147 jours contre 63 sur Implementation et 105 contre 44 sur Manufacturing."
+  caption="Le projet 4 a duré 294 jours au lieu de 151. Les courbes se croisent à la phase Initiation : à partir de là, chaque phase dure plus longtemps que prévu."
+/>
+
+<Figure
+  src={crossoverImg}
+  title="Zoom : là où le projet 4 commence à déraper"
+  alt="Graphique à double courbe de la page Délais, filtré sur le projet 4. Durée prévue (courbe foncée) et durée réelle (courbe claire) par phase : 31 prévus contre 17 réels sur Planning, 13 contre 25 sur Initiation, 63 contre 147 sur Implementation, 44 contre 105 sur Manufacturing. Un cercle marque le croisement des deux courbes, entre Planning et Initiation, et une ligne pointillée marque l’écart de 84 jours sur Implementation."
+  caption="La « Durée finale » est la durée réelle. Sous le prévu sur Planning, le projet passe au-dessus à la phase Initiation et n’en redescend plus : +12 jours, puis +84, puis +61."
+/>
+
+### Livrables : un problème diffus
+
+Seuls 9 projets sont critiques sur les livrables, ce qui semble rassurant. Mais **un seul projet a livré tout ce qu’il avait prévu** : les 94 autres restent juste sous l’objectif. Globalement, 89,5 % des livrables prévus ont été livrés, et aucune phase n’y échappe.
+
+<BarChart
+  title="Part des livrables prévus réellement livrés, par phase"
+  unit="%"
+  decimals={0}
+  data={[
+    { label: 'Marketing 1 · Planning', value: 93.9 },
+    { label: 'Marketing 2 · Initiation', value: 91.6 },
+    { label: 'Marketing 3 · Implementation', value: 93.3 },
+    { label: 'Marketing 4 · Manufacturing', value: 93.9 },
+    { label: 'IT A · Initiation', value: 88.3 },
+    { label: 'IT B · Preparation', value: 87.8 },
+    { label: 'IT C · Development', value: 85.4, highlight: true },
+    { label: 'IT D · Testing', value: 85.5, highlight: true },
+    { label: 'IT E · Deployment', value: 87.7 },
+    { label: 'IT F · Post-deployment', value: 87.8 },
+  ]}
+  caption="Chaque phase livre moins que prévu. Soit les équipes sous-livrent partout, soit les objectifs sont surévalués dès le départ."
+/>
+
+Une seule combinaison franchit le seuil d’alerte : les projets IT en Europe de l’Ouest, à −18 % sur les livrables.
+
+<Figure
+  src={deliverablesImg}
+  wide
+  title="La page Livrables, filtrée sur les projets IT"
+  alt="Page Power BI filtrée sur les projets IT : une jauge à 87,09 % livrés ; des cartes indiquant 52 projets, 9 critiques, 43 à surveiller et 0 complet ; un graphique en barres groupées des livrables prévus et livrés par phase ; un donut par phase ; un tableau par région avec l’Europe de l’Ouest à moins 18,08 % en rouge ; et un graphique en barres des dix pays au plus fort déficit, Côte d’Ivoire en tête."
+  caption="Projets IT uniquement : les 9 projets critiques sont tous IT, aucun n’a tout livré, et l’Europe de l’Ouest est la seule région au-delà du seuil."
+/>
+
+<Takeaway label="Première réponse">Le portefeuille n’est pas hors de contrôle, mais un écart de 7,3 % représente 4,1 millions d’euros, et presque aucun projet ne livre ce qu’il avait promis.</Takeaway>
+
+## Ce qu’un second regard a révélé
+
+En reprenant ce projet pour mon portfolio, j’ai recalculé chaque chiffre à partir des tables du modèle. Tous se sont confirmés, mais trois conclusions méritaient un second regard.
+
+**Le même piège, deux fois.** J’avais présenté un « paradoxe IT/Marketing » : le Marketing porte le dépassement, pourtant quatre des cinq pires projets sont IT. C’est encore le piège du pourcentage. Ces projets IT sont les pires **en pourcentage** ; classés **en euros**, les cinq plus gros dépassements sont tous des projets Marketing, avec en tête la Suisse à +397 500 €. Un projet Marketing était budgété en moyenne à 986 000 €, un projet IT à 93 000 € : un +59 % sur un petit budget IT pèse moins qu’un +26,5 % sur un gros budget Marketing.
+
+**La bonne santé de l’IT tient à une seule phase.** Globalement, l’IT a coûté moins que prévu, et j’en avais conclu que c’était le type de projet en meilleure santé. Phase par phase, le tableau change.
+
+<Figure
+  src={itImg}
+  title="Projets IT : coûts prévus et réels par phase"
+  alt="Graphique en barres groupées des 52 projets IT par phase. Testing était budgété à 192 000 euros et a coûté 960 000 euros, cinq fois plus ; Deployment était budgété à 3,28 millions et a coûté 1,95 million, 40 % de moins. Les autres phases dépassent le prévu de 10 à 19 %."
+  caption="Testing a dépassé son budget dans les 52 projets IT. Deployment est resté sous le prévu dans 46 d’entre eux."
+/>
+
+Testing a coûté cinq fois son budget, et l’a dépassé dans **chacun des 52 projets IT**. Dans le même temps, Deployment a laissé 1,3 million d’euros non dépensés. Sans Deployment, l’IT serait 61 % au-dessus du budget. Les cinq projets « les plus rentables » de mon Top 5 initial sont tous des projets IT dont la phase Deployment est restée de 53 000 € à 103 000 € sous le prévu. Les données ne disent pas pourquoi, mais tout se passe comme si l’argent prévu pour Deployment était dépensé sur Testing : un problème de planification plus que de performance.
+
+**Délais et coûts ne sont pas liés à l’échelle du portefeuille.** J’avais affirmé que délais et coûts étaient fortement corrélés : 7 des 8 projets critiques en délais dépassaient aussi leur budget. C’est vrai, mais c’était aussi le cas de 54 des 96 autres projets, et sur les 104 projets, la corrélation entre les deux écarts est proche de zéro.
+
+<Figure
+  src={scatterImg}
+  title="Écart de coûts contre écart de délais, 104 projets"
+  alt="Nuage de points des 104 projets, écart de coûts contre écart de délais, avec des lignes pointillées à 15 % sur les deux axes. Les points forment un nuage sans tendance ; les 8 projets avec 15 % de retard ou plus sont mis en évidence, dont 7 au-dessus de zéro sur les coûts, l’Égypte à +95 % sur les délais et +27 % sur les coûts."
+  caption="Les 8 projets en retard dépassent pour la plupart leur budget, mais c’est aussi le cas de la plupart des autres. ρ de Spearman = −0,01."
+/>
+
+Même chose pour mon Top 5 : les cinq ont fini en avance, mais 80 des 104 projets aussi. Une alerte sur les délais reste utile en soi, mais ce n’est pas un signal précoce pour les coûts.
+
+<Takeaway label="Constat clé">Le dépassement est réel mais concentré : les projets Marketing, une région, et un budget IT prévu sur la mauvaise phase. Chaque pourcentage du dashboard doit être accompagné de son montant.</Takeaway>
+
+## Recommandations
+
+- **Lire chaque écart en pourcentage et en euros.** Le seuil d’alerte de 15 % devrait s’appliquer aux deux : 4,1 millions d’euros ne devraient pas passer sous le radar parce qu’ils ne représentent que 7,3 %.
+- **Rééquilibrer les budgets des phases IT.** Budgéter Testing plus près de ce qu’il coûte réellement et Deployment plus près de ce qu’il dépense réellement, puis vérifier si le dépassement disparaît ou se déplace simplement.
+- **Envoyer les directeurs régionaux dans les pays qui ont deux indicateurs en rouge** : l’Égypte, le Liban, la Côte d’Ivoire et la Suisse.
+- **Remettre en question les objectifs de livrables.** Quand chaque phase de chaque type se situe entre 85 % et 94 %, l’objectif a autant de chances d’être en cause que les équipes.
+
+## Limites
+
+- **Un cas de formation** : les données sont un extrait réaliste fourni par OpenClassrooms, pas les comptes d’une vraie entreprise.
+- **La carte affiche une moyenne par pays**, pondérée par le budget ou la durée. Un pays peut apparaître en vert tout en cachant un projet critique : la carte est un thermomètre qui renvoie vers les pages de détail, pas une réponse.
+- **Toutes les relations filtrent dans les deux sens**, pour que tous les segments se mettent à jour entre eux. Sur un modèle plus large, je garderais les dimensions en filtrage unidirectionnel pour éviter les chemins de filtre ambigus.
+- **Un rapport Power BI ne peut pas être publié en accès libre sans compte professionnel** : le dashboard est donc présenté ici par des captures d’écran ; le fichier `.pbix` est dans le dépôt.
+- **Microsoft retire le visuel de questions-réponses en décembre 2026** : la boîte de questions devrait migrer vers un autre outil pour continuer à fonctionner.
+
+## Ce que j’en retiens
+
+Le même rapport sert le directeur général, quatre directeurs régionaux et les directeurs pays : je l’ai donc conçu pour la personne qui le lit, avec la sécurité au niveau des lignes, des segments synchronisés entre les pages et une boîte de questions-réponses en français et en anglais. En y revenant, j’ai appris qu’un pourcentage rassurant peut cacher un montant important : +7,3 % reste sous le seuil d’alerte, mais représente 4,1 M€ au-dessus du prévu. Je ne montre plus jamais un écart en % sans son montant en euros.

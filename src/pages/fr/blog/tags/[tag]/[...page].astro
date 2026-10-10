@@ -1,0 +1,23 @@
+---
+// French tag pages: same template as /blog/tags/<tag>/, fed with the French notes.
+import type { GetStaticPaths } from 'astro';
+import TagPage from '../../../../blog/tags/[tag]/[...page].astro';
+import { getPosts } from '../../../../../lib/content';
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const posts = await getPosts('fr');
+  const allTags = [...new Set(posts.flatMap((post) => post.data.tags))]
+    .sort((a, b) => a.localeCompare(b))
+    .map((name) => ({ name, count: posts.filter((post) => post.data.tags.includes(name)).length }));
+  return allTags.flatMap(({ name: tag }) => {
+    const taggedPosts = posts.filter((post) => post.data.tags.includes(tag));
+    return paginate(taggedPosts, {
+      params: { tag },
+      pageSize: 10,
+      props: { allTags, total: posts.length },
+    });
+  });
+}) satisfies GetStaticPaths;
+---
+
+<TagPage {...Astro.props} />

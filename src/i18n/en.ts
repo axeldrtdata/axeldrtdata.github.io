@@ -20,7 +20,7 @@ export const en = {
   // Header, footer, and other chrome
   'nav.home': 'Home',
   'nav.about': 'About',
-  'nav.works': 'Works',
+  'nav.works': 'Projects',
   'nav.blog': 'Notes',
   'nav.search': 'Search',
   'nav.label': 'Main navigation',

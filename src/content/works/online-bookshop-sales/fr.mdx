@@ -1,0 +1,147 @@
+---
+title: 'Qu’est-ce qui porte vraiment les ventes d’une librairie en ligne ?'
+description: 'Deux ans de ventes et 680 000 achats : évolution du chiffre d’affaires, tops et flops du catalogue, concentration de la clientèle, et cinq tests statistiques sur ce que le profil client change vraiment.'
+client: 'Librairie en ligne, équipe marketing (cas OpenClassrooms)'
+role: 'Data Analyst, projet de formation'
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import revenueImg from './revenue.png';
+import catalogueImg from './catalogue.png';
+import lorenzImg from './lorenz.png';
+import ageBasketImg from './age-basket.png';
+import ageCategoryImg from './age-category.png';
+
+## Les questions
+
+Une librairie en ligne m’a confié deux ans de données de ventes, de mars 2021 à février 2023, réparties en trois fichiers : clients, produits et transactions. Deux demandes les accompagnaient.
+
+La première venait de la direction : une vue d’ensemble de l’activité. Comment le chiffre d’affaires évolue-t-il dans le temps ? Quelles références se vendent, et lesquelles ne se vendent pas ? Comment le chiffre d’affaires se répartit-il entre les clients ?
+
+La seconde venait de Julie, responsable marketing, avec cinq questions précises sur le comportement des clients : existe-t-il un lien entre le **genre** d’un client et la catégorie des livres qu’il achète ? Et entre son **âge** et son montant total d’achats, sa fréquence d’achat, son panier moyen et les catégories qu’il achète ?
+
+<KeyFigures
+  items={[
+    { value: '11,1 M€', label: 'de chiffre d’affaires sur deux ans, hors B2B' },
+    { value: '8 596', label: 'clients' },
+    { value: '3 286', label: 'références réparties en trois catégories' },
+    { value: '5', label: 'tests statistiques pour le marketing' },
+  ]}
+/>
+
+## D’abord, le nettoyage
+
+Le fichier des transactions contenait plus de **361 000 lignes entièrement vides**, un artefact de l’export Excel, que j’ai supprimées. La jointure des trois fichiers sur les identifiants clients et produits a ensuite révélé 21 références jamais vendues et 21 clients n’ayant jamais rien acheté ; je les ai mis de côté, et les références jamais vendues sont revenues plus tard dans l’analyse des flops.
+
+La décision la plus importante concernait quatre clients. Chacun d’eux comptait plus de 2 500 sessions et avait dépensé entre 114 000 € et 326 000 €, alors que le meilleur de tous les autres clients avait dépensé 5 300 €. Ce sont clairement des **clients professionnels**, pas des particuliers, et les conserver aurait faussé toutes les moyennes. Je les ai analysés à part : ensemble, ils pèsent 884 000 €, soit 7,35 % du chiffre d’affaires total, et trois références ne sont achetées que par eux, ce qui suggère une tarification professionnelle.
+
+## Le chiffre d’affaires : stable et saisonnier
+
+Le chiffre d’affaires a atteint 5,57 M€ la première année et 5,58 M€ la seconde : une hausse de moins de 10 000 €, autrement dit une quasi-stabilité.
+
+<Figure
+  src={revenueImg}
+  title="Chiffre d’affaires quotidien avec moyennes mobiles sur 30 et 90 jours"
+  alt="Courbe du chiffre d’affaires quotidien de mars 2021 à février 2023, avec une moyenne mobile sur 30 jours et une sur 90 jours qui font apparaître une saisonnalité et un plateau autour de 15 000 euros par jour."
+  caption="Le chiffre d’affaires quotidien oscille entre environ 12 000 € et 20 000 €. Les moyennes mobiles lissent le bruit pour faire ressortir la tendance."
+/>
+
+Le chiffre quotidien est trop bruité pour être lu tel quel, j’ai donc superposé deux moyennes mobiles. La **moyenne sur 30 jours** révèle la saisonnalité : un creux l’été, des pics à la rentrée et avant les fêtes. La **moyenne sur 90 jours** montre la tendance de fond : une hausse jusqu’en mars 2022, puis un plateau autour de 15 000 € par jour.
+
+Tous les indicateurs d’activité racontent la même histoire, celle d’une entreprise arrivée à maturité :
+
+| Moyenne mensuelle      | Année 1 | Année 2 |
+| ---------------------- | ------- | ------- |
+| Clients                | 5 757   | 5 754   |
+| Commandes              | 13 422  | 13 454  |
+| Commandes par client   | 2,33    | 2,34    |
+| Livres vendus          | 26 855  | 26 540  |
+| Panier moyen           | 34,58 € | 34,54 € |
+
+Cette stabilité est rassurante, avec une clientèle fidèle, mais c’est aussi un signal d’alerte : sans nouveaux leviers, le chiffre d’affaires va stagner.
+
+## Le catalogue : d’où vient le chiffre d’affaires
+
+<Figure
+  src={catalogueImg}
+  title="Part de chaque catégorie dans le catalogue et dans le chiffre d’affaires"
+  alt="Deux barres empilées : la catégorie entrée de gamme représente 70 % du catalogue mais 37 % du chiffre d’affaires, le milieu de gamme 23 % et 41 %, le haut de gamme 7 % et 22 %."
+/>
+
+Les trois catégories se comportent très différemment. L’**entrée de gamme** (prix moyen 10,60 €) représente 70 % du catalogue mais n’apporte que 37 % du chiffre d’affaires. Le **milieu de gamme** (20,50 €) est celui qui rapporte le plus : 41 % du total pour 23 % des références. Le **haut de gamme** (76,20 €) ne pèse que 7 % du catalogue, mais ses prix, sept fois supérieurs à ceux de l’entrée de gamme, lui valent 22 % du chiffre d’affaires. Ces proportions restent les mêmes mois après mois : c’est une caractéristique structurelle du catalogue, pas un effet saisonnier.
+
+La concentration suit presque exactement le principe de Pareto : **21,5 % des références génèrent 80 % du chiffre d’affaires**, et 24,8 % génèrent 80 % des volumes. Le top 20 en chiffre d’affaires est composé de titres milieu et haut de gamme, emmené par la référence 2_159 avec 91 000 € ; le top 20 en volume est entièrement milieu de gamme. À l’autre extrémité, sur les 21 références jamais vendues, 16 relèvent de l’entrée de gamme, et cette catégorie n’apparaît dans aucun top. Elle mérite un audit.
+
+## Les clients : une base large et fidèle
+
+<Figure
+  src={lorenzImg}
+  title="Courbe de Lorenz du chiffre d’affaires par client"
+  alt="Courbe de Lorenz qui s’incurve sous la droite d’égalité : la moitié des clients qui dépensent le moins génère 22 % du chiffre d’affaires."
+/>
+
+La courbe de Lorenz montre une **concentration modérée** (indice de Gini de 0,40) : la moitié des clients qui dépensent le moins génère tout de même 22 % du chiffre d’affaires, et il faut 52 % des clients pour en atteindre 80 %, loin du classique 20/80. Même les 20 meilleurs clients sont remarquablement proches les uns des autres, entre 4 800 € et 5 300 € chacun. La librairie ne dépend pas de quelques clients stars, ce qui la rend résiliente.
+
+## Les cinq questions de Julie
+
+Pour les tests statistiques, une règle comptait avant tout : des **observations indépendantes**. Un client qui achète 150 livres ne doit pas compter 150 fois. Tous les tests sont donc menés au niveau client, une ligne par client, et pour les questions sur les catégories, chaque client se voit attribuer la catégorie qu’il achète le plus.
+
+```python
+# One row per customer, with the category they buy most
+df_categorie_principale_client = (
+    df_merge_transaction_products_customers.groupby(["client_id", "sex"])["categ"]
+    .agg(lambda x: x.value_counts().index[0])
+    .reset_index()
+)
+```
+
+Avant de mesurer des corrélations entre variables numériques, j’ai vérifié si les données suivaient une loi normale, condition du test de Pearson. Ce n’est pas le cas : l’âge est réparti de façon presque uniforme, les dépenses sont très asymétriques, et le test de Shapiro-Wilk (sur un échantillon de 5 000, la limite de l’implémentation SciPy) rejette nettement la normalité. J’ai donc utilisé le **test de Spearman**, qui ne repose pas sur cette hypothèse.
+
+| Question de Julie            | Test                         | Résultat      | Verdict                          |
+| ---------------------------- | ---------------------------- | ------------- | -------------------------------- |
+| Genre × catégorie            | Khi-deux                     | p = 0,086     | Pas de lien                      |
+| Âge × montant total          | Spearman                     | ρ = −0,18     | Pas de corrélation notable       |
+| Âge × fréquence d’achat      | Spearman                     | ρ = 0,21      | Pas de corrélation notable       |
+| **Âge × panier moyen**       | **Spearman**                 | **ρ = −0,70** | **Corrélation négative nette**   |
+| **Âge × catégorie**          | **Kruskal-Wallis et ANOVA**  | **p ≈ 0**     | **Lien fort**                    |
+
+Deux résultats demandaient de la prudence. Pour l’âge croisé avec le montant total et la fréquence, les p-valeurs sont minuscules, donc les liens sont statistiquement réels, mais les coefficients restent dans l’intervalle ±0,25, le seuil en dessous duquel je considère qu’il n’y a pas de corrélation. **Significatif ne veut pas dire fort.** Et pour le genre, une p-valeur de 0,086 est proche de 0,05, mais le seuil se fixe avant le test, il ne se déplace pas après avoir vu le résultat.
+
+<Figure
+  src={ageBasketImg}
+  title="Panier moyen selon l’âge du client"
+  alt="Nuage de points de 8 596 clients : les clients de moins de 30 ans ont des paniers moyens autour de 60 à 70 euros, certains au-delà de 150, tandis que les clients plus âgés se situent surtout entre 20 et 35 euros."
+  caption="Chaque point est un client. Les clients de plus de 70 ans ne dépassent jamais 90 € par commande."
+/>
+
+La seule corrélation forte relie l’**âge au panier moyen**. Les clients de moins de 30 ans dépensent beaucoup plus par commande, avec une médiane autour de 67 € et certains paniers au-delà de 150 €, et une rupture nette apparaît vers 30 ans, au-delà de laquelle la plupart des paniers retombent entre 20 et 40 €.
+
+<Figure
+  src={ageCategoryImg}
+  title="Âge des clients selon la catégorie qu’ils achètent le plus"
+  alt="Boîtes à moustaches de l’âge des clients par catégorie principale : les acheteurs du haut de gamme ont un âge médian de 25 ans, ceux de l’entrée de gamme 43 ans et ceux du milieu de gamme 57 ans."
+/>
+
+L’âge sépare aussi nettement les catégories : les acheteurs du haut de gamme ont un âge médian de **25 ans**, ceux de l’entrée de gamme 43 ans, ceux du milieu de gamme 57 ans. J’ai réalisé un test de Kruskal-Wallis, le plus adapté puisque les données ne sont pas normales, et une ANOVA comme contrôle de robustesse, justifiée par la taille de l’échantillon ; les deux rejettent l’hypothèse nulle avec des p-valeurs proches de zéro.
+
+<Takeaway label="Pour le marketing">Un message unique fonctionne pour tous, sauf sur le prix : les moins de 30 ans portent le haut de gamme et les plus gros paniers.</Takeaway>
+
+## Recommandations
+
+- **Arrêter de segmenter là où cela ne rapporte rien.** Aucun lien significatif n’a été trouvé entre le genre et les catégories, et l’âge influe à peine sur le montant total ou la fréquence : des campagnes universelles sont aussi efficaces, et bien moins coûteuses à produire que des dizaines de campagnes segmentées.
+- **Cibler les moins de 30 ans pour le haut de gamme**, le segment qui l’achète et qui dépense le plus par commande.
+- **Augmenter le panier des plus de 30 ans** avec de la vente additionnelle, des offres groupées ou des facilités de paiement.
+- **Auditer l’entrée de gamme**, 70 % du catalogue, absente de tous les tops et qui regroupe 16 des 21 références jamais vendues, et mettre plutôt en avant les références phares.
+- **Développer le segment B2B**, qui pèse déjà 7 % du chiffre d’affaires avec quatre clients, avec une tarification professionnelle sur les références qu’ils achètent.
+
+## Limites
+
+- **Corrélation n’est pas causalité.** L’âge est lié au montant du panier, mais les données ne disent pas pourquoi.
+- **L’âge est approximatif**, calculé comme 2023 moins l’année de naissance.
+- **Le seuil de ±0,25** pour qualifier une corrélation de notable est une convention issue de ma formation ; d’autres références retiennent des seuils différents, ce qui ne changerait pas le seul résultat fort.
+
+## Ce que j’en retiens
+
+Travailler au niveau client est ce qui a rendu les tests honnêtes : quelqu’un qui achète 150 livres doit compter une fois, pas 150 fois. L’autre leçon, c’est que significatif ne veut pas dire fort : une p-valeur minuscule m’indiquait qu’un lien existait, pas qu’il comptait pour le marketing.

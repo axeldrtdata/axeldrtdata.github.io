@@ -1,33 +1,40 @@
 ---
-import { getCollection, render } from 'astro:content';
-import type { GetStaticPaths, InferGetStaticPropsType } from 'astro';
+// Used by /blog/ and /fr/blog/ (src/pages/fr/blog/[...page].astro).
+import { render } from 'astro:content';
+import type { GetStaticPaths, Page } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Pagination from '../../components/Pagination.astro';
 import NoteCard from '../../components/NoteCard.astro';
 import NoteTagFilter from '../../components/NoteTagFilter.astro';
 import { SITE } from '../../consts';
-import { readingTime, t } from '../../i18n';
+import { getLang, useT, readingTimeIn } from '../../i18n';
+import { getPosts, type Post } from '../../lib/content';
 
 export const getStaticPaths = (async ({ paginate }) => {
-  const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
-    (a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf(),
-  );
+  const posts = await getPosts('en');
   const allTags = [...new Set(posts.flatMap((post) => post.data.tags))]
     .sort((a, b) => a.localeCompare(b))
     .map((name) => ({ name, count: posts.filter((post) => post.data.tags.includes(name)).length }));
   return paginate(posts, { pageSize: 10, props: { allTags, total: posts.length } });
 }) satisfies GetStaticPaths;
 
-type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+interface Props {
+  page: Page<Post>;
+  allTags: { name: string; count: number }[];
+  total: number;
+}
 
 const { page, allTags, total } = Astro.props;
 const posts = page.data;
+const lang = getLang(Astro.url);
+const fr = lang === 'fr';
+const t = useT(lang);
 
 const readingTimes = new Map(
   await Promise.all(
     posts.map(async (post) => {
-      const { remarkPluginFrontmatter } = await render(post);
-      return [post.id, readingTime(remarkPluginFrontmatter.minutesRead)] as const;
+      const { remarkPluginFrontmatter } = await render(post.contentEntry);
+      return [post.id, readingTimeIn(remarkPluginFrontmatter.minutesRead, lang)] as const;
     }),
   ),
 );
@@ -38,15 +45,28 @@ const pageTitle =
 
 <BaseLayout
   title={pageTitle}
-  description={`Notes by ${SITE.title}, Data Analyst: lessons from my projects, dataviz, and working with AI.`}
+  description={
+    fr
+      ? `Les notes de ${SITE.title}, Data Analyst : ce que mes projets m’apprennent, la dataviz et le travail avec l’IA.`
+      : `Notes by ${SITE.title}, Data Analyst: lessons from my projects, dataviz, and working with AI.`
+  }
 >
   <div class="page-wrap">
     <header class="notes-head">
       <span class="mono-label">{t('blog.eyebrow')}</span>
-      <h1 class="page-title">What I'm <span class="accent">learning</span> along the way</h1>
+      {
+        fr ? (
+          <h1 class="page-title">Ce que <span class="accent">j’apprends</span> en chemin</h1>
+        ) : (
+          <h1 class="page-title">What I'm <span class="accent">learning</span> along the way</h1>
+        )
+      }
       <p class="page-lead">
-        Short notes on what my projects teach me: analytical traps, dataviz lessons, and how I work
-        with AI without letting it think for me.
+        {
+          fr
+            ? 'De courtes notes sur ce que mes projets m’apprennent : les pièges d’analyse, les leçons de dataviz, et ma façon de travailler avec l’IA sans la laisser réfléchir à ma place.'
+            : 'Short notes on what my projects teach me: analytical traps, dataviz lessons, and how I work with AI without letting it think for me.'
+        }
       </p>
     </header>
 
