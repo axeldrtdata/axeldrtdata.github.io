@@ -114,7 +114,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
 export type HomeStyle = 'dark' | 'light';
 
 export const HOME = {
-  style: 'dark' as HomeStyle,
+  style: 'light' as HomeStyle,
   /** Photo placed in `public/`, e.g. '/axel.jpg'. Leave '' for the placeholder. */
   photo: '/axel.jpg',
   status: 'Open to a data internship · Lyon or hybrid',
