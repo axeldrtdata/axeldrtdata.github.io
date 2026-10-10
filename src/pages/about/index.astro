@@ -21,7 +21,7 @@ const COPY = {
     h1A: 'Finding the ',
     h1B: 'story',
     h1C: ' behind the numbers',
-    intro: 'Born and raised in France, I left right after high school to live abroad: Australia, then Sweden, then the Netherlands. Those years away made me fluent in English, taught me real independence, and left me with a lasting curiosity: figuring out how things work wherever I land.',
+    intro: 'Born and raised in France, I left right after high school to live abroad for nearly ten years: Australia, then Sweden, then the Netherlands. Those experiences made me fluent in English, taught me real independence, and left me with a lasting curiosity: figuring out how things work wherever I land.',
     portrait: 'Portrait of Axel DEROBERT',
     today: 'Today',
     todayText: 'That curiosity has found its playground: <strong>data</strong>. I am training as a Data Analyst with OpenClassrooms, learning to turn raw, messy data into clear decisions a team can act on.',
@@ -49,14 +49,21 @@ const COPY = {
     offscreen: 'Off-screen',
     music: ['Music', 'Listening to it, and making it.'],
     football: ['Football', 'Watching the game, and reading the numbers behind it.'],
-    travel: ['Travel', 'Discovering new places, a habit four countries left me with.'],
+    travel: ['Travel', 'Discovering new places, a habit my many trips left me with.'],
+    // Places shown as small tags under Travel, one colour per continent (continent name on hover); an empty list hides them.
+    placesLabel: 'Places I have travelled to',
+    regions: [
+      { key: 'asia', label: 'Asia', places: ['Thailand', 'Indonesia', 'Malaysia', 'Singapore', 'South Korea', 'Japan', 'Sri Lanka', 'Philippines'] },
+      { key: 'europe', label: 'Europe', places: ['Italy', 'Spain', 'Albania', 'Portugal'] },
+      { key: 'americas', label: 'Americas', places: ['United States', 'Mexico', 'Costa Rica', 'Panama', 'Colombia', 'Peru', 'Brazil'] },
+    ],
     notes: 'Notes',
     notesText: 'What my projects taught me, from analytical traps to working with AI',
     readNotes: 'Read the notes →',
     lookingFor: "What I'm looking for",
-    ctaA: 'A data internship in Lyon or hybrid. If you need someone ',
-    ctaB: 'curious and rigorous',
-    ctaC: ", let's talk.",
+    ctaA: 'A data internship in Lyon or hybrid. You could keep looking. Or get in touch and ',
+    ctaB: 'save yourself the time',
+    ctaC: '.',
     linkedin: "Let's talk on LinkedIn",
     cv: 'Download my CV',
   },
@@ -68,7 +75,7 @@ const COPY = {
     h1A: 'Trouver l’',
     h1B: 'histoire',
     h1C: ' derrière les chiffres',
-    intro: 'Né et élevé en France, je suis parti vivre à l’étranger juste après le lycée : l’Australie, puis la Suède, puis les Pays-Bas. Ces années m’ont rendu bilingue en anglais, m’ont appris la vraie autonomie et m’ont laissé une curiosité durable : comprendre comment les choses fonctionnent, où que j’arrive.',
+    intro: 'Né et grandi en France, je suis parti vivre à l’étranger juste après le lycée, pendant près de 10 ans : l’Australie, puis la Suède, puis les Pays-Bas. Ces expériences m’ont rendu bilingue en anglais, m’ont appris la vraie autonomie et m’ont laissé une curiosité durable : comprendre comment les choses fonctionnent, où que j’arrive.',
     portrait: 'Portrait d’Axel DEROBERT',
     today: 'Aujourd’hui',
     todayText: 'Cette curiosité a trouvé son terrain de jeu : <strong>la data</strong>. Je me forme au métier de Data Analyst avec OpenClassrooms, et j’apprends à transformer des données brutes et désordonnées en décisions claires sur lesquelles une équipe peut agir.',
@@ -96,14 +103,20 @@ const COPY = {
     offscreen: 'Hors écran',
     music: ['Musique', 'L’écouter, et en faire.'],
     football: ['Football', 'Regarder les matchs, et lire les chiffres derrière.'],
-    travel: ['Voyage', 'Découvrir de nouveaux endroits, une habitude héritée de quatre pays.'],
+    travel: ['Voyage', 'Découvrir de nouveaux endroits, une habitude héritée de mes nombreux voyages.'],
+    placesLabel: 'Pays visités',
+    regions: [
+      { key: 'asia', label: 'Asie', places: ['Thaïlande', 'Indonésie', 'Malaisie', 'Singapour', 'Corée du Sud', 'Japon', 'Sri Lanka', 'Philippines'] },
+      { key: 'europe', label: 'Europe', places: ['Italie', 'Espagne', 'Albanie', 'Portugal'] },
+      { key: 'americas', label: 'Amériques', places: ['États-Unis', 'Mexique', 'Costa Rica', 'Panama', 'Colombie', 'Pérou', 'Brésil'] },
+    ],
     notes: 'Notes',
     notesText: 'Ce que mes projets m’ont appris, des pièges d’analyse au travail avec l’IA',
     readNotes: 'Lire les notes →',
     lookingFor: 'Ce que je recherche',
-    ctaA: 'Un stage data à Lyon ou en hybride. Si vous cherchez quelqu’un de ',
-    ctaB: 'curieux et rigoureux',
-    ctaC: ', discutons.',
+    ctaA: 'Un stage data à Lyon ou en hybride. Vous pouvez continuer à chercher. Ou m’écrire et ',
+    ctaB: 'gagner du temps',
+    ctaC: '.',
     linkedin: 'Discutons sur LinkedIn',
     cv: 'Télécharger mon CV',
   },
@@ -251,6 +264,19 @@ const steps = c.steps.map(([title, text], index) => ({ num: String(index + 1).pa
             </span>
           </li>
         </ul>
+        {
+          c.regions.length > 0 && (
+            <ul class="places" aria-label={c.placesLabel}>
+              {c.regions.flatMap((region) =>
+                region.places.map((place) => (
+                  <li class={`region-${region.key}`} title={region.label}>
+                    {place}
+                  </li>
+                )),
+              )}
+            </ul>
+          )
+        }
       </div>
 
       <a class="card glass notes-card" href={localePath('/blog/', lang)}>
@@ -544,6 +570,34 @@ const steps = c.steps.map(([title, text], index) => ({ num: String(index + 1).pa
     font-size: 14px;
     line-height: 1.45;
     color: var(--color-muted);
+  }
+
+  .places {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .places li {
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--royal);
+  }
+
+  /* One soft tint per continent, all readable with navy text. */
+  .region-asia {
+    background: #d0e6fd;
+  }
+
+  .region-europe {
+    background: #eddcc2;
+  }
+
+  .region-americas {
+    background: #d5e8d0;
   }
 
   .notes-card {
