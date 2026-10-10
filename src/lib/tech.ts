@@ -3,10 +3,11 @@
 // A technology not listed here falls back to a neutral tint.
 
 const LANGUAGES = ['python', 'sql', 'dax', 'r', 'm (power query)'];
-const LIBRARIES = ['pandas', 'numpy', 'scikit-learn', 'matplotlib', 'seaborn', 'plotly', 'scipy', 'statsmodels'];
+const LIBRARIES = ['pandas', 'numpy', 'scikit-learn', 'matplotlib', 'seaborn', 'plotly', 'scipy', 'statsmodels', 'pandera'];
 const TOOLS = [
   'vs code', 'jupyter', 'power bi', 'tableau', 'excel', 'git', 'github', 'mysql',
   'postgresql', 'sqlite', 'snowflake', 'dbt', 'looker studio', 'power query',
+  'claude', 'gemini',
 ];
 
 export function techTone(name: string): string {

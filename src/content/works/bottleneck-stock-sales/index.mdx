@@ -1,0 +1,207 @@
+---
+title: 'Was the wine shop really sitting on three years of stock?'
+description: 'A stock and sales analysis for an online wine shop, then an audit of my own notebook with two AI models: two figures I had presented were wrong, and the rebuilt pipeline now checks every export before trusting it.'
+thumbnail: ./cover.png
+icon: ./icon.png
+tech:
+  - Python
+  - Pandas
+  - pandera
+  - Plotly
+  - Matplotlib
+  - Claude
+  - Gemini
+  - VS Code
+category: python
+featured: true
+order: 0
+client: 'Bottleneck, online wine and spirits shop (OpenClassrooms case)'
+role: 'Data Analyst, training project'
+repo: 'https://github.com/axeldrtdata/bottleneck-stock-sales'
+publishDate: 2026-10-01
+---
+
+import KeyFigures from '../../../components/case/KeyFigures.astro';
+import Takeaway from '../../../components/case/Takeaway.astro';
+import Figure from '../../../components/case/Figure.astro';
+import priceImg from './price-check.png';
+import capitalImg from './capital-by-coverage.png';
+
+## The question
+
+Bottleneck is an online wine and spirits shop. Its head of sales, Nicolas, put it simply: the tools are home-made, the data is hard to analyse and stock management is complicated. He sent me three exports for October and a brief in two phases:
+
+1. **Reconcile the files** and find the errors in them, at least eight, with solutions to clean up the systems.
+2. **Analyse the data for the management committee**: revenue, top products and the 80/20 rule, price outliers, margins, stock rotation and correlations.
+
+I presented that analysis in March 2026. Six months later, the final project of my training asked me to audit one of my own deliverables with AI, critically and with the method documented. I chose this one, and the audit found that two of the figures I had presented were wrong. This case study tells both stories: the analysis, and what happened when I checked it.
+
+<KeyFigures
+  items={[
+    { value: '3 months', label: 'of stock on average, not the 35.6 months I first presented' },
+    { value: '€119,666', label: 'revenue excl. VAT in October, from 713 products online' },
+    { value: '27', label: 'products hold 40% of the stock value; 23 of them are champagnes' },
+    { value: '10', label: 'validation rules run every time the exports are loaded' },
+  ]}
+/>
+
+## Three exports that don't share a key
+
+| File | Content | Rows |
+| ---- | ------- | ---- |
+| ERP export | Product ID, selling price, purchase price, stock quantity and status, sold online or not | 825 |
+| Website export (WordPress) | SKU, sales over the month, name, type, publication date | 1,513 |
+| Link table | ERP product ID against website SKU, since the two tools number products differently | 825 |
+
+The website export lists almost every product twice, once as a product page and once as an image page. Between that, the link table and the ERP, the files hid at least ten kinds of anomalies:
+
+- **3 negative prices** and **a price ten times too low**: a bottle bought at €77.48 and sold at €12.65.
+- **2 negative stocks**, −10 and −1, and **2 stock statuses** that contradict their quantity.
+- **85 website rows without a SKU**, two of them with negative sales of −56 and −17.
+- **4 products whose two rows show different sales**, out of 714 products listed twice.
+- **A SKU with a suffix**, `13127-1`, which turned out to be a real product variant.
+- **3 products declared online in the ERP** that have no website ID in the link table.
+- **A product listed on the website**, with 33 bottles in stock, that the ERP declares offline.
+
+Of the 734 ERP products that have a website ID, 714 are found in the website export, a 97.3% match rate, and 713 of them are sold online.
+
+## What I presented in March
+
+Revenue reached €143,424 including VAT. It took 433 products, 61% of the catalogue, to make 80% of it: no star products, a business that lives on the breadth of its range. Champagnes and premium wines led revenue, entry-level wines led volume. Spirits had the best margins, 82% on cognacs and whiskies, champagne only 40%. Price and sales were negatively correlated (−0.52), sales and stock positively (0.44).
+
+And on stock, my conclusion was alarming: an average rotation of **35.6 months, about three years**, champagnes needing up to 375 months to sell at the current pace, a stock worth €493,872, and one champagne sold at a loss of −86%.
+
+## Auditing my own work with two AIs
+
+The audit had to be critical, documented, and compare several tools. I gave **Claude** and **Gemini** the same documents: the brief, the source files, my presentation and my notebook. Only their posture changed.
+
+- **Claude** acted as an internal auditor. It had helped me on the original project, and the prompt said so: it was reviewing work it had taken part in.
+- **Gemini** acted as an external auditor. The prompt presented the notebook as a student's work, with no link to it.
+
+The reason was a risk I wanted to control: an auditor reviewing work it took part in may be tempted to validate it. The independent audit was there to catch that bias, and to test how self-critical Claude would be.
+
+| | Claude | Gemini |
+| - | ------ | ------ |
+| Findings | 15 | 10 |
+| Errors found behind the figures shown to the client | 2 of 2 | 0 of 2 |
+
+They shared 6 findings and disagreed on the severity of all six. Claude kept its high severity for what distorted a result shown to Bottleneck. Gemini gave it to anything that broke data integrity or code: an absolute file path got its highest rating. Each one missed what the other saw, but not with the same weight: Gemini missed both errors behind the figures I had presented, while Claude missed two real quality signals that changed no result, the negative stocks set to zero and an outlier test run across categories that should not be compared.
+
+Then I had each model review the other's audit, and **checked every disputed point on the data** instead of taking a vote.
+
+- **Gemini called my handling of the four imperfect duplicates a "falsification"**: I had kept the lower sales figure. In the data, all four high values sat on the image rows, the low ones on the product pages. Keeping the high values would have inflated revenue by €10,068 including VAT.
+- **Gemini read the negative prices as possible refunds.** Once their sign is removed, their selling to purchase price ratios are 1.94, 1.84 and 1.97, close to the catalogue's median of 1.93: sign errors, not refunds.
+- **Gemini approved one of Claude's findings without checking it**: margins by category should be weighted by volume. Claude had already downgraded it after computing: on totals, the weighted margin never moves more than 1.3 points from the simple average.
+
+In their revised audits, Claude added the negative-stock finding it had missed and dropped the one that did not hold. Gemini dropped three findings it had defended a step earlier, without explaining why, aligned its severities on Claude's, and lost the two contributions of its own that were right. The audits converged, but by alignment, not by verification.
+
+<Takeaway label="On working with AI">Two models that agree can agree for the wrong reasons. Every disputed finding was settled on the data, not by a vote.</Takeaway>
+
+## The two figures that were wrong
+
+**Stock coverage was multiplied by 12.** To turn sales into a monthly rate, I had divided them by 12. But the export already covered a single month, so every coverage came out twelve times too long, and the average reached 35.6 months. Rebuilt, with the never-sold products set apart, it is **2.98 months** (2.4 at the median). The diagnosis flipped from a critical overstock to a stock that turns in about three months, with a few pockets that do not move at all.
+
+**Products that never sold disappeared from the ranking.** A product with no sales has no coverage, but my code turned it into something else. When the product held stock, the infinite result was replaced by 0, which ranked it among the fastest-moving products: 3 products and €14,959 of stock. When it held none, the result was 0 divided by 0, an empty value that dropped out of the average without a warning: 22 more products.
+
+```python
+# First version: sales already monthly, and no sale turned into "0 months"
+df_web_join['rotation_stock'] = df_web_join['stock_quantity'] / (df_web_join['total_sales'] / 12)
+df_web_join['rotation_stock'] = df_web_join['rotation_stock'].replace([np.inf, -np.inf], 0)
+
+# Rebuilt version: no sale means no coverage, and never-sold products get their own category
+d["coverage_months"] = d["stock_quantity"] / d["total_sales"].replace(0, np.nan)
+d["never_sold"] = d["total_sales"] == 0
+```
+
+Other figures moved for less dramatic reasons:
+
+| Indicator | March | Now | Why |
+| --------- | ----- | --- | --- |
+| Average stock coverage | 35.6 months | 3.0 months | Sales were already monthly, and never-sold products no longer count as 0 |
+| Revenue | €143,424 incl. VAT | €119,666 excl. VAT | Excluding VAT, the basis of the purchase prices; the €25 gift card the first version deleted is kept |
+| Stock value | €493,872 | €277,225 | Valued at purchase price, not at the selling price including VAT |
+| Product sold at a loss | 1, at −86% | 0 | A decimal slip: the price is €126.50, not €12.65 |
+| Price and sales | −0.52 | −0.71 | Spearman instead of Pearson, on prices that range from €4 to €188 |
+| Stock and sales | 0.44 | 0.76 | Same reason |
+| Never-sold products identified | 0 | 25 | See above |
+| Corrections hard-coded on product IDs | 8 | 0 | Fixed by rule instead |
+
+## A pipeline that checks every export
+
+The audit also showed that my first notebook only worked on October's export: eight corrections were written against specific product IDs, and every quality check was a printout nobody had to read. Yet my own conclusion had recommended automating the cleaning. So I wrote a specification before touching the code.
+
+| Stakeholder | Decides | Needs |
+| ----------- | ------- | ----- |
+| Purchasing and stock manager | Order, clear or drop a product | A prioritised list, with the amounts at stake |
+| Management | Where the margin is made, and where capital sleeps | Financial indicators that are stable from one month to the next |
+| E-commerce manager | Whether the online catalogue is consistent | Price anomalies and ERP / website mismatches |
+
+The goal: run on the three raw exports every month, and **stop rather than produce a wrong figure** when the data is degraded. For each need the audit raised, I compared several options and tested them on the real data before choosing.
+
+| Need | Options compared | Chosen | Why |
+| ---- | ---------------- | ------ | --- |
+| Automate the quality checks | pandas assertions, pandera, Great Expectations | pandera | Both candidates caught 4 anomalies I injected into a copy of the export, a test the notebook replays. pandera cannot be skipped and reads as a specification. Great Expectations was oversized for 825 rows a month |
+| Detect price anomalies | IQR, robust z-score (MAD), Isolation Forest, each on the price and on the price ratio | MAD on the ratio, threshold 5 | On the price alone, no method isolated the 4 errors. On the ratio, all three found them, but the IQR raised 45 alerts against 7. Isolation Forest flags as many products as its setting asks for, so it needs the number of anomalies known in advance |
+| Turn findings into actions | ABC classification, k-means, coverage × stock value | Coverage × stock value | Class A would have held 60% of the catalogue. k-means found three price ranges and a group of champagnes, with weak clusters: the catalogue is too even for both |
+
+The rules run at two levels. **Blocking** rules stop the processing when a file cannot be used: a duplicated ID, a missing price, a value outside its domain, or fewer than 95% of the linked products found in the website export. **Alert** rules let the month's analysis go ahead and report the problem: three mistyped prices should not stop the whole report.
+
+```python
+class ERPSchema(pa.DataFrameModel):
+    """Blocking rules on the ERP export: if one fails, the file cannot be used."""
+
+    product_id: Series[int] = pa.Field(unique=True)                       # R1
+    price: Series[float] = pa.Field(nullable=False)                       # R2
+    purchase_price: Series[float] = pa.Field(gt=0)                        # R3
+    stock_status: Series[str] = pa.Field(isin=["instock", "outofstock"])  # R6
+    onsale_web: Series[int] = pa.Field(isin=[0, 1])                       # R7
+```
+
+Entry errors are now fixed **by rule, not by ID**. A price is only corrected when changing its sign or its scale brings it back into the catalogue's usual range of 1.4 to 3 times the purchase price. Anything no rule explains is reported, not fixed. And no row is dropped silently: the 797 rows that are not product pages, the 2 products without a SKU and the 3 online products without a website ID are all counted or reported.
+
+<Figure
+  src={priceImg}
+  title="The price ratio catches what the price alone cannot"
+  alt="Scatter plot of the 825 products, selling price against purchase price, almost all of them inside a shaded band between 1.4 and 3 times the purchase price. Three points sit below zero, joined by dotted lines to their corrected positions inside the band; a point at 12.65 euros for a purchase price of 77.48 is joined to its corrected price of 126.50. Three diamonds sit well below the band, priced at or below cost."
+  caption="The most expensive bottles look like outliers on price alone, but they sit inside the band like everything else. The ratio isolates the 4 entry errors, fixed automatically, and 3 products priced at or below cost, which no rule explains: they are reported, not fixed."
+/>
+
+## Where the capital sleeps
+
+With the coverage fixed, most of the catalogue turns in one to six months. The problem is concentrated.
+
+<Figure
+  src={capitalImg}
+  title="Stock value by coverage"
+  alt="Horizontal bar chart of stock value at purchase price by coverage band. Sold out: 23 products, 0 euros. Up to 1 month: 27 products, 2,501 euros. 1 to 3 months: 461 products, 101,899 euros, 36.8%. 3 to 6 months: 146 products, 43,517 euros. 6 to 12 months: 7 products, 19,337 euros. Over 12 months: 24 products, 95,012 euros, 34.3%, highlighted. Never sold with stock: 3 products, 14,959 euros, 5.4%, highlighted. Never sold, no stock: 22 products, 0 euros."
+  caption="Most of the catalogue sits in the one-to-six-month bands. The two dark bars are where the capital sleeps: products that cover more than a year of sales, or never sold at all."
+/>
+
+**24 products cover more than a year of sales**, €95,012 at purchase price, and 21 of them are champagnes. Add the 3 products that held stock and sold nothing, and **27 products tie up €109,971, 39.7% of the stock**. Champagne is 28 products out of 713 online, 4% of the catalogue, but 44% of the stock value and 9% of revenue, at a 40% markup against 61% for the median product. The capital sleeps where the margin is thinnest.
+
+At the other end, **23 products sold out after selling 194 bottles** in the month: €5,516 excl. VAT of October sales that stop until they are back in stock. And 22 products had neither sales nor stock: they could not sell at all, which is a question for the buyer rather than a sign of dormant stock.
+
+<Takeaway label="Key finding">Bottleneck is not sitting on three years of stock. It turns its stock in about three months, but 23 champagnes hold 38% of its stock.</Takeaway>
+
+## Recommendations
+
+- **Suspend restocking of the 24 dormant products**, €95,012 at purchase price, starting with the champagnes, after checking whether they are waiting for the year-end season.
+- **Decide on the 3 products that never sold but hold €14,959 of stock**, starting with the Egly-Ouriet Blanc de Noirs: its price was entered at €12.65 instead of €126.50.
+- **Reorder the 23 sold-out products**, and the one product with less than a month of stock left.
+- **Check whether the 22 products with neither sales nor stock are discontinued**, and take them off the website if so.
+- **Fix the data at the source**: the 3 products priced at or below cost, the 2 statuses that contradict their stock, the 3 online products missing from the link table, and the product on the website that the ERP declares offline.
+- **Run the notebook on every monthly export.** If an export changes format, it stops with an alert instead of producing a wrong report.
+
+## Limits
+
+- **One month of data.** There is no seasonality, and October comes right before the year-end peak: a dormant champagne may just be waiting for Christmas. A year of exports would let the coverage be smoothed.
+- **VAT is not in the files.** I assumed 20%, the standard French rate on wine and spirits, kept in a single constant. The three olive oils normally carry the reduced 5.5% rate.
+- **The €25 gift card is counted as a product**: 7 sold, €146 of revenue excl. VAT.
+- **The thresholds are conventions**: 1 month to reorder, 12 months for dormant stock, a MAD score of 5 for prices. They should be set with the buyer, based on supplier lead times.
+- **The 109 products the ERP declares offline are not analysed**, although their stock exists.
+- **The checks test consistency, not truth.** An entry error that fits the rest of the catalogue would pass unnoticed.
+- **A training case**: the data comes from OpenClassrooms, and the original notebook and audit are in French; the repository holds an English version.
+
+## What I learned
+
+The hardest error to catch was my own: one division by 12 turned three months of stock into three years, and I presented that conclusion without checking that it made sense. Working with two AIs taught me that their agreement proves nothing: each one missed what the other saw, and every disagreement was settled by going back to the data. I now write the checks before the analysis, so each new export has to pass them before I trust it.

@@ -25,6 +25,7 @@ import scatterImg from './cost-vs-delay.png';
 import itImg from './it-phase-budgets.png';
 import costsImg from './dashboard-costs.png';
 import delaysImg from './dashboard-delays.png';
+import crossoverImg from './delays-crossover.png';
 import deliverablesImg from './dashboard-deliverables.png';
 import mapImg from './dashboard-map.png';
 
@@ -135,6 +136,13 @@ On this page, the key visual is a dual-line chart of planned and actual duration
   title="The Delays page, filtered on project 4 (Egypt)"
   alt="Power BI page filtered on project 4: cards showing 1 critical project and 143 days late; a scatter plot with a single red point; a treemap where Implementation and Manufacturing dominate; and a dual-line chart where actual duration is below plan on Planning (17 days against 31), crosses above at Initiation (25 against 13), then reaches 147 days against 63 on Implementation and 105 against 44 on Manufacturing."
   caption="Project 4 took 294 days instead of 151. The lines cross at Initiation: from there, every phase runs longer than planned."
+/>
+
+<Figure
+  src={crossoverImg}
+  title="Zoom: where project 4 starts to slip"
+  alt="Dual-line chart from the Delays page, filtered on project 4. Planned duration (dark line) and actual duration (light line) by phase: 31 planned against 17 actual on Planning, 13 against 25 on Initiation, 63 against 147 on Implementation, 44 against 105 on Manufacturing. A circle marks where the two lines cross, between Planning and Initiation, and a dashed line marks the 84-day gap on Implementation."
+  caption="Durée prévue is the planned duration, Durée finale the actual one. Below plan on Planning, the project crosses above it at Initiation and never comes back: +12 days, then +84, then +61."
 />
 
 ### Deliverables: a problem spread everywhere
