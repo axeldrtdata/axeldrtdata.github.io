@@ -4,7 +4,7 @@ import type { UIStrings } from './en';
 export const fr: UIStrings = {
   // En-tête, pied de page
   'nav.home': 'Accueil',
-  'nav.about': 'À propos',
+  'nav.about': 'Qui suis-je ?',
   'nav.works': 'Projets',
   'nav.blog': 'Notes',
   'nav.search': 'Rechercher',
@@ -80,8 +80,8 @@ export const fr: UIStrings = {
   'work.stackEyebrow': 'Outils',
 
   // À propos
-  'about.title': 'À propos',
-  'about.eyebrow': 'À propos',
+  'about.title': 'Qui suis-je ?',
+  'about.eyebrow': 'Qui suis-je ?',
   'about.ledgerLabel': 'Parcours',
 
   // Recherche

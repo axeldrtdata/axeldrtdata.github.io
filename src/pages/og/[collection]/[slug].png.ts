@@ -140,7 +140,7 @@ export const GET: APIRoute<OgProps> = async ({ props }) => {
   const footer = el('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 26, padding: '0 8px' }, [
     el('div', { display: 'flex', alignItems: 'baseline', gap: 8, color: COLOR.royal }, [
       el('div', { fontSize: 28, fontWeight: 800 }, 'Axel'),
-      el('div', { fontFamily: 'Instrument Serif', fontSize: 34 }, 'Derobert'),
+      el('div', { fontFamily: 'Instrument Serif', fontSize: 34 }, 'DEROBERT'),
     ]),
     el('div', { fontSize: 22, color: COLOR.muted }, 'axeldrtdata.github.io'),
   ]);

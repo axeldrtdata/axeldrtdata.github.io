@@ -5,11 +5,11 @@ import type { UIKey } from './i18n/en';
 
 export const SITE = {
   locale: 'en',
-  title: 'Axel Derobert',
+  title: 'Axel DEROBERT',
   description: 'Data Analyst based in Lyon. Python, SQL and dataviz to help businesses understand what drives their performance.',
   rssDescription: 'Notes on data, analytics and what has caught my curiosity.',
   ogImage: '/og.jpg',
-  author: 'Axel Derobert',
+  author: 'Axel DEROBERT',
   footerText: 'Designed and built in Lyon with Astro.',
 } as const;
 
@@ -114,7 +114,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
 export type HomeStyle = 'dark' | 'light';
 
 export const HOME = {
-  style: 'light' as HomeStyle,
+  style: 'dark' as HomeStyle,
   /** Photo placed in `public/`, e.g. '/axel.jpg'. Leave '' for the placeholder. */
   photo: '/axel.jpg',
   status: 'Open to a data internship · Lyon or hybrid',

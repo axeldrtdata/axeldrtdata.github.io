@@ -19,7 +19,7 @@
 export const en = {
   // Header, footer, and other chrome
   'nav.home': 'Home',
-  'nav.about': 'About',
+  'nav.about': 'Who am I?',
   'nav.works': 'Projects',
   'nav.blog': 'Notes',
   'nav.search': 'Search',
@@ -101,8 +101,8 @@ export const en = {
   'work.stackEyebrow': 'Stack',
 
   // About — section labels only; the biography copy lives in about/index.astro
-  'about.title': 'About',
-  'about.eyebrow': 'About',
+  'about.title': 'Who am I?',
+  'about.eyebrow': 'Who am I?',
   'about.ledgerLabel': 'Experience summary',
 
   // Search
