@@ -6,13 +6,15 @@ interface Props {
 }
 
 const { items } = Astro.props;
+// At this display size the narrow French thousands space is almost invisible: use a regular no-break space.
+const display = (value: string) => value.replace(/\u202f/g, '\u00a0');
 ---
 
 <ul class="key-figures">
   {
     items.map((item, index) => (
       <li class:list={['figure', index % 3 === 1 ? 'tone-powder' : index % 3 === 2 ? 'tone-bone' : 'glass']}>
-        <span class="figure-value">{item.value}</span>
+        <span class="figure-value">{display(item.value)}</span>
         <span class="figure-label">{item.label}</span>
       </li>
     ))
@@ -32,10 +34,12 @@ const { items } = Astro.props;
   .figure {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
     margin: 0;
     padding: 22px;
     border-radius: 22px;
+    text-align: center;
   }
 
   .figure-value {
