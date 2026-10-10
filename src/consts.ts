@@ -125,7 +125,7 @@ export const HOME = {
   /** CV placed in `public/`, e.g. '/cv-axel-derobert.pdf'. Leave '' to hide the button. */
   cv: '/cv-axel-derobert.pdf',
   /** French CV for the /fr/ pages. Leave '' to offer the English CV there too. */
-  cvFr: '',
+  cvFr: '/cv-axel-derobert-fr.pdf',
 };
 
 /** Project categories — drive the homepage chart and the filters on /works/.
