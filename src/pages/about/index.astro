@@ -63,7 +63,7 @@ const COPY = {
     lookingFor: "What I'm looking for",
     ctaA: 'A data internship in Lyon or hybrid. You could keep looking. Or get in touch and ',
     ctaB: 'save yourself the time',
-    ctaC: '.',
+    ctaC: '',
     linkedin: "Let's talk on LinkedIn",
     cv: 'Download my CV',
   },
@@ -116,7 +116,7 @@ const COPY = {
     lookingFor: 'Ce que je recherche',
     ctaA: 'Un stage data à Lyon ou en hybride. Vous pouvez continuer à chercher. Ou m’écrire et ',
     ctaB: 'gagner du temps',
-    ctaC: '.',
+    ctaC: '',
     linkedin: 'Discutons sur LinkedIn',
     cv: 'Télécharger mon CV',
   },
@@ -467,9 +467,10 @@ const steps = c.steps.map(([title, text], index) => ({ num: String(index + 1).pa
     gap: 14px;
   }
 
+  /* Two columns: keeps this card as tall as the Off-screen card next to it. */
   .method-steps {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     margin-top: auto;
     padding-top: 8px;
@@ -500,12 +501,6 @@ const steps = c.steps.map(([title, text], index) => ({ num: String(index + 1).pa
     font-size: 13px;
     line-height: 1.45;
     color: #2a3766;
-  }
-
-  @media (max-width: 1000px) {
-    .method-steps {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
 
   @media (max-width: 480px) {
