@@ -44,12 +44,15 @@ const folderId = ({ entry }: { entry: string }) => entry.split('/')[0];
 
 const worksFr = defineCollection({
   loader: glob({ pattern: '**/fr.{md,mdx}', base: './src/content/works', generateId: folderId }),
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    client: z.string().optional(),
-    role: z.string().optional(),
-  }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      description: z.string(),
+      client: z.string().optional(),
+      role: z.string().optional(),
+      // French version of the cover, when its text has been translated.
+      thumbnail: image().optional(),
+    }),
 });
 
 const blogFr = defineCollection({
