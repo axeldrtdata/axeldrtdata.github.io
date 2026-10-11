@@ -296,9 +296,9 @@ const schema = [
     color: var(--royal);
   }
 
+  /* Emphasis stays in the text font: no serif words inside the body text. */
   .case-body :global(em) {
-    font-family: var(--font-accent);
-    font-size: 1.12em;
+    font-style: italic;
   }
 
   .case-body :global(ul:not([class])),
