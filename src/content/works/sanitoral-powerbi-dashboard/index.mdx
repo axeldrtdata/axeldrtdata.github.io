@@ -1,6 +1,6 @@
 ---
 title: 'Is a 7.3% budget overrun under control?'
-description: 'A Power BI dashboard that tracks 104 IT and marketing projects for an oral care company in 52 countries on costs, delays and deliverables, for three levels of directors, and what a second look at the data changed.'
+description: 'A Power BI dashboard that tracks 104 IT and marketing projects for an oral care company in 52 countries on costs, delays and deliverables, for three levels of directors.'
 thumbnail: ./cover.png
 icon: ./icon.png
 tech:
@@ -21,8 +21,6 @@ import KeyFigures from '../../../components/case/KeyFigures.astro';
 import BarChart from '../../../components/case/BarChart.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
-import scatterImg from './cost-vs-delay.png';
-import itImg from './it-phase-budgets.png';
 import costsImg from './dashboard-costs.png';
 import delaysImg from './dashboard-delays.png';
 import crossoverImg from './delays-crossover.png';
@@ -90,7 +88,7 @@ Like the whole case, which comes from my OpenClassrooms training, the report is 
   caption="Delays selected, as the brief asked: green ahead of plan, yellow late but under the alert, red 15% or more late. Hovering a country shows its overall gap on the chosen indicator and the projects behind it: here Canada, 16.9% ahead of plan on projects 30 and 91."
 />
 
-Every gap is a ratio of sums, not an average of ratios. In project 14, one phase was planned for a single day and took fourteen: a gap of +1,300%. Averaged with its other phases, the project would look 303% late; summed first, it finished 26% **ahead** of plan, which is what happened.
+To calculate a project's gap, I first add up the planned days of all its phases, then the actual days, and compare the two totals (same principle with euros for costs). Why not simply average the gaps of each phase? Because one tiny phase can skew everything. In project 14, a phase planned for 1 day took 14: only 13 days late, but a gap of +1,300%. The other three phases were ahead of plan, and yet the average of the four gaps would suggest a project 303% late. With totals, the real picture appears: 459 days planned, 341 days actual, so **26% ahead**.
 
 ```dax
 ecart_couts_% =
@@ -109,9 +107,9 @@ The `0 +` makes the card show 0 rather than a blank when a filter leaves no crit
 
 ## What the dashboard shows
 
-### Costs: a reassuring percentage
+### Costs: 7.3% on paper, €4.1 million in reality
 
-The portfolio was planned at €56.1 million and cost €60.2 million: **7.3% over**, comfortably under the 15% alert. On paper, everything looked fine. In euros, it is **€4.1 million** nobody had budgeted.
+The portfolio was planned at €56.1 million and cost €60.2 million: **7.3% over**, comfortably under the 15% alert. But in euros, it is **€4.1 million** nobody had budgeted.
 
 Project by project, 28 are critical, 33 are over budget but under the alert, and 43 came in under plan. The overrun is concentrated:
 
@@ -122,27 +120,29 @@ Project by project, 28 are critical, 33 are over budget but under the alert, and
 | North and Latin America | 5 | +9.4% | +0.36 | 2 |
 | Asia Pacific | 10 | −10.6% | −0.10 | 2 |
 
-The first region carries 60% of the overrun and 18 of the 28 critical projects. Its size explains part of it, but not all: its gap is also above the portfolio's. By type, **marketing projects account for the entire overrun** (+€4.46M), while IT projects came in €362,000 under plan. And a single phase, marketing's Phase 4, Manufacturing, absorbs 55% of everything spent: a 1% saving there, €332,000, is worth more than a 20% saving on any IT phase except Deployment.
+The first region carries 60% of the overrun and 18 of the 28 critical projects. Its size explains part of it, but not all: its gap is also above the portfolio's. By type, **marketing projects account for the entire overrun** (+€4.46M), while IT projects came in €362,000 under plan. Finally, a single phase takes more than half of all the money spent: manufacturing (Phase 4, Manufacturing) of the marketing projects, with €33 million out of 60. That is where every effort counts most: cutting its cost by just 1% would save €332,000. That is more than a 20% cut on any phase of the IT projects, except Deployment.
 
 ### Delays: the best-kept indicator
 
 Time is the indicator Sanitoral controls best: only 8 projects are 15% or more late, 16 are slightly late, and **80 finished ahead of plan**. Over the whole portfolio, projects took 13% fewer days than planned.
 
-On this page, the key visual is a dual-line chart of planned and actual duration, phase by phase. The point where the actual line crosses above the planned one shows the phase where a project starts to slip, early enough to act before the end. Project 4, in Egypt, is the clearest case: ahead of plan on Planning, it crosses over at Initiation, and from there every phase runs longer than planned, by up to 84 days on Implementation.
-
 <Figure
   src={delaysImg}
   wide
-  title="The Delays page, filtered on project 4 (Egypt)"
-  alt="Power BI page filtered on project 4: cards showing 1 critical project and 143 days late; a scatter plot with a single red point; a treemap where Implementation and Manufacturing dominate; and a dual-line chart where actual duration is below plan on Planning (17 days against 31), crosses above at Initiation (25 against 13), then reaches 147 days against 63 on Implementation and 105 against 44 on Manufacturing."
-  caption="Project 4 took 294 days instead of 151. The lines cross at Initiation: from there, every phase runs longer than planned."
+  title="The Delays page"
+  alt="Power BI page with no filter: cards showing 104 projects, 8 critical, 16 late, 80 on time and a gap of −7,081 days; a scatter plot of planned and actual duration by project, with critical projects in red; a treemap of the phases running late; and a dual-line chart of planned and final duration by phase, summed over all projects."
+  caption="The whole portfolio, no filter: 8 critical projects, 16 late and 80 on time, for 7,081 fewer days than planned in total."
 />
+
+On this page, the key visual is the dual-line chart of planned and actual duration, phase by phase. The aim is to find the tipping point: the moment the actual line crosses above the planned one. That is where delays start to build up; spotting it on a project means acting on the phase that tips everything, instead of suffering the consequences at the end of the project. If I had to recommend a single visual to open every Monday morning, it would be this one: it spots a delay as soon as it appears, before it gets worse in the following phases.
+
+Project 4, in Egypt, is the clearest case. Filtered on that project alone, the chart shows it was ahead of plan on Planning, crossed over at Initiation, and from there every phase ran longer than planned, by up to 84 days on Implementation.
 
 <Figure
   src={crossoverImg}
-  title="Zoom: where project 4 starts to slip"
+  title="Zoom: project 4 (Egypt), where it starts to slip"
   alt="Dual-line chart from the Delays page, filtered on project 4. Planned duration (dark line) and actual duration (light line) by phase: 31 planned against 17 actual on Planning, 13 against 25 on Initiation, 63 against 147 on Implementation, 44 against 105 on Manufacturing. A circle marks where the two lines cross, between Planning and Initiation, and a dashed line marks the 84-day gap on Implementation."
-  caption="Durée prévue is the planned duration, Durée finale the actual one. Below plan on Planning, the project crosses above it at Initiation and never comes back: +12 days, then +84, then +61."
+  caption="The dual-line chart filtered on project 4, which took 294 days instead of 151. Durée prévue is the planned duration, Durée finale the actual one. Below plan on Planning, the project crosses above it at Initiation and never comes back: +12 days, then +84, then +61."
 />
 
 ### Deliverables: a problem spread everywhere
@@ -180,40 +180,18 @@ One combination crosses the alert: IT projects in Western Europe, at −18% on d
 
 <Takeaway label="The first answer">The portfolio is not out of control, but a 7.3% gap is €4.1 million, and almost no project delivers what it promised.</Takeaway>
 
-## What a second look revealed
+## Beyond the percentages
 
-When I came back to this project for my portfolio, I recomputed every figure from the model's tables. They all held, but three conclusions needed a second look.
+Reading the waterfall chart on the Costs page phase by phase, in euros, brings out a finding the overall percentage does not show.
 
-**The same trap, twice.** I had presented an "IT/Marketing paradox": marketing drives the overrun, yet four of the five worst projects are IT. It is the percentage trap again. Those IT projects are the worst **in percent**; ranked **in euros**, the five largest overruns are all marketing projects, led by Switzerland at +€397,500. A marketing project was planned at €986,000 on average, an IT project at €93,000: a +59% on a small IT budget weighs less than a +26.5% on a large marketing one.
+**IT's good health sits in a single phase.** Overall, IT projects cost €362,000 less than planned. But the waterfall chart shows where that result comes from: Testing cost €769,000 more than planned, and it is Deployment, €1.3 million under its budget, that makes up for it. Even the five most profitable projects of the Top 5 overran on Testing. Two explanations are possible: either the Testing budget is underestimated from the start, or an operational problem keeps recurring in that phase. The data cannot settle it, but either way, that is where to look.
 
-**IT's good health sits in a single phase.** IT came in under budget overall, so I read it as the healthier type. Phase by phase, the picture changes.
-
-<Figure
-  src={itImg}
-  title="IT projects: planned and actual cost by phase"
-  alt="Grouped bar chart of the 52 IT projects by phase. Testing was planned at 192,000 euros and cost 960,000 euros, five times more; Deployment was planned at 3.28 million and cost 1.95 million, 40% less. The other phases are 10 to 19% over plan."
-  caption="Testing overran in all 52 IT projects. Deployment came in under plan in 46 of them."
-/>
-
-Testing cost five times its plan, and it overran in **every one of the 52 IT projects**. Deployment, at the same time, left €1.3 million unspent. Without Deployment, IT would be 61% over budget. The five "most profitable" projects of my original Top 5 are all IT projects whose Deployment came in €53,000 to €103,000 under plan. The data cannot say why, but the pattern looks like money planned for Deployment and spent on Testing: a planning problem more than a performance one.
-
-**Delays and costs are not linked across the portfolio.** I had said that delays and costs were strongly correlated: 7 of the 8 critically late projects were also over budget. That is true, but 54 of the 96 other projects were over budget too, and over the 104 projects, the correlation between the two gaps is close to zero.
-
-<Figure
-  src={scatterImg}
-  title="Cost gap against delay gap, 104 projects"
-  alt="Scatter plot of the 104 projects, cost gap against delay gap, with dashed lines at 15% on both axes. The points form a cloud with no trend; the 8 projects 15% or more late are highlighted, 7 of them above zero on cost, Egypt at +95% time and +27% cost."
-  caption="The 8 late projects are mostly over budget, but so are most of the others. Spearman's ρ = −0.01."
-/>
-
-The same goes for my Top 5: all five finished early, but so did 80 of the 104 projects. A delay alert remains useful in its own right, but it is not an early warning for costs.
-
-<Takeaway label="Key finding">The overrun is real but concentrated: marketing projects, one region, and an IT budget planned in the wrong phase. Every percentage on the dashboard needs its amount next to it.</Takeaway>
+<Takeaway label="Key finding">The overrun is real but concentrated: marketing projects, one region, and the Testing phase of IT projects. Every percentage on the dashboard needs its amount next to it.</Takeaway>
 
 ## Recommendations
 
 - **Read every gap in percent and in euros.** The 15% alert should run on both: €4.1 million should not pass under the radar because it is 7.3%.
-- **Rebalance the IT phase budgets.** Plan Testing closer to what it really costs and Deployment closer to what it really spends, then watch whether the overrun disappears or just moves.
+- **Review the Testing budget.** Either it is underestimated from the start and the plans need adjusting, or a recurring problem hits this phase and its cause needs finding. Either way, fixing Testing would improve the results of the IT projects.
 - **Send the regional directors to the countries with two indicators in red**: Egypt, Lebanon, Côte d'Ivoire and Switzerland.
 - **Question the deliverable targets.** When every phase of every type lands between 85% and 94%, the target is as likely to be wrong as the teams.
 
@@ -227,4 +205,4 @@ The same goes for my Top 5: all five finished early, but so did 80 of the 104 pr
 
 ## What I learned
 
-The same report serves the CEO, four regional directors and the country directors, so I designed it for the person reading: Row-Level Security, slicers synced across pages and a Q&A box in French and English. Coming back to it, I learned that a reassuring percentage can hide a large amount: +7.3% sits under the alert, yet it means €4.1M over plan. I now never show a gap in % without its amount in euros.
+The same report serves the CEO, four regional directors and the country directors, so I designed it for the person reading: Row-Level Security, slicers synced across pages and a Q&A box in French and English. This project also taught me that a reassuring percentage can hide a large amount: +7.3% sits under the alert, yet it means €4.1M over plan. Since then, I never show a gap in % without its amount in euros.
