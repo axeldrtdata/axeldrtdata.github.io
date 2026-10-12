@@ -18,7 +18,9 @@ const fr = getLang(Astro.url) === 'fr';
 const max = Math.max(...data.map((item) => item.value));
 // French puts a narrow no-break space before % and €, and a comma before decimals.
 const format = (value: number) => {
-  const number = value.toLocaleString(fr ? 'fr-FR' : 'en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+  const number = value.toLocaleString(fr ? 'fr-FR' : 'en-GB', { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    // a regular no-break space between thousands: the narrow one is almost invisible in this font
+    .replace(/\u202f/g, '\u00a0');
   return fr && unit.trim() ? `${number}\u202f${unit.trim()}` : `${number}${unit}`;
 };
 ---

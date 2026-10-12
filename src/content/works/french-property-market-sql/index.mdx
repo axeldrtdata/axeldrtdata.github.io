@@ -39,7 +39,7 @@ My job was to design and build the database, then answer twelve business questio
 
 ## Building the database
 
-Three public sources fed the database: the **DVF** files (*Demandes de Valeurs Foncières*), the official record of property sales with each property's type, surface, rooms, price and location; **INSEE** census data for the population of each commune; and the **data.gouv** geographic reference for the codes and names of regions, departments and communes.
+Three public sources fed the database: the **DVF** files (Demandes de Valeurs Foncières), the official record of property sales with each property's type, surface, rooms, price and location; **INSEE** census data for the population of each commune; and the **data.gouv** geographic reference for the codes and names of regions, departments and communes.
 
 Before building anything, I wrote a **data dictionary** listing every field with its type, length, nature and management rules, so that anyone could take the project over. I then designed a normalised schema of four tables linked by foreign keys, which avoids duplicating a commune's information on every sale.
 
@@ -50,7 +50,7 @@ Before building anything, I wrote a **data dictionary** listing every field with
   alt="Four tables linked by foreign keys: ventes points to biens through id_bien, biens to commune through coddep_codcom, and commune to region through reg_code."
 />
 
-On the **GDPR** side, the data is public and official, and only the fields needed for the analysis were kept. Directly identifying data was removed, and the database is backed up regularly, stored locally in a dedicated folder, with restricted access. I also prepared, from the design stage, a ready-to-use query for the right to erasure (article 17). By design, it does not rely on cascading deletes: rows are removed explicitly, in the right order, so nothing disappears by accident.
+On the **GDPR** side, the data is public and official, and only the fields needed for the analysis were kept. Directly identifying data was removed, and the database is backed up regularly, stored locally in a dedicated folder, with restricted access. I also prepared, from the design stage, a ready-to-use query for the right to erasure (article 17). It does not use cascading deletes, a mechanism that would automatically erase the linked rows in other tables: every deletion is written explicitly, to keep full control over what is erased and avoid any accidental deletion.
 
 ```sql
 -- Right to erasure: delete one sale, then its property only if nothing else refers to it
@@ -114,7 +114,7 @@ The market is driven by small and medium apartments: two-room apartments lead wi
   caption="Average of the price per m² of each sale, based on the Carrez surface."
 />
 
-Paris stands at over €12,000 per m², about three times the price in the Rhône or Corse-du-Sud, and the top three are all in Île-de-France. Across all departments, the average price per m² ranges from under €700 in the Creuse to over €12,000 in Paris. The gap holds for larger homes too: an apartment of five rooms or more costs €8,750 per m² in Île-de-France, four times more than in Hauts-de-France. A house in Île-de-France, at about €4,000 per m², remains far more affordable than a Paris apartment.
+Paris stands at over €12,000 per m², about three times the price recorded in the Rhône or Corse-du-Sud, and the top three are all in Île-de-France. Across all departments, the average price per m² ranges from under €700 in the Creuse to over €12,000 in Paris. The gap holds for larger homes too: an apartment of five rooms or more costs €8,750 per m² in Île-de-France, four times more than in Hauts-de-France. A house in Île-de-France, at about €4,000 per m², remains far more affordable than a Paris apartment.
 
 Size also matters: a three-room apartment costs **12% less per m²** than a two-room one. Small surfaces command a premium, because demand for them is so strong in high-pressure areas.
 
@@ -142,7 +142,7 @@ At commune level, 48 communes recorded at least 50 sales in the first quarter, l
 
 Raw volume favours big cities, so the twelfth question asked for sales relative to population. Among communes of more than 10,000 inhabitants, the most active market per head is the **2nd arrondissement of Paris**, with 5.84 sales per 1,000 inhabitants. Three poles account for 17 of the top 20: central Paris (8 communes), the Mediterranean coast (5) and the Atlantic coast (4), two logics that combine dense urban investment and second homes by the sea.
 
-To rank the communes within each department, I used a window function:
+To rank the communes within each department, I used a window function. `ROW_NUMBER()` gives each commune a rank, `ORDER BY` sorts them from the highest average sale value to the lowest, and `PARTITION BY` restarts the ranking at 1 for each department. Keeping ranks 1 to 3 then gives the top 3 of every department in a single query:
 
 ```sql
 ROW_NUMBER() OVER (
@@ -151,14 +151,14 @@ ROW_NUMBER() OVER (
 ) AS rank_in_department
 ```
 
-The contrasts are sharp even between neighbours: in the Alpes-Maritimes, Saint-Jean-Cap-Ferrat leads with an average sale value of €969,000, far ahead of any commune in the neighbouring Bouches-du-Rhône.
+The contrasts are sharp even between neighbours: in the Alpes-Maritimes, Saint-Jean-Cap-Ferrat leads with an average sale value of €969,000, almost three times that of Gignac-la-Nerthe, the top commune in the neighbouring Bouches-du-Rhône, at €330,000. In the Rhône, a peri-urban commune, Ville-sur-Jarnioux (€485,000), even outranks Lyon's most expensive arrondissements.
 
 ## Limits
 
-- **One semester only**, and an unusual one: the lockdown makes it hard to separate a seasonal effect from a crisis effect, and DVF records the date of the notarial deed, signed two to three months after the agreement: the figures do not yet measure the lockdown's effect on new sales.
-- **Averages are sensitive to DVF outliers** such as bulk sales recorded against a single unit: a cleaning rule on extreme prices per m² would make every average more robust.
-- **The quarterly comparison counts all property types**, houses included.
+- **One semester only**, and an unusual one: the lockdown makes it hard to separate a seasonal effect from a crisis effect, and DVF records the date of the notarial deed, signed two to three months after the agreement: second-quarter sales therefore mostly reflect agreements signed before the lockdown. The figures show these sales catching up, but not yet, or at least not fully, the lockdown's effect on new agreements.
+- **Averages are sensitive to DVF outliers.** The most expensive apartment of the semester is recorded at €9 million for 9.1 m²: most likely a whole building sold in one deed but recorded against a single small unit. One such sale is enough to push up a commune's average price per m². A rule that sets aside extreme prices per m² would make every average more reliable.
+- **The quarter-on-quarter comparison counts all property types**, houses included, while the rest of the analysis focuses mostly on apartments: the 3.7% rise does not describe the apartment market alone.
 
 ## What I learned
 
-Writing the data dictionary and the schema before any query felt slow, but it made the twelve queries straightforward. This project also taught me that a raw count always favours big cities: relating sales to population reveals other markets, like Paris's 2nd arrondissement, invisible in a simple ranking of sales.
+Writing the data dictionary and the schema before any query felt slow, but it made the twelve queries straightforward: I already knew which table held each piece of information, with which type, and through which key to join the tables. For the sales-per-inhabitant query, for instance, it was enough to follow the foreign keys, from sales to properties to communes, to reach the population. This project also taught me that a raw count always favours big cities: relating sales to population reveals other markets, like Paris's 2nd arrondissement, invisible in a simple ranking of sales.

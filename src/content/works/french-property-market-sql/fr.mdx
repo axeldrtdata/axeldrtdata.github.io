@@ -1,5 +1,5 @@
 ---
-title: 'Que révèlent 34 000 ventes immobilières sur le marché français ?'
+title: 'Que révèlent 34 000 ventes immobilières sur le marché français ?'
 description: 'Une base de données relationnelle construite à partir des ventes immobilières publiques, des données INSEE et géographiques, puis douze requêtes SQL sur les volumes, les prix et les dynamiques locales au premier semestre 2020, premier confinement compris.'
 client: 'Laplace Immo, réseau national d’agences immobilières (cas OpenClassrooms)'
 role: 'Data Analyst, projet de formation'
@@ -10,7 +10,7 @@ import KeyFigures from '../../../components/case/KeyFigures.astro';
 import BarChart from '../../../components/case/BarChart.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
-import schemaImg from './schema.png';
+import schemaImg from './schema-fr.png';
 
 ## La question
 
@@ -20,7 +20,7 @@ Ma mission consistait à concevoir et construire la base, puis à répondre en S
 
 <KeyFigures
   items={[
-    { value: '34 169', label: 'ventes immobilières, de janvier à juin 2020' },
+    { value: '34 169', label: 'ventes immobilières, de janvier à juin 2020' },
     { value: '4', label: 'tables dans un schéma normalisé' },
     { value: '12', label: 'questions métier traitées en SQL' },
     { value: '+3,7 %', label: 'de ventes du T1 au T2, malgré le confinement' },
@@ -29,7 +29,7 @@ Ma mission consistait à concevoir et construire la base, puis à répondre en S
 
 ## Construire la base de données
 
-Trois sources publiques ont alimenté la base : les fichiers **DVF** (*Demandes de Valeurs Foncières*), le registre officiel des ventes immobilières avec, pour chaque bien, son type, sa surface, son nombre de pièces, son prix et sa localisation ; les données du recensement de l’**INSEE** pour la population de chaque commune ; et le référentiel géographique de **data.gouv** pour les codes et noms des régions, départements et communes.
+Trois sources publiques ont alimenté la base : les fichiers **DVF** (Demandes de Valeurs Foncières), le registre officiel des ventes immobilières avec, pour chaque bien, son type, sa surface, son nombre de pièces, son prix et sa localisation ; les données du recensement de l’**INSEE** pour la population de chaque commune ; et le référentiel géographique de **data.gouv** pour les codes et noms des régions, départements et communes.
 
 Avant de construire quoi que ce soit, j’ai rédigé un **dictionnaire de données** qui recense chaque champ avec son type, sa longueur, sa nature et ses règles de gestion, pour que n’importe qui puisse reprendre le projet. J’ai ensuite conçu un schéma normalisé de quatre tables reliées par des clés étrangères, ce qui évite de dupliquer les informations d’une commune sur chaque vente.
 
@@ -40,7 +40,7 @@ Avant de construire quoi que ce soit, j’ai rédigé un **dictionnaire de donn�
   alt="Quatre tables reliées par des clés étrangères : ventes pointe vers biens via id_bien, biens vers commune via coddep_codcom, et commune vers region via reg_code."
 />
 
-Côté **RGPD**, les données sont publiques et officielles, et seuls les champs nécessaires à l’analyse ont été conservés. Les données directement identifiantes ont été supprimées, et la base est sauvegardée régulièrement, stockée localement dans un répertoire dédié, avec un accès restreint. J’ai aussi préparé, dès la conception, une requête prête à l’emploi pour le droit à l’effacement (article 17). Volontairement, elle ne repose pas sur des suppressions en cascade : les lignes sont supprimées explicitement, dans le bon ordre, pour que rien ne disparaisse par accident.
+Côté **RGPD**, les données sont publiques et officielles, et seuls les champs nécessaires à l’analyse ont été conservés. Les données directement identifiantes ont été supprimées, et la base est sauvegardée régulièrement, stockée localement dans un répertoire dédié, avec un accès restreint. J’ai aussi préparé, dès la conception, une requête prête à l’emploi pour le droit à l’effacement (article 17). Elle n’utilise pas de suppression en cascade, un mécanisme qui effacerait automatiquement les lignes liées dans les autres tables : chaque suppression est écrite explicitement, pour garder un contrôle total sur ce qui est effacé et éviter toute suppression involontaire.
 
 ```sql
 -- Droit à l'effacement : supprimer une vente, puis son bien seulement si plus rien n'y fait référence
@@ -53,7 +53,7 @@ WHERE id_bien = 'b001'
 
 ## Où se sont vendus les appartements
 
-**31 378 appartements** ont été vendus au premier semestre 2020, et l’Île-de-France en représente à elle seule 45 %, près de quatre fois plus que la région suivante.
+**31 378 appartements** ont été vendus au premier semestre 2020, et l’Île-de-France en représente à elle seule 45 %, près de quatre fois plus que la région suivante.
 
 <BarChart
   title="Ventes d’appartements par région, premier semestre 2020 (top 6)"
@@ -104,7 +104,7 @@ Le marché est porté par les petites et moyennes surfaces : les deux-pièces a
   caption="Moyenne des prix au m² de chaque vente, calculés sur la surface Carrez."
 />
 
-Paris dépasse les 12 000 € le m², environ trois fois le prix dans le Rhône ou en Corse-du-Sud, et les trois premiers départements sont tous en Île-de-France. Sur l’ensemble des départements, le prix moyen au m² va de moins de 700 € dans la Creuse à plus de 12 000 € à Paris. L’écart se maintient pour les grands logements : un appartement de cinq pièces ou plus coûte 8 750 € le m² en Île-de-France, quatre fois plus que dans les Hauts-de-France. Une maison en Île-de-France, à environ 4 000 € le m², reste bien plus abordable qu’un appartement parisien.
+Paris dépasse les 12 000 € le m², soit environ trois fois le prix constaté dans le Rhône ou en Corse-du-Sud, et les trois premiers départements sont tous en Île-de-France. Sur l’ensemble des départements, le prix moyen au m² va de moins de 700 € dans la Creuse à plus de 12 000 € à Paris. L’écart se maintient pour les grands logements : un appartement de cinq pièces ou plus coûte 8 750 € le m² en Île-de-France, quatre fois plus que dans les Hauts-de-France. Une maison en Île-de-France, à environ 4 000 € le m², reste bien plus abordable qu’un appartement parisien.
 
 La taille compte aussi : un trois-pièces coûte **12 % de moins au m²** qu’un deux-pièces. Les petites surfaces se paient plus cher, tant la demande est forte dans les zones tendues.
 
@@ -122,7 +122,7 @@ SELECT sales_q1, sales_q2,
 FROM quarters;
 ```
 
-Les ventes sont passées de 16 776 au premier trimestre à 17 393 au deuxième : **+3,7 %**, alors que le confinement a couvert la moitié du deuxième trimestre. On aurait pu s’attendre à un effondrement. Cette légère hausse traduit plutôt un effet de rattrapage : les transactions gelées pendant le confinement ont été finalisées dès la levée des restrictions, en mai et en juin.
+Les ventes sont passées de 16 776 au premier trimestre à 17 393 au deuxième : **+3,7 %**, alors que le confinement a couvert la moitié du deuxième trimestre. On aurait pu s’attendre à un effondrement. Cette légère hausse traduit plutôt un effet de rattrapage : les transactions gelées pendant le confinement ont été finalisées dès la levée des restrictions, en mai et en juin.
 
 <Takeaway label="Constat clé">L’Île-de-France domine à la fois les volumes et les prix, et les ventes se sont poursuivies pendant le premier confinement.</Takeaway>
 
@@ -130,9 +130,9 @@ Les ventes sont passées de 16 776 au premier trimestre à 17 393 au deuxiè
 
 À l’échelle des communes, 48 communes ont enregistré au moins 50 ventes au premier trimestre, emmenées par les 17e, 15e et 18e arrondissements de Paris ; sept des dix premières sont des arrondissements parisiens, aux côtés de Nice, Bordeaux et Nantes.
 
-Le volume brut favorise les grandes villes : la douzième question demandait donc de rapporter les ventes à la population. Parmi les communes de plus de 10 000 habitants, le marché le plus actif par habitant est le **2e arrondissement de Paris**, avec 5,84 ventes pour 1 000 habitants. Trois pôles regroupent 17 des 20 premières : le centre de Paris (8 communes), le littoral méditerranéen (5) et la côte atlantique (4), qui relèvent de deux logiques : l’investissement urbain dense et les résidences secondaires en bord de mer.
+Le volume brut favorise les grandes villes : la douzième question demandait donc de rapporter les ventes à la population. Parmi les communes de plus de 10 000 habitants, le marché le plus actif par habitant est le **2e arrondissement de Paris**, avec 5,84 ventes pour 1 000 habitants. Trois pôles regroupent 17 des 20 premières : le centre de Paris (8 communes), le littoral méditerranéen (5) et la côte atlantique (4), qui relèvent de deux logiques : l’investissement urbain dense et les résidences secondaires en bord de mer.
 
-Pour classer les communes au sein de chaque département, j’ai utilisé une fonction de fenêtrage :
+Pour classer les communes au sein de chaque département, j’ai utilisé une fonction de fenêtrage. `ROW_NUMBER()` attribue un rang à chaque commune, `ORDER BY` les trie de la valeur moyenne de vente la plus élevée à la plus faible, et `PARTITION BY` fait repartir le classement à 1 pour chaque département. Il suffit ensuite de garder les rangs 1 à 3 pour obtenir le top 3 de chaque département en une seule requête :
 
 ```sql
 ROW_NUMBER() OVER (
@@ -141,14 +141,14 @@ ROW_NUMBER() OVER (
 ) AS rank_in_department
 ```
 
-Les contrastes sont marqués même entre voisins : dans les Alpes-Maritimes, Saint-Jean-Cap-Ferrat arrive en tête avec une valeur moyenne de vente de 969 000 €, loin devant toutes les communes des Bouches-du-Rhône voisines.
+Les contrastes sont marqués même entre voisins : dans les Alpes-Maritimes, Saint-Jean-Cap-Ferrat arrive en tête avec une valeur moyenne de vente de 969 000 €, presque trois fois celle de Gignac-la-Nerthe, la première commune des Bouches-du-Rhône voisines, à 330 000 €. Dans le Rhône, une commune périurbaine, Ville-sur-Jarnioux (485 000 €), dépasse même les arrondissements les plus chers de Lyon.
 
 ## Limites
 
-- **Un seul semestre**, et un semestre inhabituel : le confinement rend difficile la distinction entre un effet saisonnier et un effet de crise, et DVF enregistre la date de l’acte notarié, signé deux à trois mois après le compromis : les chiffres ne mesurent pas encore l’effet du confinement sur les nouvelles ventes.
-- **Les moyennes sont sensibles aux valeurs aberrantes de DVF**, comme les ventes en bloc enregistrées sur un seul lot : une règle de nettoyage des prix au m² extrêmes rendrait toutes les moyennes plus robustes.
-- **La comparaison trimestrielle compte tous les types de biens**, maisons comprises.
+- **Un seul semestre**, et un semestre inhabituel : le confinement rend difficile la distinction entre un effet saisonnier et un effet de crise, et DVF enregistre la date de l’acte notarié, signé deux à trois mois après le compromis : les ventes du deuxième trimestre correspondent donc surtout à des compromis signés avant le confinement. Les chiffres montrent le rattrapage de ces ventes, mais pas encore, ou du moins pas totalement, l’effet du confinement sur les nouveaux compromis.
+- **Les moyennes sont sensibles aux valeurs aberrantes de DVF.** L’appartement le plus cher du semestre est enregistré à 9 millions d’euros pour 9,1 m² : très probablement un immeuble entier vendu en un seul acte, mais rattaché à un seul petit lot. Une seule vente de ce type suffit à faire monter le prix moyen au m² d’une commune. Une règle qui écarte les prix au m² extrêmes rendrait toutes les moyennes plus fiables.
+- **La comparaison entre trimestres compte tous les types de biens**, maisons comprises, alors que le reste de l’analyse porte surtout sur les appartements : la hausse de 3,7 % ne décrit donc pas le seul marché des appartements.
 
 ## Ce que j’en retiens
 
-Rédiger le dictionnaire de données et le schéma avant la moindre requête m’a semblé long, mais cela a rendu les douze requêtes simples à écrire. Ce projet m’a aussi appris qu’un volume brut favorise toujours les grandes villes : rapporter les ventes à la population fait apparaître d’autres marchés, comme le 2e arrondissement de Paris, invisible dans un simple classement des ventes.
+Rédiger le dictionnaire de données et le schéma avant la moindre requête m’a semblé long, mais cela a rendu les douze requêtes simples à écrire : je savais déjà dans quelle table se trouvait chaque information, avec quel type, et par quelle clé relier les tables entre elles. Pour la requête sur les ventes par habitant, par exemple, il suffisait de suivre les clés étrangères, des ventes vers les biens puis vers les communes, pour retrouver la population. Ce projet m’a aussi appris qu’un volume brut favorise toujours les grandes villes : rapporter les ventes à la population fait apparaître d’autres marchés, comme le 2e arrondissement de Paris, invisible dans un simple classement des ventes.
