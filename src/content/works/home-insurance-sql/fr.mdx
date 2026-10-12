@@ -1,6 +1,6 @@
 ---
-title: 'Qu’est-ce qui fait le prix d’une assurance habitation ?'
-description: 'Une base SQLite de 30 335 contrats d’assurance habitation, douze questions métier en SQL, et ce que cachaient les jointures.'
+title: 'Que révèlent 30 000 contrats d’assurance habitation ?'
+description: 'Une base SQLite de 30 335 contrats d’assurance habitation, puis douze questions métier en SQL : où vivent les clients, ce qu’ils assurent et combien ils paient.'
 client: 'Compagnie d’assurance habitation (cas OpenClassrooms)'
 role: 'Data Analyst, projet de formation'
 thumbnail: ./cover-fr.png
@@ -10,20 +10,20 @@ import KeyFigures from '../../../components/case/KeyFigures.astro';
 import BarChart from '../../../components/case/BarChart.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
-import schemaImg from './schema.png';
+import schemaImg from './schema-fr.png';
 
 ## La question
 
 Une compagnie d’assurance habitation conservait ses contrats dans deux fichiers plats : une ligne par contrat, et une liste de référence des communes françaises. Elle voulait les réunir dans une base de données relationnelle que ses équipes pourraient interroger, et obtenir des réponses à douze questions métier : où vivent ses clients, ce qu’ils assurent, et combien ils paient.
 
-C’était mon premier projet SQL. En le reprenant pour mon portfolio, j’ai ajouté la question autour de laquelle tournent les douze requêtes sans jamais la poser directement : **qu’est-ce qui fixe réellement le prix d’un contrat ?**
+C’était mon premier projet SQL : concevoir la base, y charger les deux fichiers, puis répondre aux douze questions.
 
 <KeyFigures
   items={[
     { value: '30 335', label: 'contrats d’assurance habitation' },
     { value: '12', label: 'questions métier traitées en SQL' },
-    { value: '×14', label: 'cotisation mensuelle, de la tranche de valeur la plus basse à la plus haute' },
-    { value: '9', label: 'contrats perdus en silence par chaque jointure' },
+    { value: '47 %', label: 'des contrats en Île-de-France' },
+    { value: '19,33 €', label: 'de cotisation mensuelle moyenne' },
   ]}
 />
 
@@ -42,7 +42,7 @@ Côté **RGPD**, la table des contrats contenait l’adresse postale de chaque l
 
 ## Qui sont les clients
 
-Le portefeuille se compose surtout d’appartements (92 %) et de résidences principales (84 %), et 70 % des assurés sont propriétaires de leur logement. Géographiquement, il est fortement concentré en région parisienne.
+Le portefeuille se compose surtout d’appartements (92 %) et de résidences principales (84 %), et 70 % des assurés sont propriétaires de leur logement. À Paris, la surface moyenne des logements assurés est de 51,8 m², et les cinq plus grandes surfaces du portefeuille vont de 559 à 815 m². Géographiquement, le portefeuille est fortement concentré en région parisienne.
 
 <BarChart
   title="Contrats par région (top 6)"
@@ -58,63 +58,43 @@ Le portefeuille se compose surtout d’appartements (92 %) et de résidences pr
   caption="L’Île-de-France concentre à elle seule 47 % des contrats. Les arrondissements de Paris représentent l’essentiel des communes comptant au moins 150 contrats."
 />
 
-## Ce qui détermine la cotisation
+## Les cotisations
 
-La cotisation mensuelle moyenne est de 19,33 €, mais la médiane n’est que de 15 € : quelques gros contrats, jusqu’à 450 € par mois, tirent la moyenne vers le haut. Pour comprendre ce qui les rend si élevés, j’ai comparé la cotisation moyenne selon chaque variable de la table. Une seule compte vraiment : **la valeur déclarée des biens assurés**.
+La cotisation mensuelle moyenne est de **19,33 €**. Par département, Paris arrive nettement en tête, à 36,40 € par mois, presque deux fois la moyenne, devant les Hauts-de-Seine (26,27 €) et le Val-de-Marne (19,82 €). Pour ce classement, une jointure relie chaque contrat à sa commune, et donc à son département :
+
+```sql
+-- Top 10 des départements par cotisation mensuelle moyenne
+SELECT region.dep_nom,
+       ROUND(AVG(contrat.Prix_cotisation_mensuel), 2) AS average_premium,
+       COUNT(*)                                       AS contracts
+FROM contrat
+JOIN region
+    ON contrat.Code_dep_code_commune = region.Code_dep_code_commune
+GROUP BY region.dep_nom
+ORDER BY average_premium DESC
+LIMIT 10;
+```
+
+La valeur déclarée des biens dessine un portefeuille surtout modeste : les trois quarts des contrats déclarent moins de 25 000 € de biens.
 
 <BarChart
-  title="Cotisation mensuelle moyenne selon la valeur déclarée des biens"
-  unit=" €"
+  title="Contrats selon la valeur déclarée des biens"
+  decimals={0}
   data={[
-    { label: '0–25 000 €', value: 13.6 },
-    { label: '25–50 000 €', value: 30.1 },
-    { label: '50–100 000 €', value: 76.7 },
-    { label: '100 000 € +', value: 193.5, highlight: true },
+    { label: '0–25 000 €', value: 22720, highlight: true },
+    { label: '25–50 000 €', value: 6815 },
+    { label: '50–100 000 €', value: 696 },
+    { label: '100 000 € +', value: 104 },
   ]}
-  caption="22 720, 6 815, 696 et 104 contrats dans chaque tranche. Selon la formule, le type de logement ou le statut de l’occupant, la cotisation moyenne reste entre 19,2 € et 20,2 €."
 />
 
-```sql
--- Un seul GROUP BY renvoie chaque tranche de valeur déclarée, avec son poids et son prix
-SELECT Valeur_declaree_biens,
-       COUNT(*)                                AS contracts,
-       ROUND(AVG(Prix_cotisation_mensuel), 1)  AS average_premium
-FROM contrat
-GROUP BY Valeur_declaree_biens
-ORDER BY average_premium;
-```
-
-Cela explique aussi le classement des départements par cotisation. Paris arrive en tête, à 36,40 € par mois contre 16,10 € ailleurs, mais pas parce qu’assurer un logement à Paris coûte cher en soi : 72 % des contrats parisiens déclarent plus de 25 000 € de biens, contre 16 % dans le reste de la France. À tranche de valeur déclarée égale, un contrat parisien ne coûte que 5 % à 19 % plus cher.
-
-| Valeur déclarée | Paris | Reste de la France |
-| --------------- | ----- | ------------------ |
-| 0–25 000 €      | 16,0 € | 13,4 €            |
-| 25–50 000 €     | 33,0 € | 28,0 €            |
-| 50–100 000 €    | 77,5 € | 73,7 €            |
-| 100 000 € +     | 195,0 € | 182,0 €          |
-
-<Takeaway label="Constat clé">Le prix d’un contrat dépend de ce qui est assuré, pas de l’endroit ni de la manière : Paris paie plus parce qu’il assure plus.</Takeaway>
-
-## Ce qu’un second regard a révélé
-
-En reprenant ce projet, j’ai vérifié les données avant de me fier aux résultats, et j’ai trouvé trois choses que mes requêtes d’origine avaient manquées.
-
-**Neuf contrats disparaissaient de chaque jointure.** La table des contrats compte 30 335 lignes, mais le décompte par région n’atteint que 30 326. Neuf contrats de La Réunion portent leur code postal (97434, 97460, 97470) à la place du code commune : ils ne correspondent donc à aucune commune, et chaque jointure interne les écarte sans prévenir. La Réunion affiche ainsi 8 contrats au lieu de 17. La clé étrangère ne les a pas bloqués, car SQLite n’applique les clés étrangères qu’une fois celles-ci activées. Une seule commande les liste :
-
-```sql
-PRAGMA foreign_key_check;   -- renvoie les 9 contrats dont la commune n'existe pas
-```
-
-**Une tranche de valeur manquait.** Ma réponse initiale à la question sur les valeurs déclarées listait trois tranches, écrites en trois requêtes distinctes. Leurs totaux oubliaient 104 contrats : la tranche au-delà de 100 000 €, qui s’est révélée la plus déterminante pour le prix. Un seul `GROUP BY` rend cet oubli impossible, puisqu’il renvoie toutes les valeurs présentes dans la colonne.
-
-**Les noms de communes ne sont pas uniques.** La table de référence contient 38 916 communes mais seulement 35 572 noms différents : il existe par exemple quatorze Sainte-Colombe. Ma requête sur les communes d’au moins 150 contrats regroupait par nom. Elle donnait par chance la bonne réponse, mais elle regroupe désormais par code commune, la seule clé fiable.
+<Takeaway label="Constat clé">Un portefeuille très concentré : près d’un contrat sur deux en Île-de-France, surtout des appartements occupés en résidence principale, et des cotisations parisiennes presque deux fois plus élevées que la moyenne.</Takeaway>
 
 ## Limites
 
 - **Une photographie unique :** les données ne sont pas datées, elles ne disent donc rien de l’évolution du portefeuille ni des prix.
-- **Les valeurs déclarées sont exprimées en tranches,** pas en montants, ce qui limite la finesse avec laquelle on peut expliquer la cotisation.
-- **Les neuf contrats orphelins sont conservés tels quels** et documentés. Faire correspondre leurs codes postaux à des communes nécessiterait un référentiel externe.
+- **Les valeurs déclarées sont exprimées en tranches,** pas en montants, ce qui limite la finesse de l’analyse.
 
 ## Ce que j’en retiens
 
-C’était mon premier projet SQL, et y revenir m’a appris à vérifier que les totaux tombent juste. Mes trois requêtes séparées avaient oublié 104 contrats, la tranche qui compte le plus pour le prix, et neuf contrats de La Réunion disparaissaient de chaque jointure. Un seul `GROUP BY` et `PRAGMA foreign_key_check` auraient permis de repérer ces deux problèmes : une clé étrangère n’est une garantie qu’une fois appliquée.
+C’était mon premier projet SQL. J’y ai appris à traduire une question métier en requête : chaque question demandait de choisir la bonne table, le bon filtre et le bon niveau de regroupement, du simple comptage des résidences principales jusqu’à la jointure entre contrats et communes pour classer les départements. J’ai aussi compris l’intérêt d’un schéma normalisé : les informations géographiques ne sont stockées qu’une fois, et une seule jointure suffit à les retrouver pour n’importe quel contrat.

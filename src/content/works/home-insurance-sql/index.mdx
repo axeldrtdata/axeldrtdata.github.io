@@ -1,6 +1,6 @@
 ---
-title: 'What drives the price of a home insurance policy?'
-description: 'A SQLite database of 30,335 home insurance contracts, twelve business questions in SQL, and what the joins were hiding.'
+title: 'What do 30,000 home insurance contracts reveal?'
+description: 'A SQLite database of 30,335 home insurance contracts, then twelve business questions in SQL: where the customers live, what they insure and how much they pay.'
 thumbnail: ./cover.png
 icon: ./icon.png
 tech:
@@ -25,14 +25,14 @@ import schemaImg from './schema.png';
 
 A home insurance company kept its contracts in two flat files: one row per contract, and a reference list of French communes. It wanted them in a relational database its teams could query, and answers to twelve business questions: where its customers live, what they insure, and how much they pay.
 
-This was my first SQL project. Coming back to it for my portfolio, I added the question the twelve queries circle around without asking it directly: **what actually sets the price of a policy?**
+This was my first SQL project: design the database, load the two files into it, then answer the twelve questions.
 
 <KeyFigures
   items={[
     { value: '30,335', label: 'home insurance contracts' },
     { value: '12', label: 'business questions answered in SQL' },
-    { value: '×14', label: 'monthly premium, from the lowest to the highest value band' },
-    { value: '9', label: 'contracts silently lost by every join' },
+    { value: '47%', label: 'of the contracts in Île-de-France' },
+    { value: '€19.33', label: 'average monthly premium' },
   ]}
 />
 
@@ -51,7 +51,7 @@ On the **GDPR** side, the contract table held the street address of every insure
 
 ## Who the customers are
 
-The portfolio is mostly made of apartments (92%) and main homes (84%), and 70% of the policyholders own their home. Geographically, it leans heavily towards the Paris region.
+The portfolio is mostly made of apartments (92%) and main homes (84%), and 70% of the policyholders own their home. In Paris, the average surface of insured homes is 51.8 m², and the five largest surfaces in the portfolio range from 559 to 815 m². Geographically, the portfolio leans heavily towards the Paris region.
 
 <BarChart
   title="Contracts by region (top 6)"
@@ -67,63 +67,43 @@ The portfolio is mostly made of apartments (92%) and main homes (84%), and 70% o
   caption="Île-de-France alone holds 47% of the contracts. Paris’s arrondissements fill most of the communes with at least 150 contracts."
 />
 
-## What drives the premium
+## The premiums
 
-The average monthly premium is €19.33, but the median is only €15: a few large contracts, up to €450 a month, pull the average up. To find out what makes them large, I compared the average premium across every variable in the table. Only one really matters: **the declared value of the insured contents**.
+The average monthly premium is **€19.33**. By department, Paris comes clearly first, at €36.40 a month, almost twice the average, ahead of Hauts-de-Seine (€26.27) and Val-de-Marne (€19.82). For this ranking, a join links each contract to its commune, and so to its department:
+
+```sql
+-- Top 10 departments by average monthly premium
+SELECT region.dep_nom,
+       ROUND(AVG(contrat.Prix_cotisation_mensuel), 2) AS average_premium,
+       COUNT(*)                                       AS contracts
+FROM contrat
+JOIN region
+    ON contrat.Code_dep_code_commune = region.Code_dep_code_commune
+GROUP BY region.dep_nom
+ORDER BY average_premium DESC
+LIMIT 10;
+```
+
+The declared value of the contents paints a mostly modest portfolio: three quarters of the contracts declare less than €25,000 of contents.
 
 <BarChart
-  title="Average monthly premium by declared value of the contents"
-  unit=" €"
+  title="Contracts by declared value of the contents"
+  decimals={0}
   data={[
-    { label: '0–25,000 €', value: 13.6 },
-    { label: '25–50,000 €', value: 30.1 },
-    { label: '50–100,000 €', value: 76.7 },
-    { label: '100,000 € +', value: 193.5, highlight: true },
+    { label: '0–25,000 €', value: 22720, highlight: true },
+    { label: '25–50,000 €', value: 6815 },
+    { label: '50–100,000 €', value: 696 },
+    { label: '100,000 € +', value: 104 },
   ]}
-  caption="22,720, 6,815, 696 and 104 contracts in each band. The formula, the type of home and the occupant’s status all stay between €19.2 and €20.2 on average."
 />
 
-```sql
--- One GROUP BY returns every band of declared value, with its weight and its price
-SELECT Valeur_declaree_biens,
-       COUNT(*)                                AS contracts,
-       ROUND(AVG(Prix_cotisation_mensuel), 1)  AS average_premium
-FROM contrat
-GROUP BY Valeur_declaree_biens
-ORDER BY average_premium;
-```
-
-That also explains the ranking of departments by premium. Paris comes first, at €36.40 a month against €16.10 elsewhere, but not because insuring a home in Paris is expensive in itself: 72% of Parisian contracts declare more than €25,000 of contents, against 16% in the rest of France. Within the same value band, a Parisian contract costs only 5% to 19% more.
-
-| Declared value | Paris | Rest of France |
-| -------------- | ----- | -------------- |
-| 0–25,000 €     | €16.0 | €13.4          |
-| 25–50,000 €    | €33.0 | €28.0          |
-| 50–100,000 €   | €77.5 | €73.7          |
-| 100,000 € +    | €195.0 | €182.0        |
-
-<Takeaway label="Key finding">The price of a policy follows what is insured, not where or how: Paris pays more because it insures more.</Takeaway>
-
-## What a second look revealed
-
-When I came back to this project, I checked the data before trusting the results, and found three things my original queries had missed.
-
-**Nine contracts disappeared from every join.** The contracts table has 30,335 rows, but the count by region only adds up to 30,326. Nine contracts in La Réunion carry their postcode (97434, 97460, 97470) where the commune code should be, so they match no commune and every inner join drops them without warning: La Réunion shows 8 contracts instead of 17. The foreign key did not stop them, because SQLite only enforces foreign keys once they are switched on. One command lists them:
-
-```sql
-PRAGMA foreign_key_check;   -- returns the 9 contracts whose commune does not exist
-```
-
-**One value band was missing.** My original answer to the question on declared values listed three bands, written as three separate queries. Their totals left out 104 contracts: the band above €100,000, which turned out to be the most important one for the price. A single `GROUP BY` makes this impossible, since it returns every value present in the column.
-
-**Commune names are not unique.** The reference table holds 38,916 communes but only 35,572 different names: there are fourteen Sainte-Colombe, for example. My query on communes with at least 150 contracts grouped by name. It happened to give the right answer, but it now groups by commune code, which is the only safe key.
+<Takeaway label="Key finding">A highly concentrated portfolio: almost one contract in two in Île-de-France, mostly apartments used as main homes, and Parisian premiums almost twice the average.</Takeaway>
 
 ## Limits
 
 - **A single snapshot:** the data has no dates, so it says nothing about how the portfolio or the prices evolve.
-- **Declared values come in bands,** not amounts, which limits how finely the premium can be explained.
-- **The nine orphan contracts are kept as they are** and documented. Matching their postcodes to communes would need an external reference.
+- **Declared values come in bands,** not amounts, which limits how fine the analysis can be.
 
 ## What I learned
 
-This was my first SQL project, and coming back to it taught me to check that totals add up. My three separate queries had left out 104 contracts, the band that matters most for the price, and nine contracts from La Réunion vanished from every join. A single `GROUP BY` and `PRAGMA foreign_key_check` would have caught both: a foreign key is only a guarantee once it is enforced.
+This was my first SQL project. It taught me to turn a business question into a query: each question meant choosing the right table, the right filter and the right level of grouping, from a simple count of main homes to the join between contracts and communes that ranks the departments. I also saw why a normalised schema matters: the geographic information is stored only once, and a single join is enough to find it for any contract.
