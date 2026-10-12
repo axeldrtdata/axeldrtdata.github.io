@@ -43,7 +43,7 @@ La préparation a surtout consisté à faire parler le même langage aux quatre 
 
 En 2017, **535,7 millions de personnes étaient en sous-nutrition**, soit 7,1 % de la population mondiale : une personne sur 14.
 
-Pour estimer combien de personnes la nourriture mondiale pourrait nourrir, j’ai multiplié les calories disponibles par personne et par jour de chaque pays par sa population et par 365, puis divisé le total mondial par un besoin moyen de 2 400 kcal par jour, issu d’une source FAO. Les calories disponibles en 2017 pourraient nourrir **environ 8,8 milliards de personnes**, soit 1,3 milliard de plus que la population mondiale. Les produits végétaux à eux seuls pourraient nourrir 96 % de la population mondiale.
+Pour estimer combien de personnes la nourriture mondiale pourrait nourrir, j’ai multiplié les calories disponibles par personne et par jour de chaque pays par sa population et par 365, puis divisé le total mondial par un besoin moyen de 2 400 kcal par jour, issu d’une source FAO. Les calories disponibles en 2017 pourraient nourrir **environ 8,8 milliards de personnes**, soit 1,3 milliard de plus que la population mondiale. Les produits végétaux à eux seuls pourraient nourrir 96 % de la population mondiale.
 
 <Takeaway label="Première réponse">Le monde ne manque pas de nourriture. La faim est une question d’accès : qui en reçoit.</Takeaway>
 
@@ -74,11 +74,11 @@ Les moyennes cachent un large écart entre pays. Dans 29 des 174 pays, la nourri
 <Figure
   src={kcalImg}
   title="Calories disponibles par personne et par jour, 174 pays"
-  alt="Diagramme en barres de 174 pays classés par calories disponibles par personne et par jour, de 1 879 en République centrafricaine à 3 770 en Autriche ; 29 pays se situent sous la ligne des 2 400 kcal."
-  caption="Chaque barre est un pays. Les barres vides se situent sous le besoin quotidien moyen de 2 400 kcal."
+  alt="Diagramme en barres de 174 pays classés par calories disponibles par personne et par jour, de 1 879 en République centrafricaine à 3 770 en Autriche ; 29 pays se situent sous la ligne des 2 400 kcal."
+  caption="Chaque barre est un pays. Les barres vides se situent sous le besoin quotidien moyen de 2 400 kcal."
 />
 
-Les dix pays les mieux approvisionnés, dont six en Europe, disposent en moyenne de 3 625 kcal par personne et par jour, soit 1 225 de plus que le besoin. Les dix moins bien approvisionnés, dont sept en Afrique, en ont 2 060, soit un déficit de 340. En théorie, l’excédent d’une personne du premier groupe pourrait combler le manque de trois à quatre personnes du second.
+Les dix pays les mieux approvisionnés, dont six en Europe, disposent en moyenne de 3 625 kcal par personne et par jour, soit 1 225 de plus que le besoin. Les dix moins bien approvisionnés, dont sept en Afrique, en ont 2 060, soit un déficit de 340. En théorie, l’excédent d’une personne du premier groupe pourrait combler le manque de trois à quatre personnes du second.
 
 Là où la sous-nutrition est mesurée, elle touche près de la moitié de la population dans les pays les plus durement frappés.
 
@@ -109,7 +109,7 @@ Entre 2013 et 2016, la Syrie, l’Éthiopie et le Yémen ont reçu le plus d’a
 
 En reprenant ce projet pour mon portfolio, j’ai vérifié ce que couvrent les données avant de me fier à ce qu’elles disent. Trois constats ont changé la façon de lire les résultats.
 
-**Unités et jointures.** Les bilans alimentaires sont exprimés en milliers de tonnes : une fois multipliés par 1 000, ils sont en tonnes, pas en kilogrammes. Ma première version sous-estimait les pertes alimentaires et les exportations de manioc de la Thaïlande d’un facteur 1 000. Trois pays portaient aussi des noms différents d’un fichier à l’autre (le Royaume-Uni, la Tchéquie et l’Eswatini), si bien que les jointures les écartaient sans prévenir. Une fois les noms harmonisés, le nombre de personnes que le monde pourrait nourrir passe de 8,7 à 8,8 milliards.
+**Unités et jointures.** Les bilans alimentaires sont exprimés en milliers de tonnes : une fois multipliés par 1 000, ils sont en tonnes, pas en kilogrammes. Ma première version sous-estimait les pertes alimentaires et les exportations de manioc de la Thaïlande d’un facteur 1 000. Trois pays portaient aussi des noms différents d’un fichier à l’autre (le Royaume-Uni, la Tchéquie et l’Eswatini), si bien que les jointures les écartaient sans prévenir. Une fois les noms harmonisés, le nombre de personnes que le monde pourrait nourrir passe de 8,7 à 8,8 milliards.
 
 ```python
 # Harmoniser les noms de pays avant toute jointure, puis vérifier qu'aucun pays ne reste sans correspondance
@@ -140,7 +140,7 @@ La chute spectaculaire de l’aide alimentaire mondiale, −82 % entre 2013 et 
 
 - **Utiliser les séries FAOSTAT complètes**, pour suivre les mêmes pays dans le temps au lieu de comparer une seule année.
 - **Compléter les données d’aide avec les chiffres du Programme alimentaire mondial**, pour distinguer une vraie baisse de l’aide d’un pays qui a simplement cessé de déclarer.
-- **Pondérer le calcul théorique par les besoins réels**, qui varient selon l’âge, le sexe et l’activité, plutôt que par une moyenne unique de 2 400 kcal.
+- **Pondérer le calcul théorique par les besoins réels**, qui varient selon l’âge, le sexe et l’activité, plutôt que par une moyenne unique de 2 400 kcal.
 
 ## Limites
 

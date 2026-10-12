@@ -77,7 +77,7 @@ Comme tout le cas, issu de ma formation OpenClassrooms, le rapport est en franç
   caption="Délais sélectionné, comme le demandait la note de cadrage : vert en avance sur le prévu, jaune en retard mais sous le seuil, rouge 15 % de retard ou plus. Le survol d’un pays affiche son écart global sur l’indicateur choisi et les projets concernés : ici le Canada, 16,9 % en avance sur les projets 30 et 91."
 />
 
-Pour calculer l’écart d’un projet, j’additionne d’abord les jours prévus de toutes ses phases, puis les jours réels, et je compare les deux totaux (même principe avec les euros pour les coûts). Pourquoi ne pas faire simplement la moyenne des écarts de chaque phase ? Parce qu’une toute petite phase peut tout fausser. Dans le projet 14, une phase prévue sur 1 jour en a duré 14 : seulement 13 jours de retard, mais un écart de +1 300 %. Les trois autres phases étaient en avance, et pourtant la moyenne des quatre écarts ferait croire à un projet en retard de 303 %. Avec les totaux, on voit la réalité : 459 jours prévus, 341 jours réels, soit **26 % d’avance**.
+Pour calculer l’écart d’un projet, j’additionne d’abord les jours prévus de toutes ses phases, puis les jours réels, et je compare les deux totaux (même principe avec les euros pour les coûts). Pourquoi ne pas faire simplement la moyenne des écarts de chaque phase ? Parce qu’une toute petite phase peut tout fausser. Dans le projet 14, une phase prévue sur 1 jour en a duré 14 : seulement 13 jours de retard, mais un écart de +1 300 %. Les trois autres phases étaient en avance, et pourtant la moyenne des quatre écarts ferait croire à un projet en retard de 303 %. Avec les totaux, on voit la réalité : 459 jours prévus, 341 jours réels, soit **26 % d’avance**.
 
 ```dax
 ecart_couts_% =
@@ -109,7 +109,7 @@ Projet par projet, 28 sont critiques, 33 dépassent leur budget sans atteindre l
 | Amérique du Nord et Amérique latine | 5 | +9,4 % | +0,36 | 2 |
 | Asie-Pacifique | 10 | −10,6 % | −0,10 | 2 |
 
-La première région porte 60 % du dépassement et 18 des 28 projets critiques. Son volume en explique une partie, mais pas tout : son écart est aussi supérieur à celui du portefeuille. Par type, **les projets Marketing portent la totalité du dépassement** (+4,46 M€), tandis que les projets IT ont coûté 362 000 € de moins que prévu. Enfin, une seule phase concentre plus de la moitié de l’argent dépensé : la fabrication (Phase 4 Manufacturing) des projets Marketing, avec 33 millions d’euros sur 60. C’est donc là que chaque effort compte le plus : réduire son coût de seulement 1 % ferait économiser 332 000 €. C’est plus qu’une réduction de 20 % sur n’importe quelle phase des projets IT, sauf Deployment.
+La première région porte 60 % du dépassement et 18 des 28 projets critiques. Son volume en explique une partie, mais pas tout : son écart est aussi supérieur à celui du portefeuille. Par type, **les projets Marketing portent la totalité du dépassement** (+4,46 M€), tandis que les projets IT ont coûté 362 000 € de moins que prévu. Enfin, une seule phase concentre plus de la moitié de l’argent dépensé : la fabrication (Phase 4 Manufacturing) des projets Marketing, avec 33 millions d’euros sur 60. C’est donc là que chaque effort compte le plus : réduire son coût de seulement 1 % ferait économiser 332 000 €. C’est plus qu’une réduction de 20 % sur n’importe quelle phase des projets IT, sauf Deployment.
 
 ### Délais : l’indicateur le mieux maîtrisé
 
@@ -119,8 +119,8 @@ Les délais sont l’indicateur que Sanitoral maîtrise le mieux : seuls 8 proj
   src={delaysImg}
   wide
   title="La page Délais"
-  alt="Page Power BI sans filtre : des cartes indiquant 104 projets, 8 critiques, 16 en retard, 80 ponctuels et un écart de −7 081 jours ; un nuage de points des durées prévue et réelle par projet, avec les projets critiques en rouge ; un treemap des phases en dépassement de délai ; et un graphique à double courbe des durées prévue et finale par phase, cumulées sur tous les projets."
-  caption="Tout le portefeuille, sans filtre : 8 projets critiques, 16 en retard et 80 ponctuels, pour 7 081 jours de moins que prévu au total."
+  alt="Page Power BI sans filtre : des cartes indiquant 104 projets, 8 critiques, 16 en retard, 80 ponctuels et un écart de −7 081 jours ; un nuage de points des durées prévue et réelle par projet, avec les projets critiques en rouge ; un treemap des phases en dépassement de délai ; et un graphique à double courbe des durées prévue et finale par phase, cumulées sur tous les projets."
+  caption="Tout le portefeuille, sans filtre : 8 projets critiques, 16 en retard et 80 ponctuels, pour 7 081 jours de moins que prévu au total."
 />
 
 Sur cette page, le visuel clé est le graphique à double courbe des durées prévue et réelle, phase par phase. On y cherche le point de bascule : le moment où la courbe réelle passe au-dessus de la courbe prévue. C’est à partir de là que les retards s’accumulent ; le repérer sur un projet permet d’agir sur la phase qui fait tout basculer, au lieu d’en subir les conséquences en fin de projet. Si je devais recommander un seul visuel à ouvrir chaque lundi matin, ce serait celui-là : il permet de repérer un retard dès qu’il apparaît, avant qu’il ne s’aggrave sur les phases suivantes.
@@ -173,7 +173,7 @@ Une seule combinaison franchit le seuil d’alerte : les projets IT en Europe d
 
 Lire le graphique en cascade de la page Coûts phase par phase, en euros, fait apparaître un constat que le pourcentage global ne montre pas.
 
-**La bonne santé de l’IT tient à une seule phase.** Globalement, les projets IT ont coûté 362 000 € de moins que prévu. Mais le graphique en cascade montre d’où vient ce résultat : la phase Testing a coûté 769 000 € de plus que prévu, et c’est la phase Deployment, restée 1,3 million d’euros sous son budget, qui compense. Même les cinq projets les plus rentables du Top 5 dépassent leur budget sur Testing. Deux explications sont possibles : soit le budget de Testing est sous-estimé dès le départ, soit un problème opérationnel se répète sur cette phase. Les données ne permettent pas de trancher, mais dans les deux cas, c’est là qu’il faut regarder.
+**La bonne santé de l’IT tient à une seule phase.** Globalement, les projets IT ont coûté 362 000 € de moins que prévu. Mais le graphique en cascade montre d’où vient ce résultat : la phase Testing a coûté 769 000 € de plus que prévu, et c’est la phase Deployment, restée 1,3 million d’euros sous son budget, qui compense. Même les cinq projets les plus rentables du Top 5 dépassent leur budget sur Testing. Deux explications sont possibles : soit le budget de Testing est sous-estimé dès le départ, soit un problème opérationnel se répète sur cette phase. Les données ne permettent pas de trancher, mais dans les deux cas, c’est là qu’il faut regarder.
 
 <Takeaway label="Constat clé">Le dépassement est réel mais concentré : les projets Marketing, une région, et la phase Testing des projets IT. Chaque pourcentage du dashboard doit être accompagné de son montant.</Takeaway>
 

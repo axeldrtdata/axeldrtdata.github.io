@@ -1,6 +1,6 @@
 ---
 title: 'Dans quelles villes investir sur Airbnb ?'
-description: 'Un dashboard Tableau de trois pages qui mène un investisseur du marché mondial jusqu’à un quartier précis, construit sur 478 000 annonces nettoyées dans 16 pays.'
+description: 'Un dashboard Tableau de trois pages qui mène un investisseur du marché mondial jusqu’à un quartier précis, construit sur 478 000 annonces nettoyées dans 16 pays.'
 client: 'Investisseurs en location courte durée (cas OpenClassrooms)'
 role: 'Data Analyst, projet de formation'
 thumbnail: ./cover-fr.png
@@ -24,7 +24,7 @@ Mais le revenu seul ne suffit pas pour décider. Un investisseur doit aussi savo
 
 <KeyFigures
   items={[
-    { value: '478 000', label: 'annonces après nettoyage, de 2008 à 2017' },
+    { value: '478 000', label: 'annonces après nettoyage, de 2008 à 2017' },
     { value: '16', label: 'pays' },
     { value: '986', label: 'villes avec assez d’annonces pour être comparées' },
     { value: '3', label: 'pages de dashboard, du monde au quartier' },
@@ -47,9 +47,9 @@ Le dashboard est publié sur Tableau Public. Lancez-le ci-dessous pour déplacer
   alt="Aperçu de la page World (Monde) du dashboard d’investissement Airbnb."
 />
 
-## Rendre 500 000 annonces comparables
+## Rendre 500 000 annonces comparables
 
-Les données viennent d’Inside Airbnb, qui collecte ville par ville les pages publiques des annonces Airbnb. Le fichier brut comptait près de 500 000 annonces et 89 variables.
+Les données viennent d’Inside Airbnb, qui collecte ville par ville les pages publiques des annonces Airbnb. Le fichier brut comptait près de 500 000 annonces et 89 variables.
 
 La partie la plus longue du nettoyage a porté sur les noms de villes. Le champ était en texte libre, saisi par les hôtes eux-mêmes : une même ville apparaissait donc sous plusieurs orthographes, avec ou sans accents, dans différentes langues et différents alphabets. Hong Kong à elle seule apparaissait sous 26 libellés. Plutôt qu’une normalisation automatique, qui aurait pu fusionner silencieusement des villes différentes, je les ai harmonisées pays par pays avec des dictionnaires de correspondance explicites, pour que chaque décision reste visible dans le notebook.
 
@@ -86,7 +86,7 @@ df["distance_aeroport_km"] = (dist[:, 0] * 6371).round(2)   # radians → km
   caption="Chaque visuel filtre les autres : cliquer sur un pays de la carte met à jour toute la page."
 />
 
-La première page plante le décor. Les logements entiers représentent près des deux tiers de l’offre, les appartements 75 % des biens, et plus de la moitié des annonces n’accueillent qu’un ou deux voyageurs. Les États-Unis dominent avec environ 130 000 annonces, devant le Royaume-Uni (60 000) et la France (56 000).
+La première page plante le décor. Les logements entiers représentent près des deux tiers de l’offre, les appartements 75 % des biens, et plus de la moitié des annonces n’accueillent qu’un ou deux voyageurs. Les États-Unis dominent avec environ 130 000 annonces, devant le Royaume-Uni (60 000) et la France (56 000).
 
 Le chiffre le plus utile pour un investisseur est la **part d’hôtes multi-annonces**, qui va d’environ 15 % au Danemark à près de 70 % en Italie. Un marché à 70 % n’est plus fait de particuliers qui arrondissent leurs fins de mois : c’est un secteur professionnel, avec une concurrence organisée, mais aussi une rentabilité éprouvée.
 
@@ -124,12 +124,12 @@ Pour montrer la méthode de bout en bout, je l’ai appliquée à un marché que
 
 | Quartier    | Annonces | Prix / nuit | Occupation | Revenu annuel estimé |
 | ----------- | -------- | ----------- | ---------- | -------------------- |
-| Bondi Beach | 954      | 155 $       | 56 %       | 31 200 $             |
-| Bronte      | 217      | 200 $       | 51 %       | 38 653 $             |
-| Rose Bay    | 129      | 167 $       | 54 %       | 31 585 $             |
-| **Clovelly**| **123**  | **229 $**   | **54 %**   | **49 053 $**         |
+| Bondi Beach | 954      | 155 $       | 56 %       | 31 200 $             |
+| Bronte      | 217      | 200 $       | 51 %       | 38 653 $             |
+| Rose Bay    | 129      | 167 $       | 54 %       | 31 585 $             |
+| **Clovelly**| **123**  | **229 $**   | **54 %**   | **49 053 $**         |
 
-Clovelly compte huit fois moins d’annonces que Bondi Beach, mais facture 229 $ la nuit au lieu de 155 $ pour un taux d’occupation presque identique. Résultat : un revenu estimé à 49 000 $ par an au lieu de 31 000 $, soit près de 60 % de plus par bien. Cela confirme, à l’échelle du quartier, ce que montrait le nuage de points de la page 2 : facturer plus cher ne fait pas mécaniquement baisser le taux d’occupation.
+Clovelly compte huit fois moins d’annonces que Bondi Beach, mais facture 229 $ la nuit au lieu de 155 $ pour un taux d’occupation presque identique. Résultat : un revenu estimé à 49 000 $ par an au lieu de 31 000 $, soit près de 60 % de plus par bien. Cela confirme, à l’échelle du quartier, ce que montrait le nuage de points de la page 2 : facturer plus cher ne fait pas mécaniquement baisser le taux d’occupation.
 
 <Takeaway label="Ce que le dashboard apporte">Pas une ville, mais une méthode : une façon d’arriver à une décision, et de la justifier.</Takeaway>
 

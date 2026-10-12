@@ -19,7 +19,7 @@ La commande : construire un algorithme capable de distinguer un vrai billet d�
 
 <KeyFigures
   items={[
-    { value: '1 500', label: 'billets pour l’apprentissage, dont 500 faux' },
+    { value: '1 500', label: 'billets pour l’apprentissage, dont 500 faux' },
     { value: '6', label: 'mesures par billet, en millimètres' },
     { value: '99 %', label: 'des billets de test correctement classés' },
     { value: '98/100', label: 'faux billets détectés dans le jeu de test' },
@@ -65,7 +65,7 @@ x_test_scaled = scaler.transform(X_test)
 
 ## Quatre modèles, un même cadre d’évaluation
 
-Chaque modèle a été entraîné sur les mêmes 1 200 billets et jugé sur les mêmes 300 qu’il n’avait jamais vus, avec les mêmes outils : une matrice de confusion pour compter chaque type d’erreur, l’accuracy (taux de bonnes prédictions), et la courbe ROC avec son score AUC pour vérifier la capacité du modèle à bien classer les billets quel que soit le seuil.
+Chaque modèle a été entraîné sur les mêmes 1 200 billets et jugé sur les mêmes 300 qu’il n’avait jamais vus, avec les mêmes outils : une matrice de confusion pour compter chaque type d’erreur, l’accuracy (taux de bonnes prédictions), et la courbe ROC avec son score AUC pour vérifier la capacité du modèle à bien classer les billets quel que soit le seuil.
 
 | Modèle                  | Apprentissage | Accuracy | Erreurs / 300 | AUC    |
 | ----------------------- | ------------- | -------- | ------------- | ------ |
