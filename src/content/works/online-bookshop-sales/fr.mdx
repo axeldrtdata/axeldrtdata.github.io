@@ -9,11 +9,11 @@ thumbnail: ./cover-fr.png
 import KeyFigures from '../../../components/case/KeyFigures.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
-import revenueImg from './revenue.png';
-import catalogueImg from './catalogue.png';
-import lorenzImg from './lorenz.png';
-import ageBasketImg from './age-basket.png';
-import ageCategoryImg from './age-category.png';
+import revenueImg from './revenue-fr.png';
+import catalogueImg from './catalogue-fr.png';
+import lorenzImg from './lorenz-fr.png';
+import ageBasketImg from './age-basket-fr.png';
+import ageCategoryImg from './age-category-fr.png';
 
 ## Les questions
 
@@ -21,7 +21,7 @@ Une librairie en ligne m’a confié deux ans de données de ventes, de mars 202
 
 La première venait de la direction : une vue d’ensemble de l’activité. Comment le chiffre d’affaires évolue-t-il dans le temps ? Quelles références se vendent, et lesquelles ne se vendent pas ? Comment le chiffre d’affaires se répartit-il entre les clients ?
 
-La seconde venait de Julie, responsable marketing, avec cinq questions précises sur le comportement des clients : existe-t-il un lien entre le **genre** d’un client et la catégorie des livres qu’il achète ? Et entre son **âge** et son montant total d’achats, sa fréquence d’achat, son panier moyen et les catégories qu’il achète ?
+La seconde venait de Julie, responsable marketing, avec cinq questions précises sur le comportement des clients : existe-t-il un lien entre le genre d’un client et la catégorie des livres qu’il achète ? Et entre son âge et son montant total d’achats, sa fréquence d’achat, son panier moyen et les catégories qu’il achète ?
 
 <KeyFigures
   items={[
@@ -34,9 +34,9 @@ La seconde venait de Julie, responsable marketing, avec cinq questions précises
 
 ## D’abord, le nettoyage
 
-Le fichier des transactions contenait plus de **361 000 lignes entièrement vides**, un artefact de l’export Excel, que j’ai supprimées. La jointure des trois fichiers sur les identifiants clients et produits a ensuite révélé 21 références jamais vendues et 21 clients n’ayant jamais rien acheté ; je les ai mis de côté, et les références jamais vendues sont revenues plus tard dans l’analyse des flops.
+Le fichier des transactions contenait plus de **361 000 lignes entièrement vides**, un artefact de l’export Excel, que j’ai supprimées. La jointure des trois fichiers sur les identifiants clients et produits a ensuite révélé 21 références jamais vendues et 21 clients n’ayant jamais rien acheté ; je les ai mis de côté, et les références jamais vendues sont revenues plus tard dans l’analyse des flops.
 
-La décision la plus importante concernait quatre clients. Chacun d’eux comptait plus de 2 500 sessions et avait dépensé entre 114 000 € et 326 000 €, alors que le meilleur de tous les autres clients avait dépensé 5 300 €. Ce sont clairement des **clients professionnels**, pas des particuliers, et les conserver aurait faussé toutes les moyennes. Je les ai analysés à part : ensemble, ils pèsent 884 000 €, soit 7,35 % du chiffre d’affaires total, et trois références ne sont achetées que par eux, ce qui suggère une tarification professionnelle.
+La décision la plus importante concernait quatre clients. Chacun d’eux comptait plus de 2 500 sessions et avait dépensé entre 114 000 € et 326 000 €, alors que le meilleur de tous les autres clients avait dépensé 5 300 €. Ce sont clairement des **clients professionnels**, pas des particuliers, et les conserver aurait faussé toutes les moyennes. Je les ai donc analysés à part : ensemble, ils pèsent 884 000 €, soit 7,35 % du chiffre d’affaires total, et trois références ne sont achetées que par eux.
 
 ## Le chiffre d’affaires : stable et saisonnier
 
@@ -49,7 +49,7 @@ Le chiffre d’affaires a atteint 5,57 M€ la première année et 5,58 M€ l
   caption="Le chiffre d’affaires quotidien oscille entre environ 12 000 € et 20 000 €. Les moyennes mobiles lissent le bruit pour faire ressortir la tendance."
 />
 
-Le chiffre quotidien est trop bruité pour être lu tel quel, j’ai donc superposé deux moyennes mobiles. La **moyenne sur 30 jours** révèle la saisonnalité : un creux l’été, des pics à la rentrée et avant les fêtes. La **moyenne sur 90 jours** montre la tendance de fond : une hausse jusqu’en mars 2022, puis un plateau autour de 15 000 € par jour.
+Le chiffre quotidien est trop bruité pour être lu tel quel, j’ai donc superposé deux moyennes mobiles. La **moyenne sur 30 jours** révèle la saisonnalité : des creux en juillet et en novembre 2021, des pics en octobre 2021 et en février 2022. La **moyenne sur 90 jours** montre la tendance de fond : une hausse jusqu’en mars 2022, puis un plateau autour de 15 000 € par jour.
 
 Tous les indicateurs d’activité racontent la même histoire, celle d’une entreprise arrivée à maturité :
 
@@ -83,7 +83,7 @@ La concentration suit presque exactement le principe de Pareto : **21,5 % des 
   alt="Courbe de Lorenz qui s’incurve sous la droite d’égalité : la moitié des clients qui dépensent le moins génère 22 % du chiffre d’affaires."
 />
 
-La courbe de Lorenz montre une **concentration modérée** (indice de Gini de 0,40) : la moitié des clients qui dépensent le moins génère tout de même 22 % du chiffre d’affaires, et il faut 52 % des clients pour en atteindre 80 %, loin du classique 20/80. Même les 20 meilleurs clients sont remarquablement proches les uns des autres, entre 4 800 € et 5 300 € chacun. La librairie ne dépend pas de quelques clients stars, ce qui la rend résiliente.
+La courbe de Lorenz montre une **concentration modérée** (indice de Gini de 0,40) : la moitié des clients qui dépensent le moins génère tout de même 22 % du chiffre d’affaires, et il faut 52 % des clients pour en atteindre 80 %, loin du classique 20/80. Même les 20 meilleurs clients sont remarquablement proches les uns des autres, entre 4 800 € et 5 300 € chacun. La librairie ne dépend pas de quelques clients stars, mais d’une clientèle large, fidèle et régulière, ce qui la rend résiliente.
 
 ## Les cinq questions de Julie
 
@@ -100,15 +100,15 @@ df_categorie_principale_client = (
 
 Avant de mesurer des corrélations entre variables numériques, j’ai vérifié si les données suivaient une loi normale, condition du test de Pearson. Ce n’est pas le cas : l’âge est réparti de façon presque uniforme, les dépenses sont très asymétriques, et le test de Shapiro-Wilk (sur un échantillon de 5 000, la limite de l’implémentation SciPy) rejette nettement la normalité. J’ai donc utilisé le **test de Spearman**, qui ne repose pas sur cette hypothèse.
 
-| Question de Julie            | Test                         | Résultat      | Verdict                          |
-| ---------------------------- | ---------------------------- | ------------- | -------------------------------- |
-| Genre × catégorie            | Khi-deux                     | p = 0,086     | Pas de lien                      |
-| Âge × montant total          | Spearman                     | ρ = −0,18     | Pas de corrélation notable       |
-| Âge × fréquence d’achat      | Spearman                     | ρ = 0,21      | Pas de corrélation notable       |
-| **Âge × panier moyen**       | **Spearman**                 | **ρ = −0,70** | **Corrélation négative nette**   |
-| **Âge × catégorie**          | **Kruskal-Wallis et ANOVA**  | **p ≈ 0**     | **Lien fort**                    |
+| Question de Julie | Test | Pourquoi ce test | Résultat | Verdict |
+| --- | --- | --- | --- | --- |
+| Genre × catégorie | Khi-deux | Deux variables qualitatives | χ² = 4,89<br />p = 0,086 | Pas de lien |
+| Âge × montant total | Spearman | Deux variables quantitatives non normales | ρ = −0,18<br />p &lt; 0,001 | Pas de corrélation notable |
+| Âge × fréquence d’achat | Spearman | Deux variables quantitatives non normales | ρ = 0,21<br />p &lt; 0,001 | Pas de corrélation notable |
+| **Âge × panier moyen** | **Spearman** | Deux variables quantitatives non normales | **ρ = −0,70**<br />**p &lt; 0,001** | **Corrélation négative nette** |
+| **Âge × catégorie** | **Kruskal-Wallis et ANOVA** | Une variable quantitative, une qualitative à trois groupes | **H = 2 004**<br />**F = 1 202**<br />**p &lt; 0,001** | **Lien fort** |
 
-Deux résultats demandaient de la prudence. Pour l’âge croisé avec le montant total et la fréquence, les p-valeurs sont minuscules, donc les liens sont statistiquement réels, mais les coefficients restent dans l’intervalle ±0,25, le seuil en dessous duquel je considère qu’il n’y a pas de corrélation. **Significatif ne veut pas dire fort.** Et pour le genre, une p-valeur de 0,086 est proche de 0,05, mais le seuil se fixe avant le test, il ne se déplace pas après avoir vu le résultat.
+Deux résultats demandaient de la prudence. Pour l’âge croisé avec le montant total et la fréquence, les p-valeurs sont minuscules, donc les liens sont statistiquement réels, mais les coefficients restent compris entre −0,25 et +0,25 : par convention, une corrélation aussi faible est considérée comme négligeable. **Significatif ne veut pas dire fort.** Et pour le genre, une p-valeur de 0,086 est proche de 0,05, mais le seuil se fixe avant le test, il ne se déplace pas après avoir vu le résultat.
 
 <Figure
   src={ageBasketImg}
@@ -125,24 +125,25 @@ La seule corrélation forte relie l’**âge au panier moyen**. Les clients de m
   alt="Boîtes à moustaches de l’âge des clients par catégorie principale : les acheteurs du haut de gamme ont un âge médian de 25 ans, ceux de l’entrée de gamme 43 ans et ceux du milieu de gamme 57 ans."
 />
 
-L’âge sépare aussi nettement les catégories : les acheteurs du haut de gamme ont un âge médian de **25 ans**, ceux de l’entrée de gamme 43 ans, ceux du milieu de gamme 57 ans. J’ai réalisé un test de Kruskal-Wallis, le plus adapté puisque les données ne sont pas normales, et une ANOVA comme contrôle de robustesse, justifiée par la taille de l’échantillon ; les deux rejettent l’hypothèse nulle avec des p-valeurs proches de zéro.
+L’âge sépare aussi nettement les catégories : les acheteurs du haut de gamme ont un âge médian de **25 ans**, ceux de l’entrée de gamme 43 ans, ceux du milieu de gamme 57 ans. J’ai réalisé un test de Kruskal-Wallis, le plus adapté puisque l’âge ne suit pas une loi normale, puis une ANOVA comme contrôle de robustesse. En principe, l’ANOVA suppose des données normales. Mais le théorème central limite montre qu’avec un échantillon assez grand (au-delà d’une trentaine d’observations), les moyennes que compare l’ANOVA suivent à peu près une loi normale, quelle que soit la forme des données. Avec 8 596 clients, l’ANOVA reste donc fiable malgré l’absence de normalité. Les deux tests rejettent l’hypothèse nulle avec des p-valeurs proches de zéro : l’âge diffère nettement d’une catégorie à l’autre.
 
-<Takeaway label="Pour le marketing">Un message unique fonctionne pour tous, sauf sur le prix : les moins de 30 ans portent le haut de gamme et les plus gros paniers.</Takeaway>
+<Takeaway label="Pour le marketing">Inutile de segmenter les campagnes par genre ou par âge, sauf pour le haut de gamme : les moins de 30 ans en sont les principaux acheteurs, et ce sont eux qui dépensent le plus par commande.</Takeaway>
 
 ## Recommandations
 
 - **Arrêter de segmenter là où cela ne rapporte rien.** Aucun lien significatif n’a été trouvé entre le genre et les catégories, et l’âge influe à peine sur le montant total ou la fréquence : des campagnes universelles sont aussi efficaces, et bien moins coûteuses à produire que des dizaines de campagnes segmentées.
-- **Cibler les moins de 30 ans pour le haut de gamme**, le segment qui l’achète et qui dépense le plus par commande.
+- **Cibler les moins de 30 ans pour le haut de gamme** : ce sont les principaux acheteurs de cette catégorie, et ceux qui dépensent le plus par commande.
+- **Adapter le ton et le canal de communication à chaque catégorie**, selon le profil de ses acheteurs : grand public pour l’entrée de gamme, seniors pour le milieu de gamme, jeunes adultes pour le haut de gamme.
 - **Augmenter le panier des plus de 30 ans** avec de la vente additionnelle, des offres groupées ou des facilités de paiement.
-- **Auditer l’entrée de gamme**, 70 % du catalogue, absente de tous les tops et qui regroupe 16 des 21 références jamais vendues, et mettre plutôt en avant les références phares.
-- **Développer le segment B2B**, qui pèse déjà 7 % du chiffre d’affaires avec quatre clients, avec une tarification professionnelle sur les références qu’ils achètent.
+- **Auditer l’entrée de gamme** : elle représente 70 % du catalogue, n’apparaît dans aucun top et regroupe 16 des 21 références jamais vendues. Revoir ces références permettrait de mettre davantage en avant les références phares.
+- **Développer le segment B2B**, qui pèse déjà 7 % du chiffre d’affaires avec seulement quatre clients, en proposant des tarifs professionnels, à commencer par les trois références qu’ils sont seuls à acheter.
 
 ## Limites
 
 - **Corrélation n’est pas causalité.** L’âge est lié au montant du panier, mais les données ne disent pas pourquoi.
-- **L’âge est approximatif**, calculé comme 2023 moins l’année de naissance.
+- **Une seule catégorie par client.** Pour les tests sur les catégories, chaque client est résumé par la catégorie qu’il achète le plus, ce qui masque les clients qui achètent dans plusieurs catégories.
 - **Le seuil de ±0,25** pour qualifier une corrélation de notable est une convention issue de ma formation ; d’autres références retiennent des seuils différents, ce qui ne changerait pas le seul résultat fort.
 
 ## Ce que j’en retiens
 
-Travailler au niveau client est ce qui a rendu les tests honnêtes : quelqu’un qui achète 150 livres doit compter une fois, pas 150 fois. L’autre leçon, c’est que significatif ne veut pas dire fort : une p-valeur minuscule m’indiquait qu’un lien existait, pas qu’il comptait pour le marketing.
+Travailler au niveau client est ce qui a rendu les tests honnêtes : quelqu’un qui achète 150 livres doit compter une fois, pas 150 fois. L’autre leçon, c’est que significatif ne veut pas dire fort : une p-valeur minuscule m’indiquait qu’un lien existait, pas qu’il comptait pour le marketing. Enfin, un test qui ne trouve rien reste un résultat utile : montrer à Julie que le genre ne change rien aux catégories achetées, c’est lui éviter de produire des campagnes segmentées qui ne rapporteraient rien de plus.
