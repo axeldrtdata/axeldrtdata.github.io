@@ -33,7 +33,7 @@ Picture someone with enough money to buy a property and rent it out on Airbnb, w
 
 In practice, it breaks down into three questions asked in order. How much can I charge per night? How many nights a year will I fill? And together, does that make a worthwhile income? Price, occupancy and estimated yearly income are the backbone of the dashboard, and they appear at every level.
 
-But income alone is not enough to decide. An investor also needs to know who they are competing with (private hosts or professionals), what actually rents (entire homes or private rooms), and what eats into the margin once inside the market: cleaning fees, minimum stays, strict cancellation policies. These are the criteria that separate two cities showing the same income.
+But income alone is not enough to decide. An investor also needs to know who they are competing with (private hosts or professionals), what actually rents (entire homes or private rooms), and what eats into the margin once inside the market (cleaning fees, minimum stays, strict cancellation policies). These are the criteria that separate two cities showing the same income.
 
 <KeyFigures
   items={[
@@ -84,7 +84,7 @@ df["distance_aeroport_km"] = (dist[:, 0] * 6371).round(2)   # radians → km
 
 | Decision | Why |
 | -------- | --- |
-| **Country + city as the key**, never the city alone | Otherwise Venice in Italy and Venice in California merge into one point in the middle of the Atlantic |
+| **Country + city as the key**, never the city alone | Without the country, cities with the same name, like Venice in Italy and Venice in California, would have had all their listings merged under one name |
 | **Dormant listings filtered in Tableau, not deleted in Python** | 20% of listings had zero availability and very few reviews. They are excluded from profitability, but still counted in the size of the market |
 | **A minimum number of listings per city**, set with a slider | An average income calculated on eight listings is unstable. The slider makes the trade-off between coverage and robustness visible |
 | **Host growth stopped at the end of 2016** | The data ends in June 2017, so keeping that year would have drawn a drop in activity that never happened |
@@ -154,4 +154,4 @@ Clovelly has eight times fewer listings than Bondi Beach, but charges $229 a nig
 
 ## What I learned
 
-I built the dashboard around the investor's questions, not around the data I had. The slider is the best example: instead of fixing a minimum number of listings myself, I let the investor set it, because a threshold is a decision, not a technical detail. And the panel's feedback on my colours taught me that a dashboard is only finished when everyone can read it.
+Building this dashboard taught me to put myself in the user's shoes: starting from the investor's questions is far more relevant than starting from the data available. It is also what lets you pick the right variables when the raw file has 89 of them. The slider is the best example: instead of fixing a minimum number of listings myself, I leave that setting in their hands, because a threshold is a decision, not a technical detail. Finally, the panel's feedback on my colours showed me that a dashboard is only finished when everyone can read it.

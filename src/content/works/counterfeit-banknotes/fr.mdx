@@ -49,7 +49,7 @@ Certains billets sortaient nettement de la plage habituelle, surtout sur la marg
 
 **37 billets n’avaient pas de marge basse.** Plutôt que de combler ces trous avec une médiane, j’ai utilisé une régression linéaire sur les cinq autres mesures, car la marge basse est fortement liée à la longueur (−0,67). Tous les billets ont été conservés. Point important : la régression n’a utilisé que les mesures, jamais l’étiquette « vrai » ou « faux ». Sinon, la réponse que les modèles doivent trouver se serait glissée dans leurs données d’entrée (une fuite de données) et leurs scores auraient été trop optimistes ; un nouveau billet à analyser n’a de toute façon pas d’étiquette.
 
-J’ai ensuite séparé les données en un jeu d’entraînement et un jeu de test, puis standardisé les mesures pour qu’aucune variable ne pèse plus que les autres du seul fait de son échelle.
+J’ai ensuite séparé les données en un jeu d’entraînement et un jeu de test, puis standardisé les mesures pour qu’aucune variable ne pèse plus que les autres du seul fait de son échelle. L’échelle est calculée sur le seul jeu d’entraînement : les billets de test n’influencent rien, ce qui évite une seconde fuite de données.
 
 ```python
 # Découpage 80/20, en gardant le ratio 2:1 vrais/faux dans les deux jeux

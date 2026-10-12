@@ -61,7 +61,7 @@ Some notes sat well outside the usual range, especially on the lower margin. I k
 
 **37 notes were missing their lower margin.** Rather than filling the gaps with a median, I used a linear regression on the five other measurements, since the lower margin is strongly linked to the length (−0.67). Every note was kept. One point matters: the regression used only the measurements, never the genuine/fake label. Otherwise, the answer the models have to find would have leaked into their inputs (data leakage) and their scores would have been too optimistic; a new note to check has no label anyway.
 
-I then split the data into a training set and a test set, and standardised the measurements so that no variable outweighs the others simply because of its scale.
+I then split the data into a training set and a test set, and standardised the measurements so that no variable outweighs the others simply because of its scale. The scale is computed on the training set alone: the test notes influence nothing, which avoids a second form of data leakage.
 
 ```python
 # 80/20 split, keeping the 2:1 genuine/fake ratio in both sets

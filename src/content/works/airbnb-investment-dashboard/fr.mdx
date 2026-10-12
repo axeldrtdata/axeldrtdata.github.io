@@ -18,9 +18,9 @@ import citiesImg from './dashboard-cities.png';
 
 Imaginez une personne qui dispose d’assez d’argent pour acheter un bien et le louer sur Airbnb, sans contrainte géographique : elle pourrait acheter à Lisbonne, Melbourne ou Berlin. La question est simple à poser et difficile à trancher : **dans quelle ville acheter ?**
 
-Concrètement, elle se décompose en trois questions posées dans l’ordre. Combien puis-je facturer la nuit ? Combien de nuits par an vais-je louer ? Et au final, cela fait-il un revenu intéressant ? Le prix, le taux d’occupation et le revenu annuel estimé forment la colonne vertébrale du dashboard, et ils apparaissent à chaque niveau.
+Concrètement, elle se décompose en trois questions posées dans l’ordre. Combien puis-je facturer la nuit ? Combien de nuits par an vais-je louer ? Et au final, cela représente-t-il un revenu intéressant ? Le prix, le taux d’occupation et le revenu annuel estimé forment la colonne vertébrale du dashboard, et ils apparaissent à chaque niveau.
 
-Mais le revenu seul ne suffit pas pour décider. Un investisseur doit aussi savoir qui sont ses concurrents (particuliers ou professionnels), ce qui se loue vraiment (logements entiers ou chambres privées), et ce qui grignote la marge une fois sur le marché : frais de ménage, durées minimales de séjour, conditions d’annulation strictes. Ce sont ces critères qui départagent deux villes affichant le même revenu.
+Mais le revenu seul ne suffit pas pour décider. Un investisseur doit aussi savoir qui sont ses concurrents (particuliers ou professionnels), ce qui se loue vraiment (logements entiers ou chambres privées), et ce qui grignote la marge une fois sur le marché (frais de ménage, durées minimales de séjour, conditions d’annulation strictes). Ce sont ces critères qui départagent deux villes affichant le même revenu.
 
 <KeyFigures
   items={[
@@ -71,7 +71,7 @@ df["distance_aeroport_km"] = (dist[:, 0] * 6371).round(2)   # radians → km
 
 | Décision | Pourquoi |
 | -------- | -------- |
-| **Pays + ville comme clé**, jamais la ville seule | Sinon, Venise en Italie et Venice en Californie fusionnent en un seul point au milieu de l’Atlantique |
+| **Pays + ville comme clé**, jamais la ville seule | Sans le pays, les villes homonymes, comme Venice en Italie et Venice en Californie, auraient vu toutes leurs annonces fusionnées sous un seul nom |
 | **Annonces dormantes filtrées dans Tableau, pas supprimées en Python** | 20 % des annonces n’avaient aucune disponibilité et très peu d’avis. Elles sont exclues du calcul de rentabilité, mais restent comptées dans la taille du marché |
 | **Un nombre minimum d’annonces par ville**, réglé avec un curseur | Un revenu moyen calculé sur huit annonces est instable. Le curseur rend visible l’arbitrage entre couverture et robustesse |
 | **Croissance des hôtes arrêtée fin 2016** | Les données s’arrêtent en juin 2017 : garder cette année aurait fait apparaître une baisse d’activité qui n’a jamais eu lieu |
@@ -141,4 +141,4 @@ Clovelly compte huit fois moins d’annonces que Bondi Beach, mais facture 229 
 
 ## Ce que j’en retiens
 
-J’ai construit le dashboard autour des questions de l’investisseur, pas autour des données dont je disposais. Le curseur en est le meilleur exemple : au lieu de fixer moi-même un nombre minimum d’annonces, je laisse l’investisseur le régler, car un seuil est une décision, pas un détail technique. Et les retours du jury sur mes couleurs m’ont appris qu’un dashboard n’est terminé que lorsque tout le monde peut le lire.
+La construction de ce dashboard m’a appris à me placer du côté de l’utilisateur : partir des questions de l’investisseur est bien plus pertinent que partir des données disponibles. C’est aussi ce qui permet de choisir les bonnes variables quand le fichier de départ en compte 89. Le curseur en est le meilleur exemple : au lieu de fixer moi-même un nombre minimum d’annonces, je lui laisse ce réglage, car un seuil est une décision, pas un détail technique. Enfin, les retours du jury sur mes couleurs m’ont montré qu’un dashboard n’est terminé que lorsque tout le monde peut le lire.
