@@ -10,8 +10,8 @@ import KeyFigures from '../../../components/case/KeyFigures.astro';
 import BarChart from '../../../components/case/BarChart.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
-import pipelineImg from './pipeline.png';
-import genderImg from './gender-artefact.png';
+import pipelineImg from './pipeline-fr.png';
+import genderImg from './gender-artefact-fr.png';
 
 ## La question
 
@@ -39,13 +39,14 @@ Plutôt qu’une grosse requête unique, j’ai découpé la transformation en c
   alt="Quatre colonnes : trois sources (les inscriptions dans Snowflake, les seeds INSEE de population et de chômage), trois modèles staging, un modèle intermédiaire et sept marts."
 />
 
-Quatre choix structurent l’ensemble du pipeline :
+Cinq choix structurent l’ensemble du pipeline :
 
 | Choix | Pourquoi |
 | ----- | -------- |
 | **Identifiants hachés en SHA-256** dès le staging | RGPD : aucun identifiant brut ne dépasse la première couche. Il s’agit de pseudonymisation, pas d’anonymisation, car le lien reste théoriquement reconstituable côté source, et je le présente comme tel |
 | **Genres manquants conservés en « unknown »** plutôt que supprimés | Les supprimer aurait masqué le taux de non-réponse, qui s’est révélé être l’un des constats clés |
 | **Libellés de régions harmonisés** avec l’INSEE, départements d’outre-mer regroupés sous « DROM », Corse exclue | Sans libellés identiques, une jointure perd des lignes sans le signaler |
+| **Une seule année INSEE (2024)** pour toute la période | Les parts régionales de population varient de moins de 0,15 point entre 2022 et 2025 : une seule année suffit, sans effet notable sur les comparaisons régionales |
 | **Tests à chaque exécution** | Unicité et non-nullité des clés, valeurs autorisées pour chaque variable, et un test de relation qui vérifie que chaque région des étudiants existe dans le référentiel INSEE |
 
 Ce dernier test est celui qui m’a le plus servi : il détecte toute divergence de libellé entre les données étudiantes et l’INSEE avant qu’elle ne fausse un résultat.
@@ -141,11 +142,11 @@ Aucune région n’approche non plus la parité, avec des taux compris entre 21�
 
 L’Île-de-France représente 46 % des étudiants mais seulement 18 % de la population française, soit une surreprésentation d’un facteur 2,5. Douze régions sur treize sont en dessous de leur poids démographique. Pour une formation **100 % en ligne**, c’est frappant : il n’y a aucune barrière géographique à lever, le sujet n’est donc pas l’accès mais la visibilité hors de la région parisienne.
 
-J’ai testé une explication évidente : les régions à fort chômage pourraient envoyer davantage de personnes en reconversion. Elle ne tient pas. Les Hauts-de-France ont le taux de chômage le plus élevé mais une présence moyenne, l’Île-de-France un taux de chômage moyen mais une présence record. Une moyenne régionale ne dit rien de la situation individuelle des personnes qui s’inscrivent.
+Il pourrait sembler logique que les régions à fort chômage génèrent davantage d’inscriptions, par effet de reconversion. J’ai testé cette hypothèse : elle ne tient pas. Les Hauts-de-France ont le taux de chômage le plus élevé mais une présence moyenne, l’Île-de-France un taux de chômage moyen mais une présence record, et les Pays de la Loire le chômage le plus faible avec une présence faible elle aussi. Un indicateur à l’échelle d’une région entière ne dit rien de la situation individuelle des personnes qui s’inscrivent : pour comprendre qui s’inscrit et pourquoi, il faudrait des données individuelles, comme la catégorie socioprofessionnelle ou la situation au moment de l’inscription (en poste, en recherche d’emploi, étudiant).
 
 ## Un public de passage
 
-86 % des étudiants ne suivent qu’un seul parcours (3 442 sur 4 010) ; seuls 14 % reviennent pour en suivre un autre. Avec des inscriptions en baisse, l’activité repose presque entièrement sur l’acquisition de nouveaux étudiants. Les cohortes récentes ont eu moins de temps pour revenir, ce taux est donc un plancher, mais il a peu de chances d’évoluer sensiblement de lui-même.
+86 % des étudiants ne suivent qu’un seul parcours (3 442 sur 4 010) ; seuls 14 % reviennent pour en suivre un autre. Dans un contexte de baisse des inscriptions, l’activité repose donc presque entièrement sur l’acquisition de nouveaux étudiants, et la fidélisation devient un vrai enjeu : faire revenir une partie de ces 86 % apparaît comme un levier à explorer, potentiellement plus durable que le seul recrutement. Les cohortes récentes ont eu moins de temps pour revenir, ce taux est donc un plancher, mais il a peu de chances d’évoluer sensiblement de lui-même.
 
 ## Recommandations
 
@@ -161,8 +162,7 @@ J’ai testé une explication évidente : les régions à fort chômage pourrai
 - **La complétude de 2025** reste à confirmer.
 - **Les écarts régionaux reposent sur de faibles effectifs** pour plusieurs régions.
 - **Les régions d’outre-mer sont écartées de la comparaison avec le chômage** : elles sont regroupées dans une seule catégorie DROM, et aucun taux de chômage unique ne peut représenter fidèlement cinq régions aussi différentes que la Martinique et Mayotte ; j’ai donc choisi de laisser ce groupe de côté.
-- **Une seule année INSEE (2024)** est utilisée pour toute la période ; les parts régionales de population varient de moins de 0,15 point entre 2022 et 2025.
 
 ## Ce que j’en retiens
 
-La décision dont je suis le plus fier tient à peu de chose : j’ai conservé les genres manquants en « unknown » au lieu de les supprimer, et c’est ce qui a montré que la hausse de la part des femmes était surtout une baisse de la non-réponse. dbt m’a aussi appris à raisonner en couches et en tests : quand un chiffre semble faux, je sais quelle couche ouvrir, et le test sur les régions détecte une divergence de libellé avant qu’elle ne casse une jointure.
+Un détail de méthode a changé toute la lecture du projet : conserver les genres manquants en « unknown » au lieu de les supprimer. C’est ce qui a montré que la hausse de la part des femmes venait surtout d’une baisse de la non-réponse. dbt m’a aussi appris à raisonner en couches et en tests : quand un chiffre semble faux, je sais quelle couche ouvrir, et le test sur les régions détecte une divergence de libellé avant qu’elle ne casse une jointure.
