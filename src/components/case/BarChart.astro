@@ -8,10 +8,12 @@ interface Props {
   unit?: string;
   caption?: string;
   decimals?: number;
+  /** Optional reference line drawn across every bar (e.g. Kaiser criterion), with its legend. */
+  threshold?: { value: number; label: string };
 }
 
 import { getLang } from '../../i18n';
-const { title, data, unit = '', caption, decimals = 1 } = Astro.props;
+const { title, data, unit = '', caption, decimals = 1, threshold } = Astro.props;
 const fr = getLang(Astro.url) === 'fr';
 const max = Math.max(...data.map((item) => item.value));
 // French puts a narrow no-break space before % and €, and a comma before decimals.
@@ -30,12 +32,21 @@ const format = (value: number) => {
           <span class="chart-label">{item.label}</span>
           <span class="chart-track">
             <span class="chart-bar" style={`width: ${(item.value / max) * 100}%`} />
+            {threshold && <span class="chart-threshold" style={`left: ${(threshold.value / max) * 100}%`} />}
           </span>
           <span class="chart-value">{format(item.value)}</span>
         </li>
       ))
     }
   </ul>
+  {
+    threshold && (
+      <p class="chart-legend">
+        <span class="chart-legend-line" aria-hidden="true" />
+        {threshold.label}
+      </p>
+    )
+  }
   {caption && <p class="chart-caption">{caption}</p>}
 </figure>
 
@@ -80,6 +91,7 @@ const format = (value: number) => {
   }
 
   .chart-track {
+    position: relative;
     height: 14px;
     border-radius: var(--radius-pill);
     background: rgba(22, 38, 96, 0.06);
@@ -90,6 +102,29 @@ const format = (value: number) => {
     height: 100%;
     border-radius: var(--radius-pill);
     background: var(--steel);
+  }
+
+  .chart-threshold {
+    position: absolute;
+    top: -7px;
+    bottom: -7px;
+    border-left: 2px dashed var(--gold, #e2a93b);
+  }
+
+  .chart-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 14px 0 0;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+  }
+
+  .chart-legend-line {
+    width: 0;
+    height: 16px;
+    border-left: 2px dashed var(--gold, #e2a93b);
   }
 
   .is-highlight .chart-bar {

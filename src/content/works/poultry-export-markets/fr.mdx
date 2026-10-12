@@ -1,6 +1,6 @@
 ---
-title: 'Où une marque de volaille française doit-elle exporter en premier ?'
-description: 'Une étude de marchés internationaux sur 164 pays : 15 indicateurs PESTEL, une analyse en composantes principales et un clustering qui transforment des données publiques en feuille de route export en trois étapes.'
+title: 'Dans quels pays une marque de volaille française doit-elle exporter en priorité ?'
+description: 'Une étude de marchés internationaux sur 164 pays : 15 indicateurs PESTEL, une analyse en composantes principales et un clustering pour bâtir, à partir de données publiques, une feuille de route export en trois étapes.'
 client: 'La poule qui chante, producteur de volaille français (cas OpenClassrooms)'
 role: 'Data Analyst, projet de formation'
 thumbnail: ./cover-fr.png
@@ -10,11 +10,12 @@ import KeyFigures from '../../../components/case/KeyFigures.astro';
 import BarChart from '../../../components/case/BarChart.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
-import circleImg from './correlation-circle.png';
-import clustersImg from './clusters.png';
-import kImg from './choosing-k.png';
-import mapImg from './map.png';
-import radarImg from './radar.png';
+import circleImg from './correlation-circle-fr.png';
+import clustersImg from './clusters-fr.png';
+import kImg from './choosing-k-fr.png';
+import dendroImg from './dendrogram-fr.png';
+import mapImg from './map-fr.png';
+import radarImg from './radar-fr.png';
 
 ## La question
 
@@ -67,8 +68,9 @@ La population, le tourisme, la production et les importations de volaille étaie
 La matrice de corrélation faisait apparaître trois familles de variables : la gouvernance, la logistique et l’accès à internet évoluent ensemble ; la population, la production et les importations évoluent ensemble ; le chômage, la croissance du tourisme et la distance restent isolés. C’est précisément cette redondance qu’exploite une **analyse en composantes principales (ACP)**.
 
 <BarChart
-  title="Part de variance expliquée par chaque composante principale"
+  title="Éboulis des valeurs propres : part de variance expliquée par composante"
   unit="%"
+  threshold={{ value: 6.67, label: 'Valeur propre = 1 (critère de Kaiser), soit 6,67 % de la variance' }}
   data={[
     { label: 'F1', value: 40.8, highlight: true },
     { label: 'F2', value: 15.09, highlight: true },
@@ -78,10 +80,10 @@ La matrice de corrélation faisait apparaître trois familles de variables : la
     { label: 'F6', value: 4.79 },
     { label: 'F7', value: 4.22 },
   ]}
-  caption="Cinq composantes ont une valeur propre supérieure à 1 (critère de Kaiser) et conservent ensemble 79,1 % de l’information initiale."
+  caption="Cinq composantes dépassent la ligne de Kaiser et conservent ensemble 79,1 % de l’information initiale. Le coude se voit entre F5 et F6, où la variance expliquée chute de 6,9 % à 4,8 %."
 />
 
-Trois méthodes s’accordaient pour retenir cinq composantes : le critère de Kaiser, le coude de l’éboulis des valeurs propres entre F5 et F6, et une variance cumulée de 79,1 %. Les deux premières composantes sont les plus faciles à lire :
+Trois méthodes s’accordaient pour retenir cinq composantes, toutes visibles sur l’éboulis ci-dessus : le critère de Kaiser, le coude entre F5 et F6, et une variance cumulée de 79,1 %. Les deux premières composantes sont les plus faciles à lire :
 
 - **F1 (40,8 %) mesure la maturité institutionnelle et des infrastructures.** Les indices de gouvernance, la performance logistique et l’accès à internet y contribuent tous fortement (entre 0,78 et 0,94), tandis qu’une forte croissance démographique tire dans l’autre sens.
 - **F2 (15,1 %) mesure le poids démographique.** Elle est portée par la population (0,94) et la production de volaille (0,83), et sépare les grands marchés des petits, quel que soit leur niveau de développement.
@@ -98,6 +100,13 @@ Placés sur ces deux axes, les pays se répartissent en quatre zones naturelles�
 ## Quatre profils de pays
 
 J’ai réalisé le clustering des pays sur leurs coordonnées dans les cinq composantes. Pour choisir le nombre de groupes, j’ai de nouveau croisé trois méthodes : un clustering hiérarchique selon la méthode de Ward, dont le dendrogramme suggérait une coupe à quatre groupes ; le coude de l’inertie intra-classe, entre trois et quatre ; et le score de silhouette.
+
+<Figure
+  src={dendroImg}
+  title="Dendrogramme du clustering hiérarchique (méthode de Ward)"
+  alt="Dendrogramme des dix dernières fusions : une ligne pointillée coupe l’arbre en quatre branches, sous le grand saut qui ne séparerait que deux blocs."
+  caption="Les dix dernières fusions de l’arbre, avec le nombre de pays de chaque branche. Le plus grand saut, tout en haut, ne séparerait que deux blocs ; la coupe à quatre groupes (en pointillés) retrouve pour l’essentiel les quatre profils du K-means."
+/>
 
 <Figure
   src={kImg}
@@ -120,7 +129,7 @@ Le score de silhouette culminait en réalité à deux clusters (0,32), mais divi
 | Petits pays à revenu intermédiaire  | 35   | 61,4                  | 18 kt                    | 6 567 km         |
 | Pays en développement               | 56   | 42,8                  | 37 kt                    | 6 301 km         |
 
-Les économies développées (voisins de la France, Amérique du Nord, Japon, Australie…) arrivent en tête sur 12 des 15 indicateurs : la gouvernance la plus solide, la meilleure logistique, la plus forte consommation de volaille par habitant, les plus grosses importations et la distance la plus courte avec la France. Sur une carte, elles forment un bloc remarquablement compact en Europe.
+Pour décrire ces groupes, je suis revenu aux 15 indicateurs d’origine : l’ACP sert à construire les groupes, mais ce sont les indicateurs bruts qui parlent au client. En comparant la moyenne de chaque groupe, les économies développées (voisins de la France, Amérique du Nord, Japon, Australie…) arrivent en tête sur 11 des 15 indicateurs : la gouvernance la plus solide, la meilleure logistique, la plus forte consommation de volaille par habitant, les plus grosses importations et la distance la plus courte avec la France. Les quatre autres sont ceux d’un marché mûr : une croissance démographique et touristique plus lente, une population et une production de volaille derrière celles des grandes économies émergentes. Sur une carte, les économies développées forment un bloc remarquablement compact en Europe.
 
 <Figure
   src={mapImg}
@@ -150,4 +159,4 @@ Les économies développées (voisins de la France, Amérique du Nord, Japon, Au
 
 ## Ce que j’en retiens
 
-Le score de silhouette culminait à deux clusters, et techniquement, c’était la bonne réponse. Mais « développés » contre « en développement » n’aurait pas aidé le client à choisir un marché. Le second pic, à quatre, concordait avec le dendrogramme et le coude, et donnait des groupes sur lesquels le client pouvait agir : un modèle n’a pas à gagner sur le papier, il doit éclairer une décision.
+Le score de silhouette culminait à deux clusters, et techniquement, c’était la bonne réponse. Mais « développés » contre « en développement » n’aurait pas aidé le client à choisir un marché. Le second pic, à quatre, concordait avec le dendrogramme et le coude, et donnait des groupes sur lesquels le client pouvait agir : un modèle n’a pas à gagner sur le papier, il doit éclairer une décision. J’ai aussi appris à séparer deux usages de l’ACP : réduire les dimensions pour construire les groupes, puis revenir aux indicateurs d’origine pour les expliquer. Enfin, une valeur manquante n’a pas toujours le même sens : un chômage absent se comble par la médiane du groupe de revenu, alors qu’un tourisme absent vaut souvent vraiment zéro.

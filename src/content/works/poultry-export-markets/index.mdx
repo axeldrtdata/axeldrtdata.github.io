@@ -27,6 +27,7 @@ import Figure from '../../../components/case/Figure.astro';
 import circleImg from './correlation-circle.png';
 import clustersImg from './clusters.png';
 import kImg from './choosing-k.png';
+import dendroImg from './dendrogram.png';
 import mapImg from './map.png';
 import radarImg from './radar.png';
 
@@ -81,8 +82,9 @@ Population, tourism, poultry production and imports were heavily skewed: China a
 The correlation matrix showed three families of variables: governance, logistics and internet access move together; population, production and imports move together; unemployment, tourism growth and distance stand on their own. That redundancy is exactly what a **principal component analysis (PCA)** exploits.
 
 <BarChart
-  title="Share of variance explained by each principal component"
+  title="Scree plot: share of variance explained by each component"
   unit="%"
+  threshold={{ value: 6.67, label: 'Eigenvalue = 1 (Kaiser criterion), i.e. 6.67% of the variance' }}
   data={[
     { label: 'F1', value: 40.8, highlight: true },
     { label: 'F2', value: 15.09, highlight: true },
@@ -92,10 +94,10 @@ The correlation matrix showed three families of variables: governance, logistics
     { label: 'F6', value: 4.79 },
     { label: 'F7', value: 4.22 },
   ]}
-  caption="Five components have an eigenvalue above 1 (Kaiser criterion) and together keep 79.1% of the original information."
+  caption="Five components clear the Kaiser line and together keep 79.1% of the original information. The elbow shows between F5 and F6, where the explained variance drops from 6.9% to 4.8%."
 />
 
-Three methods agreed on keeping five components: the Kaiser criterion, the elbow of the scree plot between F5 and F6, and a cumulative variance of 79.1%. The first two are the easiest to read:
+Three methods agreed on keeping five components, all visible on the scree plot above: the Kaiser criterion, the elbow between F5 and F6, and a cumulative variance of 79.1%. The first two are the easiest to read:
 
 - **F1 (40.8%) measures institutional and infrastructure maturity.** Governance indices, logistics performance and internet access all load strongly on it (between 0.78 and 0.94), while fast population growth pulls the other way.
 - **F2 (15.1%) measures demographic weight.** It is driven by population (0.94) and poultry production (0.83), and separates large markets from small ones regardless of how developed they are.
@@ -112,6 +114,13 @@ Placed on these two axes, countries fall into four natural areas: large develope
 ## Four country profiles
 
 I clustered the countries on their five component scores. To choose the number of groups, I again crossed three methods: a hierarchical clustering with Ward's method, whose dendrogram suggested a cut at four groups; the elbow of the within-cluster inertia, between three and four; and the silhouette score.
+
+<Figure
+  src={dendroImg}
+  title="Hierarchical clustering dendrogram (Ward's method)"
+  alt="Dendrogram of the last ten merges: a dashed line cuts the tree into four branches, below the big jump that would only separate two blocks."
+  caption="The last ten merges of the tree, with the number of countries in each branch. The biggest jump, at the top, would only separate two blocks; the cut at four groups (dashed) largely matches the four K-means profiles."
+/>
 
 <Figure
   src={kImg}
@@ -134,7 +143,7 @@ The silhouette score actually peaked at two clusters (0.32), but splitting the w
 | Small middle-income countries    | 35        | 61.4                     | 18 kt           | 6,567 km            |
 | Developing countries             | 56        | 42.8                     | 37 kt           | 6,301 km            |
 
-The developed economies (France's neighbours, North America, Japan, Australia…) come out on top for 12 of the 15 indicators: the strongest governance, the best logistics, the highest poultry consumption per person, the largest imports, and the shortest distance from France. On a map, they form a remarkably compact block across Europe.
+To describe these groups, I went back to the 15 original indicators: the PCA builds the groups, but the raw indicators are what speak to the client. Comparing the average of each group, the developed economies (France's neighbours, North America, Japan, Australia…) come out on top for 11 of the 15 indicators: the strongest governance, the best logistics, the highest poultry consumption per person, the largest imports, and the shortest distance from France. The other four are those of a mature market: slower population and tourism growth, and a population and poultry production behind those of the large emerging economies. On a map, the developed economies form a remarkably compact block across Europe.
 
 <Figure
   src={mapImg}
@@ -164,4 +173,4 @@ The developed economies (France's neighbours, North America, Japan, Australia…
 
 ## What I learned
 
-The silhouette score peaked at two clusters, and technically that was the right answer. But "developed" against "developing" would not help the client choose a market. The second peak, at four, matched the dendrogram and the elbow, and gave groups the client could act on: a model does not have to win on paper, it has to support a decision.
+The silhouette score peaked at two clusters, and technically that was the right answer. But "developed" against "developing" would not help the client choose a market. The second peak, at four, matched the dendrogram and the elbow, and gave groups the client could act on: a model does not have to win on paper, it has to support a decision. I also learned to separate two uses of the PCA: reducing the dimensions to build the groups, then going back to the original indicators to explain them. Finally, a missing value does not always mean the same thing: a missing unemployment rate is filled with the median of the income group, while missing tourism is often truly zero.
