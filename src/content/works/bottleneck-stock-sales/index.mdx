@@ -147,7 +147,7 @@ The goal: run on the three raw exports every month, and **stop rather than produ
 
 | Need | Options compared | Chosen | Why |
 | ---- | ---------------- | ------ | --- |
-| Check data quality automatically | pandas assertions, pandera, Great Expectations | pandera | Great Expectations was ruled out from the start: too heavy for 825 rows a month. I coded the 8 quality rules from the audit with the other two tools, then tested them on a copy of the export into which I had slipped 4 errors: both tools caught all of them. pandera wins because the check cannot be forgotten and the code is shorter (39 lines against 57) |
+| Check data quality automatically | pandas assertions, pandera, Great Expectations | pandera | Great Expectations, too heavy for 825 rows a month, was ruled out from the start. The other two tools caught the 4 errors I had slipped into a copy of the export. pandera wins: the check cannot be forgotten, and the code is shorter (39 lines against 57) |
 | Catch mistyped prices | IQR, robust z-score (MAD) and Isolation Forest, tested on the price, then on the selling / purchase price ratio | MAD on the ratio, threshold 5 | On the price alone, no method found the real errors: they mostly flagged expensive bottles. On the ratio, all three found the 4 errors, but the IQR raised 45 alerts, against 7 for the MAD. Isolation Forest needs to know in advance how many anomalies to look for, which is impossible on a new export |
 | Turn findings into actions | ABC classification, K-means, a table crossing coverage and stock value | Coverage × stock value | With ABC, 60% of the catalogue would have been class A, so a priority: priority no longer meant anything. K-means mostly found price ranges, with blurry groups. The catalogue is too even for both methods |
 
@@ -220,7 +220,7 @@ Finally, 22 products had neither sales nor stock. They could not sell anything: 
 
 - **Suspend restocking of the 24 dormant products**, €95,012 at purchase price, starting with the champagnes, after checking whether they are waiting for the year-end season.
 - **Decide on the 3 products that never sold but hold €14,959 of stock**, starting with the Egly-Ouriet Blanc de Noirs: its price was entered at €12.65 instead of €126.50.
-- **Reorder the 23 sold-out products**, and the one product with less than a month of stock left.
+- **Reorder the 23 sold-out products**, and the 27 with a month of stock or less left.
 - **Check whether the 22 products with neither sales nor stock are discontinued**, and take them off the website if so.
 - **Fix the data at the source**: the 3 products priced at or below cost, the 2 statuses that contradict their stock, the 3 online products missing from the link table, and the product on the website that the ERP declares offline.
 
@@ -228,7 +228,6 @@ Finally, 22 products had neither sales nor stock. They could not sell anything: 
 
 - **One month of data.** There is no seasonality, and October comes right before the year-end peak: a dormant champagne may just be waiting for Christmas. A year of exports would let the coverage be smoothed.
 - **VAT is not in the files.** I assumed 20%, the standard French rate on wine and spirits, kept in a single constant. The three olive oils normally carry the reduced 5.5% rate.
-- **The €25 gift card is counted as a product**: 7 sold, €146 of revenue excl. VAT.
 - **The thresholds are conventions**: 1 month to reorder, 12 months for dormant stock, a MAD score of 5 for prices. They should be set with the buyer, based on supplier lead times.
 - **The 109 products the ERP declares offline are not analysed**, although their stock exists.
 - **The checks test consistency, not truth.** An entry error that fits the rest of the catalogue would pass unnoticed: a wine bought at €10 and entered at €25 instead of €20 keeps a ratio of 2.5, within the usual range, and no rule flags it.

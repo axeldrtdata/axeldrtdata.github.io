@@ -132,7 +132,7 @@ L’objectif : s’exécuter chaque mois sur les trois exports bruts, et **s’
 
 | Besoin | Options comparées | Choix | Pourquoi |
 | ------ | ----------------- | ----- | -------- |
-| Contrôler automatiquement la qualité des données | Assertions pandas, pandera, Great Expectations | pandera | Great Expectations a été écarté d’emblée : trop lourd pour 825 lignes par mois. J’ai codé les 8 règles de qualité issues de l’audit avec les deux autres outils, puis je les ai testées sur une copie de l’export dans laquelle j’avais glissé 4 erreurs : les deux outils les ont toutes trouvées. pandera l’emporte parce que le contrôle ne peut pas être oublié et que le code est plus court (39 lignes contre 57) |
+| Contrôler automatiquement la qualité des données | Assertions pandas, pandera, Great Expectations | pandera | Great Expectations, trop lourd pour 825 lignes par mois, a été écarté d’emblée. Les deux autres outils ont trouvé les 4 erreurs que j’avais glissées dans une copie de l’export. pandera l’emporte : le contrôle ne peut pas être oublié, et le code est plus court (39 lignes contre 57) |
 | Repérer les prix mal saisis | IQR, score z robuste (MAD) et Isolation Forest, testés sur le prix, puis sur le rapport prix de vente / prix d’achat | MAD sur le rapport, avec un seuil à 5 | Sur le prix seul, aucune méthode ne trouvait les vraies erreurs : elles signalaient surtout les bouteilles chères. Sur le rapport, les trois méthodes trouvaient les 4 erreurs, mais l’IQR déclenchait 45 alertes, contre 7 pour le MAD. L’Isolation Forest, lui, doit connaître à l’avance le nombre d’anomalies à chercher, ce qui est impossible sur un nouvel export |
 | Transformer les constats en actions | Classification ABC, K-means, tableau croisant couverture et valeur immobilisée | Couverture × valeur immobilisée | Avec l’ABC, 60 % du catalogue aurait été classé A, donc prioritaire : la priorité ne voulait plus rien dire. K-means retrouvait surtout des gammes de prix, avec des groupes peu nets. Le catalogue est trop homogène pour ces deux méthodes |
 
@@ -205,7 +205,7 @@ Enfin, 22 produits n’avaient ni ventes ni stock. Ils ne pouvaient donc rien ve
 
 - **Suspendre le réapprovisionnement des 24 produits dormants**, 95 012 € au prix d’achat, en commençant par les champagnes, après avoir vérifié s’ils attendent la saison de fin d’année.
 - **Statuer sur les 3 produits jamais vendus qui portent 14 959 € de stock**, à commencer par l’Egly-Ouriet Blanc de Noirs : son prix avait été saisi à 12,65 € au lieu de 126,50 €.
-- **Réapprovisionner les 23 produits épuisés**, ainsi que le seul produit auquel il reste moins d’un mois de stock.
+- **Réapprovisionner les 23 produits épuisés**, ainsi que les 27 auxquels il reste un mois de stock ou moins.
 - **Vérifier si les 22 produits sans ventes ni stock sont arrêtés**, et les retirer du site le cas échéant.
 - **Corriger les données à la source** : les 3 produits vendus au prix d’achat ou en dessous, les 2 statuts qui contredisent leur stock, les 3 produits en ligne absents de la table de liaison, et le produit présent sur le site que l’ERP déclare hors vente en ligne.
 
@@ -213,7 +213,6 @@ Enfin, 22 produits n’avaient ni ventes ni stock. Ils ne pouvaient donc rien ve
 
 - **Un seul mois de données.** Aucune saisonnalité, et octobre précède juste le pic de fin d’année : un champagne dormant attend peut-être simplement Noël. Une année d’exports permettrait de lisser la couverture.
 - **La TVA ne figure pas dans les fichiers.** J’ai retenu 20 %, le taux normal en France sur les vins et spiritueux, isolé dans une seule constante. Les trois huiles d’olive relèvent normalement du taux réduit de 5,5 %.
-- **Le bon cadeau de 25 € est compté comme un produit** : 7 ventes, 146 € de chiffre d’affaires HT.
 - **Les seuils sont des conventions** : 1 mois pour commander, 12 mois pour le stock dormant, un score MAD de 5 pour les prix. Ils devraient être fixés avec l’acheteur, en fonction des délais de réapprovisionnement des fournisseurs.
 - **Les 109 produits que l’ERP déclare hors vente en ligne ne sont pas analysés**, alors que leur stock existe.
 - **Les contrôles testent la cohérence, pas la vérité.** Une erreur de saisie cohérente avec le reste du catalogue passerait inaperçue : un vin acheté 10 € et saisi à 25 € au lieu de 20 € garde un rapport de 2,5, dans la fourchette habituelle, et aucune règle ne le signale.
