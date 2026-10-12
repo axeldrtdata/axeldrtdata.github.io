@@ -1,6 +1,6 @@
 ---
 title: 'Does the world produce enough food to feed everyone?'
-description: 'A public-health study for the FAO on four datasets: how many people are undernourished, how many the world could feed, where its food actually goes, and what a second look at data coverage changes.'
+description: 'A public-health study for the FAO on four datasets: how many people are undernourished, how many the world could feed, and where its food actually goes.'
 thumbnail: ./cover.png
 icon: ./icon.png
 tech:
@@ -23,7 +23,6 @@ import BarChart from '../../../components/case/BarChart.astro';
 import Takeaway from '../../../components/case/Takeaway.astro';
 import Figure from '../../../components/case/Figure.astro';
 import kcalImg from './calories-by-country.png';
-import aidImg from './food-aid-coverage.png';
 
 ## The question
 
@@ -33,7 +32,7 @@ Behind the list sits one question: **is hunger a problem of production, or of di
 
 <KeyFigures
   items={[
-    { value: '535M', label: 'people undernourished in 2017, at the very least' },
+    { value: '535M', label: 'people undernourished in 2017' },
     { value: '8.8bn', label: 'people the calories available could feed' },
     { value: '36%', label: 'of the world’s cereals go to animal feed' },
     { value: '83%', label: 'of Thailand’s cassava is exported' },
@@ -117,49 +116,20 @@ Thailand shows how food can leave a country with hunger. In 2017, about 9% of Th
 
 Between 2013 and 2016, Syria, Ethiopia and Yemen received the most food aid, ahead of South Sudan, Sudan and Kenya. Seven of the ten largest recipients are in Africa, the other three in Asia, and many of them were facing war or a major crisis. Aid followed acute crises: it fell sharply for Ethiopia, Sudan and South Sudan in 2015, while Yemen's rose again as its war escalated.
 
-## What a second look revealed
-
-When I came back to this project for my portfolio, I checked what the data covers before trusting what it says. Three findings changed how the results should be read.
-
-**Units and joins.** The food balance sheets are in thousands of tonnes: once multiplied by 1,000, they are in tonnes, not kilograms. My first version understated food losses and Thailand's cassava exports by a factor of 1,000. Three countries also had different names from one file to another (the United Kingdom, Czechia and Eswatini), so the joins dropped them without warning. With the names harmonised, the number of people the world could feed rises from 8.7 to 8.8 billion.
-
-```python
-# Harmonise country names before any join, then check nothing is left unmatched
-dispo_alimentaire['Zone'] = dispo_alimentaire['Zone'].replace({
-    'Royaume-Uni': "Royaume-Uni de Grande-Bretagne et d'Irlande du Nord",
-    'Tchéquie (la)': 'Tchéquie',
-})
-aide_alimentaire['Pays bénéficiaire'] = aide_alimentaire['Pays bénéficiaire'].replace({'Swaziland': 'Eswatini'})
-print(sorted(set(dispo_alimentaire['Zone']) - set(population['Zone'])))   # → []
-```
-
-**The undernourished total is a floor.** Countries with no estimate were counted as zero. That is reasonable for France or Germany, but the 96 countries without any estimate are home to **more than 3.3 billion people, 44% of the world**, and they include some of the hungriest places on earth: the Democratic Republic of the Congo, Yemen, Somalia, South Sudan, Syria, Zambia and Zimbabwe. The top 10 above only ranks countries that have an estimate.
-
-**Food aid is not as disconnected from needs, nor as collapsed, as it first looked.** My original conclusion was that none of the countries with the highest undernourishment rates were among the top aid recipients. But six of the ten largest recipients have no undernourishment estimate at all, so they could never appear in the other ranking. Among the 49 recipients that do have one, aid clearly follows the **number** of undernourished people (Spearman ρ = 0.55, p < 0.001), but not their **share** (ρ = 0.28, not significant at the 5% level). Aid goes to large numbers of hungry people and to crises, rather than to the highest rates.
-
-The headline drop in world food aid, −82% between 2013 and 2016, was also mostly an artefact of coverage.
-
-<Figure
-  src={aidImg}
-  title="Recorded food aid and the countries behind it"
-  alt="Grouped bar chart: recorded food aid falls from 4.17 to 0.74 million tonnes between 2013 and 2016, while the number of countries recorded falls from 72 to 26; for the same 25 countries recorded in both years, aid falls from 1.51 to 0.74 million tonnes."
-  caption="72 countries have aid recorded in 2013, only 26 in 2016. On the same 25 countries, aid fell by half: a real decline, but not a collapse."
-/>
-
-<Takeaway label="Key finding">The world grows enough food for everyone. The real gaps are in how it is shared, and in the data that measures who goes hungry.</Takeaway>
+<Takeaway label="Key finding">The world grows enough food for everyone: the real gaps are in how it is shared.</Takeaway>
 
 ## What I would do next
 
 - **Use the full FAOSTAT series**, to follow the same countries over time instead of comparing a single year.
-- **Complete the aid data with the World Food Programme's figures**, to tell a real drop in aid from a country that simply stopped reporting.
+- **Complete the aid data with the World Food Programme's figures**, to cover the countries and years missing from the FAO data.
 - **Weight the theoretical calculation by real needs**, which vary with age, sex and activity, rather than a single 2,400 kcal average.
 
 ## Limits
 
-- **Undernourishment estimates are missing** for 44% of the world population, so every total and ranking based on them is incomplete.
+- **The undernourished total is a minimum:** countries without an estimate count as zero, and the ranking of rates only covers the countries that have one.
 - **Food availability is not consumption:** the calories available include what is wasted at home and in shops.
 - **The theoretical calculation leaves aside** transport, storage, prices and politics, which are precisely what decides who eats.
 
 ## What I learned
 
-My first version reported a −82% collapse in food aid and an undernourished total as if they covered the whole world. Coming back to it, I learned to look at what is missing before what is there: 96 countries had no estimate, and most of the drop in aid came from fewer countries being reported. A unit error and three country names spelt differently across files also taught me to check units and joins before any total.
+Starting from the real question, production or distribution, guided the whole analysis: every calculation had to answer it, from how many people the available food could feed to what cereals are used for. I also learned that a theoretical result depends on its assumptions: the 8.8 billion rest on an average need of 2,400 kcal a day, an assumption that should always sit next to the figure.
