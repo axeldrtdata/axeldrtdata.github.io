@@ -90,7 +90,7 @@ La courbe de Lorenz montre une **concentration modérée** (indice de Gini de 0,
 Pour les tests statistiques, une règle comptait avant tout : des **observations indépendantes**. Un client qui achète 150 livres ne doit pas compter 150 fois. Tous les tests sont donc menés au niveau client, une ligne par client, et pour les questions sur les catégories, chaque client se voit attribuer la catégorie qu’il achète le plus.
 
 ```python
-# One row per customer, with the category they buy most
+# Une ligne par client, avec la catégorie qu'il achète le plus
 df_categorie_principale_client = (
     df_merge_transaction_products_customers.groupby(["client_id", "sex"])["categ"]
     .agg(lambda x: x.value_counts().index[0])

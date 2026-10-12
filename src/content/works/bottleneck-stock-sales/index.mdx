@@ -142,7 +142,7 @@ The goal: run on the three raw exports every month, and **stop rather than produ
 | ---- | ---------------- | ------ | --- |
 | Automate the quality checks | pandas assertions, pandera, Great Expectations | pandera | Both candidates caught 4 anomalies I injected into a copy of the export, a test the notebook replays. pandera cannot be skipped and reads as a specification. Great Expectations was oversized for 825 rows a month |
 | Detect price anomalies | IQR, robust z-score (MAD), Isolation Forest, each on the price and on the price ratio | MAD on the ratio, threshold 5 | On the price alone, no method isolated the 4 errors. On the ratio, all three found them, but the IQR raised 45 alerts against 7. Isolation Forest flags as many products as its setting asks for, so it needs the number of anomalies known in advance |
-| Turn findings into actions | ABC classification, k-means, coverage × stock value | Coverage × stock value | Class A would have held 60% of the catalogue. k-means found three price ranges and a group of champagnes, with weak clusters: the catalogue is too even for both |
+| Turn findings into actions | ABC classification, K-means, coverage × stock value | Coverage × stock value | Class A would have held 60% of the catalogue. K-means found three price ranges and a group of champagnes, with weak clusters: the catalogue is too even for both |
 
 The rules run at two levels. **Blocking** rules stop the processing when a file cannot be used: a duplicated ID, a missing price, a value outside its domain, or fewer than 95% of the linked products found in the website export. **Alert** rules let the month's analysis go ahead and report the problem: three mistyped prices should not stop the whole report.
 

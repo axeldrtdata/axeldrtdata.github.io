@@ -89,7 +89,7 @@ DIVIDE(
     0
 )
 
--- Number of projects 15% or more over budget, in the current filter context
+-- Nombre de projets qui dépassent leur budget de 15 % ou plus, dans le contexte de filtre actif
 couts+15% =
 0 + COUNTROWS(FILTER(VALUES(Projects_plans[Project ID]), [ecart_couts_%] >= 0.15))
 ```

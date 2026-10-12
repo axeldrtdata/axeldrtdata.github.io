@@ -59,7 +59,7 @@ J’ai ensuite enrichi les données avec deux sources externes :
 - **OurAirports**, pour calculer la distance de chaque annonce au grand aéroport international le plus proche, à l’aide d’un BallTree qui mesure les distances réelles à la surface du globe.
 
 ```python
-# Nearest large international airport for every listing (great-circle distance)
+# Aéroport international le plus proche de chaque annonce (distance orthodromique)
 tree = BallTree(
     np.radians(df_airport[["latitude_deg", "longitude_deg"]].values), metric="haversine"
 )

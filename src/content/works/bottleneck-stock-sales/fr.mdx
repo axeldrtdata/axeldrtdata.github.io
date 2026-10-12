@@ -89,11 +89,11 @@ Dans leurs audits révisés, Claude a ajouté le constat sur les stocks négatif
 **Les produits jamais vendus disparaissaient du classement.** Un produit sans vente n’a pas de couverture, mais mon code en faisait autre chose. Quand le produit avait du stock, le résultat infini était remplacé par 0, ce qui le classait parmi les produits qui s’écoulent le plus vite : 3 produits et 14 959 € de stock. Quand il n’en avait pas, le résultat était 0 divisé par 0, une valeur vide qui sortait de la moyenne sans alerte : 22 produits de plus.
 
 ```python
-# First version: sales already monthly, and no sale turned into "0 months"
+# Première version : ventes supposées déjà mensuelles, et « aucune vente » transformé en « 0 mois »
 df_web_join['rotation_stock'] = df_web_join['stock_quantity'] / (df_web_join['total_sales'] / 12)
 df_web_join['rotation_stock'] = df_web_join['rotation_stock'].replace([np.inf, -np.inf], 0)
 
-# Rebuilt version: no sale means no coverage, and never-sold products get their own category
+# Version reconstruite : sans vente, pas de couverture, et les produits jamais vendus ont leur propre catégorie
 d["coverage_months"] = d["stock_quantity"] / d["total_sales"].replace(0, np.nan)
 d["never_sold"] = d["total_sales"] == 0
 ```
@@ -127,13 +127,13 @@ L’objectif : s’exécuter chaque mois sur les trois exports bruts, et **s’
 | ------ | ----------------- | ------- | -------- |
 | Automatiser les contrôles qualité | Assertions pandas, pandera, Great Expectations | pandera | Les deux candidats ont détecté les 4 anomalies que j’avais injectées dans une copie de l’export, un test que le notebook rejoue. pandera ne peut pas être contourné et se lit comme une spécification. Great Expectations était surdimensionné pour 825 lignes par mois |
 | Détecter les anomalies de prix | IQR, score z robuste (MAD), Isolation Forest, chacun sur le prix et sur le ratio prix / achat | MAD sur le ratio, seuil à 5 | Sur le prix seul, aucune méthode n’isolait les 4 erreurs. Sur le ratio, les trois les trouvaient, mais l’IQR levait 45 alertes contre 7. L’Isolation Forest signale autant de produits que son paramétrage le lui demande : il faut donc connaître le nombre d’anomalies à l’avance |
-| Passer du constat à l’action | Classification ABC, k-means, couverture × valeur immobilisée | Couverture × valeur immobilisée | La classe A aurait contenu 60 % du catalogue. k-means trouvait trois gammes de prix et un groupe de champagnes, avec des clusters faibles : le catalogue est trop homogène pour ces deux méthodes |
+| Passer du constat à l’action | Classification ABC, K-means, couverture × valeur immobilisée | Couverture × valeur immobilisée | La classe A aurait contenu 60 % du catalogue. K-means trouvait trois gammes de prix et un groupe de champagnes, avec des clusters faibles : le catalogue est trop homogène pour ces deux méthodes |
 
 Les règles s’appliquent à deux niveaux. Les règles **bloquantes** arrêtent le traitement quand un fichier est inexploitable : un identifiant dupliqué, un prix manquant, une valeur hors de son domaine, ou moins de 95 % des produits liés retrouvés dans l’export web. Les règles d’**alerte** laissent l’analyse du mois se poursuivre et signalent le problème : trois prix mal saisis ne doivent pas bloquer tout le rapport.
 
 ```python
 class ERPSchema(pa.DataFrameModel):
-    """Blocking rules on the ERP export: if one fails, the file cannot be used."""
+    """Règles bloquantes sur l'export ERP : si l'une échoue, le fichier est inutilisable."""
 
     product_id: Series[int] = pa.Field(unique=True)                       # R1
     price: Series[float] = pa.Field(nullable=False)                       # R2

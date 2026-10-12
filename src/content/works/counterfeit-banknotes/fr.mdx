@@ -15,7 +15,7 @@ import Takeaway from '../../../components/case/Takeaway.astro';
 
 L’ONCFM lutte contre la contrefaçon des billets en euros. Chaque billet qui arrive à l’organisme passe dans une machine qui relève six mesures : sa longueur, sa diagonale, sa hauteur de chaque côté et les deux marges entre le bord et l’image imprimée. Au fil des années, l’organisme a remarqué que les faux diffèrent légèrement des vrais par leurs dimensions, de quelques fractions de millimètre invisibles à l’œil nu.
 
-La commande : construire un algorithme capable de distinguer un vrai billet d’un faux à partir de ces six mesures seulement, comparer quatre méthodes (régression logistique, k-means, k plus proches voisins et forêt aléatoire), puis livrer la meilleure sous forme de script capable de traiter un fichier de nouveaux billets. Une priorité avant tout : **laisser passer le moins de faux billets possible**.
+La commande : construire un algorithme capable de distinguer un vrai billet d’un faux à partir de ces six mesures seulement, comparer quatre méthodes (régression logistique, K-means, KNN et forêt aléatoire), puis livrer la meilleure sous forme de script capable de traiter un fichier de nouveaux billets. Une priorité avant tout : **laisser passer le moins de faux billets possible**.
 
 <KeyFigures
   items={[
@@ -28,7 +28,7 @@ La commande : construire un algorithme capable de distinguer un vrai billet d�
 
 ## Comprendre les mesures
 
-Avant toute modélisation, j’ai regardé le comportement de chaque mesure. Quatre d’entre elles (la diagonale, les deux hauteurs et la marge haute) suivent de belles courbes en cloche où vrais et faux billets se chevauchent. Deux racontent une autre histoire : la **marge basse** est asymétrique à droite, et la **longueur** présente deux pics distincts, la signature de deux populations qui se mélangent à peine.
+Avant toute modélisation, j’ai regardé le comportement de chaque mesure. Quatre d’entre elles (la diagonale, les deux hauteurs et la marge haute) suivent de belles courbes en cloche : la plupart des billets se concentrent autour d’une valeur moyenne, et les valeurs extrêmes sont rares. Sur ces quatre mesures, vrais et faux billets se chevauchent : leurs valeurs tombent dans la même plage, si bien qu’aucune d’elles ne suffit, seule, à les distinguer. Deux racontent une autre histoire : la **marge basse** est asymétrique à droite, et la **longueur** présente deux pics distincts (distribution bimodale), la signature de deux populations qui se mélangent à peine.
 
 Les corrélations avec l’authenticité l’ont confirmé. Les vrais billets sont plus longs et ont des marges plus petites.
 
@@ -47,17 +47,17 @@ Certains billets sortaient nettement de la plage habituelle, surtout sur la marg
 
 ## Préparer les données
 
-**37 billets n’avaient pas de marge basse.** Plutôt que de combler ces trous avec une médiane, j’ai utilisé une régression linéaire sur les cinq autres mesures, car la marge basse est fortement liée à la longueur (−0,67). Tous les billets ont été conservés, et l’étiquette d’authenticité n’a jamais servi à combler les valeurs manquantes.
+**37 billets n’avaient pas de marge basse.** Plutôt que de combler ces trous avec une médiane, j’ai utilisé une régression linéaire sur les cinq autres mesures, car la marge basse est fortement liée à la longueur (−0,67). Tous les billets ont été conservés. Point important : la régression n’a utilisé que les mesures, jamais l’étiquette « vrai » ou « faux ». Sinon, la réponse que les modèles doivent trouver se serait glissée dans leurs données d’entrée (une fuite de données) et leurs scores auraient été trop optimistes ; un nouveau billet à analyser n’a de toute façon pas d’étiquette.
 
 J’ai ensuite séparé les données en un jeu d’entraînement et un jeu de test, puis standardisé les mesures pour qu’aucune variable ne pèse plus que les autres du seul fait de son échelle.
 
 ```python
-# 80/20 split, keeping the 2:1 genuine/fake ratio in both sets
+# Découpage 80/20, en gardant le ratio 2:1 vrais/faux dans les deux jeux
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.20, random_state=42, stratify=y
 )
 
-# The scale is learned on training notes only
+# L'échelle est apprise sur les billets d'entraînement uniquement
 scaler = StandardScaler()
 x_train_scaled = scaler.fit_transform(X_train)
 x_test_scaled = scaler.transform(X_test)
@@ -71,10 +71,10 @@ Chaque modèle a été entraîné sur les mêmes 1 200 billets et jugé sur le
 | ----------------------- | ------------- | -------- | ------------- | ------ |
 | Régression logistique   | Supervisé     | 99,0 %   | 3             | 0,9995 |
 | Forêt aléatoire         | Supervisé     | 99,0 %   | 3             | 0,9994 |
-| K plus proches voisins  | Supervisé     | 98,7 %   | 4             | 0,9972 |
+| KNN (k plus proches voisins) | Supervisé     | 98,7 %   | 4             | 0,9972 |
 | K-means (2 clusters)    | Non supervisé | 98,7 %   | 4             | —      |
 
-Le résultat du k-means est le plus parlant. Sans qu’on lui ait jamais indiqué quels billets étaient faux, il les a répartis en deux groupes qui correspondent à la réalité dans 98,7 % des cas. Vrais et faux billets forment deux populations naturellement distinctes, ce qui explique les excellentes performances de tous les modèles.
+Le résultat du K-means est le plus parlant. Sans qu’on lui ait jamais indiqué quels billets étaient faux, il les a répartis en deux groupes qui correspondent à la réalité dans 98,7 % des cas. Or, avec deux groupes, le K-means les sépare par une frontière linéaire (l’équivalent d’une droite, en six dimensions) : ce résultat confirme que vrais et faux billets forment deux populations presque linéairement séparables, ce qui explique les excellentes performances de tous les modèles.
 
 <ConfusionMatrix
   title="Régression logistique sur les 300 billets de test"
@@ -91,7 +91,7 @@ Le résultat du k-means est le plus parlant. Sans qu’on lui ait jamais indiqu�
 
 La régression logistique et la forêt aléatoire ont terminé à égalité : même matrice de confusion, même accuracy, et des scores AUC à 0,0001 d’écart. Quand deux modèles sont aussi proches, c’est tout le reste qui les départage.
 
-Les classes sont presque linéairement séparables : la puissance supplémentaire de cent arbres de décision n’apporte donc rien ici. C’est le principe de parcimonie, plus connu sous le nom de **rasoir d’Ockham** : à performances égales, le modèle le plus simple doit l’emporter. La régression logistique est plus rapide, moins sujette au surapprentissage et surtout **explicable** : chaque mesure reçoit un coefficient, si bien que n’importe qui à l’organisme peut comprendre pourquoi un billet a été signalé.
+Comme l’a montré le K-means, les classes sont presque linéairement séparables : par conséquent, la puissance supplémentaire de cent arbres de décision n’apporte rien ici. C’est le principe de parcimonie, plus connu sous le nom de **rasoir d’Ockham** : à performances égales, le modèle le plus simple doit l’emporter. La régression logistique est plus rapide, moins sujette au surapprentissage et surtout **explicable** : chaque mesure reçoit un coefficient, si bien que n’importe qui à l’organisme peut comprendre pourquoi un billet a été signalé.
 
 <Takeaway label="Rasoir d’Ockham">À performances égales, le modèle le plus simple l’emporte toujours.</Takeaway>
 
@@ -102,11 +102,11 @@ Le modèle final est sauvegardé sous forme d’un pipeline unique qui regroupe 
 Le script charge un fichier de nouveaux billets et renvoie, pour chacun, un verdict et la probabilité d’être vrai. J’ai ajouté une fonctionnalité qui ne figurait pas dans la commande : les billets sur lesquels le modèle hésite sont **signalés pour une vérification humaine** au lieu d’être tranchés à l’aveugle.
 
 ```python
-# Flag uncertain notes for a human check
-confiance = modele.predict_proba(df_taille_billets)[:, 1]   # probability of being genuine
-ecart = np.abs(confiance - 0.5) * 2                          # 0 = coin toss, 1 = fully certain
+# Signaler les billets incertains pour une vérification humaine
+confiance = modele.predict_proba(df_taille_billets)[:, 1]   # probabilité d'être vrai
+ecart = np.abs(confiance - 0.5) * 2                          # 0 = pile ou face, 1 = certitude totale
 seuil = 0.30
-resultats["Human check"] = np.where(ecart < seuil, "To check", "")
+resultats["Vérification humaine"] = np.where(ecart < seuil, "À vérifier", "")
 ```
 
 | Billet | Verdict | Probabilité d’être vrai |
@@ -120,7 +120,7 @@ resultats["Human check"] = np.where(ecart < seuil, "To check", "")
 ## Pour aller plus loin
 
 - **Ajuster le seuil de décision pour mieux détecter les faux.** Un faux billet non détecté coûte bien plus cher qu’une fausse alerte : exiger une probabilité plus élevée avant de déclarer un billet vrai laisserait moins de faux en circulation, au prix de quelques vérifications supplémentaires.
-- **Confirmer le classement par validation croisée.** Avec seulement trois ou quatre erreurs sur 300 billets, les écarts entre modèles restent dans la marge du hasard sur un seul découpage.
+- **Confirmer le classement des modèles par validation croisée.** Le classement repose sur un seul découpage entre entraînement et test : avec trois ou quatre erreurs sur 300 billets, un autre découpage aurait pu inverser l’ordre. La validation croisée répète l’évaluation sur plusieurs découpages (par exemple cinq) et en fait la moyenne, ce qui rend la comparaison plus fiable.
 
 ## Ce que j’en retiens
 

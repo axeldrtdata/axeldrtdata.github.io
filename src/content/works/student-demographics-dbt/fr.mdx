@@ -51,7 +51,7 @@ Quatre choix structurent l’ensemble du pipeline :
 Ce dernier test est celui qui m’a le plus servi : il détecte toute divergence de libellé entre les données étudiantes et l’INSEE avant qu’elle ne fausse un résultat.
 
 ```sql
--- stg_students: pseudonymise identifiers and make missing genders explicit
+-- stg_students : pseudonymiser les identifiants et rendre explicites les genres manquants
 select
     {{ hash_id("replace(user_id, '-', '')") }} as user_id_hash,
     {{ hash_id("replace(user_id, '-', '') || '_' || year_path_started") }} as primary_key,

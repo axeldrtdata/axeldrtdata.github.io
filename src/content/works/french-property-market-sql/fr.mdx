@@ -43,7 +43,7 @@ Avant de construire quoi que ce soit, j’ai rédigé un **dictionnaire de donn�
 Côté **RGPD**, les données sont publiques et officielles, et seuls les champs nécessaires à l’analyse ont été conservés. Pour la version publique de la base, j’ai également retiré les adresses : associée à un prix et à une date, une adresse peut permettre d’identifier une personne. J’ai aussi préparé, dès la conception, une requête prête à l’emploi pour le droit à l’effacement (article 17). Volontairement, elle ne repose pas sur des suppressions en cascade : les lignes sont supprimées explicitement, dans le bon ordre, pour que rien ne disparaisse par accident.
 
 ```sql
--- Right to erasure: delete one sale, then its property only if nothing else refers to it
+-- Droit à l'effacement : supprimer une vente, puis son bien seulement si plus rien n'y fait référence
 DELETE FROM ventes WHERE id_vente = 'v001';
 
 DELETE FROM biens

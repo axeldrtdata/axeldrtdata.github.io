@@ -75,7 +75,7 @@ La cotisation mensuelle moyenne est de 19,33 €, mais la médiane n’est que 
 />
 
 ```sql
--- One GROUP BY returns every band of declared value, with its weight and its price
+-- Un seul GROUP BY renvoie chaque tranche de valeur déclarée, avec son poids et son prix
 SELECT Valeur_declaree_biens,
        COUNT(*)                                AS contracts,
        ROUND(AVG(Prix_cotisation_mensuel), 1)  AS average_premium
@@ -102,7 +102,7 @@ En reprenant ce projet, j’ai vérifié les données avant de me fier aux résu
 **Neuf contrats disparaissaient de chaque jointure.** La table des contrats compte 30 335 lignes, mais le décompte par région n’atteint que 30 326. Neuf contrats de La Réunion portent leur code postal (97434, 97460, 97470) à la place du code commune : ils ne correspondent donc à aucune commune, et chaque jointure interne les écarte sans prévenir. La Réunion affiche ainsi 8 contrats au lieu de 17. La clé étrangère ne les a pas bloqués, car SQLite n’applique les clés étrangères qu’une fois celles-ci activées. Une seule commande les liste :
 
 ```sql
-PRAGMA foreign_key_check;   -- returns the 9 contracts whose commune does not exist
+PRAGMA foreign_key_check;   -- renvoie les 9 contrats dont la commune n'existe pas
 ```
 
 **Une tranche de valeur manquait.** Ma réponse initiale à la question sur les valeurs déclarées listait trois tranches, écrites en trois requêtes distinctes. Leurs totaux oubliaient 104 contrats : la tranche au-delà de 100 000 €, qui s’est révélée la plus déterminante pour le prix. Un seul `GROUP BY` rend cet oubli impossible, puisqu’il renvoie toutes les valeurs présentes dans la colonne.

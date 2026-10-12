@@ -27,7 +27,7 @@ import Takeaway from '../../../components/case/Takeaway.astro';
 
 The ONCFM fights counterfeit euro banknotes. Every note that reaches the agency goes through a machine that records six measurements: its length, its diagonal, its height on each side, and the two margins between the edge and the printed image. Over the years, the agency noticed that fakes differ slightly in size from genuine notes, by fractions of a millimetre that no one can see with the naked eye.
 
-The brief: build an algorithm that tells a genuine note from a fake using only those six measurements, compare four methods (logistic regression, k-means, k-nearest neighbours and random forest), and deliver the winner as a script that can process a file of new notes. One priority above all: **let as few counterfeits as possible slip through**.
+The brief: build an algorithm that tells a genuine note from a fake using only those six measurements, compare four methods (logistic regression, K-means, KNN and random forest), and deliver the winner as a script that can process a file of new notes. One priority above all: **let as few counterfeits as possible slip through**.
 
 <KeyFigures
   items={[
@@ -40,7 +40,7 @@ The brief: build an algorithm that tells a genuine note from a fake using only t
 
 ## Understanding the measurements
 
-Before modelling anything, I looked at how each measurement behaves. Four of them (the diagonal, both heights and the upper margin) follow neat bell curves where genuine and fake notes overlap. Two tell a different story: the **lower margin** is skewed to the right, and the **length** has two distinct peaks, the signature of two populations that barely mix.
+Before modelling anything, I looked at how each measurement behaves. Four of them (the diagonal, both heights and the upper margin) follow neat bell curves: most notes sit close to an average value, and extreme values are rare. On these four, genuine and fake notes overlap: their values fall in the same range, so none of them can tell the two apart on its own. Two tell a different story: the **lower margin** is skewed to the right, and the **length** has two distinct peaks (a bimodal distribution), the signature of two populations that barely mix.
 
 The correlations with authenticity confirmed it. Genuine notes are longer and have smaller margins.
 
@@ -59,7 +59,7 @@ Some notes sat well outside the usual range, especially on the lower margin. I k
 
 ## Preparing the data
 
-**37 notes were missing their lower margin.** Rather than filling the gaps with a median, I used a linear regression on the five other measurements, since the lower margin is strongly linked to the length (−0.67). Every note was kept, and the authenticity label was never used to fill the gaps.
+**37 notes were missing their lower margin.** Rather than filling the gaps with a median, I used a linear regression on the five other measurements, since the lower margin is strongly linked to the length (−0.67). Every note was kept. One point matters: the regression used only the measurements, never the genuine/fake label. Otherwise, the answer the models have to find would have leaked into their inputs (data leakage) and their scores would have been too optimistic; a new note to check has no label anyway.
 
 I then split the data into a training set and a test set, and standardised the measurements so that no variable outweighs the others simply because of its scale.
 
@@ -83,10 +83,10 @@ Each model was trained on the same 1,200 notes and judged on the same 300 it had
 | --------------------- | ------------ | -------- | ------------ | ------ |
 | Logistic regression   | Supervised   | 99.0%    | 3            | 0.9995 |
 | Random forest         | Supervised   | 99.0%    | 3            | 0.9994 |
-| K-nearest neighbours  | Supervised   | 98.7%    | 4            | 0.9972 |
+| KNN (k-nearest neighbours) | Supervised   | 98.7%    | 4            | 0.9972 |
 | K-means (2 clusters)  | Unsupervised | 98.7%    | 4            | —      |
 
-The k-means result is the most telling one. Without ever being told which notes were fake, it split them into two groups that match reality 98.7% of the time. Genuine and counterfeit notes form two naturally separate populations, which explains why every model performs so well.
+The K-means result is the most telling one. Without ever being told which notes were fake, it split them into two groups that match reality 98.7% of the time. And with two groups, K-means separates them with a linear boundary (the equivalent of a straight line, in six dimensions): this confirms that genuine and counterfeit notes form two almost linearly separable populations, which explains why every model performs so well.
 
 <ConfusionMatrix
   title="Logistic regression on the 300 test notes"
@@ -103,7 +103,7 @@ The k-means result is the most telling one. Without ever being told which notes 
 
 Logistic regression and random forest finished level: the same confusion matrix, the same accuracy, and AUC scores 0.0001 apart. When two models are this close, the tie-breaker is everything else.
 
-The classes are almost linearly separable, so the extra power of a hundred decision trees brings nothing here. That is the principle of parsimony, better known as **Occam's razor**: when two models perform equally well, the simpler one should win. Logistic regression is faster, less prone to overfitting, and above all **explainable**: each measurement gets one coefficient, so anyone at the agency can see why a note was flagged.
+As K-means showed, the classes are almost linearly separable, so the extra power of a hundred decision trees brings nothing here. That is the principle of parsimony, better known as **Occam's razor**: when two models perform equally well, the simpler one should win. Logistic regression is faster, less prone to overfitting, and above all **explainable**: each measurement gets one coefficient, so anyone at the agency can see why a note was flagged.
 
 <Takeaway label="Occam's razor">At equal performance, the simplest model always wins.</Takeaway>
 
@@ -132,7 +132,7 @@ resultats["Human check"] = np.where(ecart < seuil, "To check", "")
 ## What I would do next
 
 - **Tune the decision threshold towards catching fakes.** A missed counterfeit costs far more than a false alarm, so requiring a higher probability before calling a note genuine would trade a few extra checks for fewer fakes in circulation.
-- **Confirm the ranking with cross-validation.** With only three or four errors on 300 notes, the gaps between models are within the margin of chance on a single split.
+- **Confirm the model ranking with cross-validation.** The ranking rests on a single train/test split: with only three or four errors on 300 notes, another split could have swapped the order. Cross-validation repeats the evaluation over several splits (five, for instance) and averages the results, which makes the comparison more reliable.
 
 ## What I learned
 

@@ -51,7 +51,7 @@ Seuls 105 des 181 pays avaient un profil complet. Je me suis fixé une règle st
 Pour les valeurs manquantes restantes, l’imputation dépendait de ce que signifiait l’absence. Les valeurs nulles pour l’accès à internet ou le chômage ont été considérées comme manquantes plutôt que réelles, puis remplacées par la **médiane du groupe de revenu du pays** : un pays à faible revenu est comparé aux autres pays à faible revenu, pas à la moyenne mondiale. Les données de tourisme manquantes, en revanche, ont été fixées à zéro, car elles concernaient surtout des États instables ou très petits, où le tourisme est réellement négligeable.
 
 ```python
-   # Fill gaps with the median of countries in the same income group (IC)
+   # Combler les trous par la médiane des pays du même groupe de revenu (IC)
    for col in ["Internet", "Chomage"]:
        df_volaille[col] = df_volaille.groupby("IC")[col].transform(
            lambda x: x.fillna(x.median())
@@ -105,7 +105,7 @@ J’ai réalisé le clustering des pays sur leurs coordonnées dans les cinq com
   alt="Courbe du coude qui s’infléchit entre trois et quatre clusters, et score de silhouette avec un premier pic à deux et un second pic à quatre."
 />
 
-Le score de silhouette culminait en réalité à deux clusters (0,32), mais diviser le monde entre pays « développés » et « en développement » n’aurait éclairé aucune décision commerciale. Son second pic, à **quatre clusters (0,26)**, concordait avec les deux autres méthodes. Un k-means à cinq clusters a confirmé ce choix : il laissait trois groupes intacts et se contentait de scinder le quatrième en deux, sans apporter d’enseignement utile.
+Le score de silhouette culminait en réalité à deux clusters (0,32), mais diviser le monde entre pays « développés » et « en développement » n’aurait éclairé aucune décision commerciale. Son second pic, à **quatre clusters (0,26)**, concordait avec les deux autres méthodes. Un K-means à cinq clusters a confirmé ce choix : il laissait trois groupes intacts et se contentait de scinder le quatrième en deux, sans apporter d’enseignement utile.
 
 <Figure
   src={clustersImg}

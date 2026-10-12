@@ -112,7 +112,7 @@ En reprenant ce projet pour mon portfolio, j’ai vérifié ce que couvrent les 
 **Unités et jointures.** Les bilans alimentaires sont exprimés en milliers de tonnes : une fois multipliés par 1 000, ils sont en tonnes, pas en kilogrammes. Ma première version sous-estimait les pertes alimentaires et les exportations de manioc de la Thaïlande d’un facteur 1 000. Trois pays portaient aussi des noms différents d’un fichier à l’autre (le Royaume-Uni, la Tchéquie et l’Eswatini), si bien que les jointures les écartaient sans prévenir. Une fois les noms harmonisés, le nombre de personnes que le monde pourrait nourrir passe de 8,7 à 8,8 milliards.
 
 ```python
-# Harmonise country names before any join, then check nothing is left unmatched
+# Harmoniser les noms de pays avant toute jointure, puis vérifier qu'aucun pays ne reste sans correspondance
 dispo_alimentaire['Zone'] = dispo_alimentaire['Zone'].replace({
     'Royaume-Uni': "Royaume-Uni de Grande-Bretagne et d'Irlande du Nord",
     'Tchéquie (la)': 'Tchéquie',
