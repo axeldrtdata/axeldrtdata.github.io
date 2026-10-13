@@ -42,6 +42,8 @@ Every push to `main` builds and deploys the site to GitHub Pages (`.github/workf
 
 The site started from the [Astro Keel](https://github.com/kpab/astro-keel) theme by kpab, released under the MIT licence (see [LICENSE](LICENSE)). I reworked the design, added the French version and the case-study components, and wrote the content.
 
+The MIT licence covers the code. The content of the site (texts, case studies, figures, images and CV) is © Axel Derobert, all rights reserved.
+
 ---
 
 Axel Derobert · Data Analyst · Lyon · [Portfolio](https://axeldrtdata.github.io) · [LinkedIn](https://www.linkedin.com/in/axel-derobert-5717463b1/) · [GitHub](https://github.com/axeldrtdata)
