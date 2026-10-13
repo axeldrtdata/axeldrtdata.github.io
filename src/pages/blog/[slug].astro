@@ -9,6 +9,7 @@ import { withBase } from '../../lib/url';
 import { SITE } from '../../consts';
 import { getLang, useT, localePath, formatDateIn, readingTimeIn } from '../../i18n';
 import { getPosts, type Post } from '../../lib/content';
+import { tagLabel } from '../../lib/tags';
 
 export async function getStaticPaths() {
   // Newest first, same ordering as the notes list.
@@ -107,7 +108,7 @@ const schema = [
                 <ul class="note-tags">
                   {entry.data.tags.map((tag) => (
                     <li>
-                      <a href={localePath(`/blog/tags/${tag}/`, lang)}>{tag}</a>
+                      <a href={localePath(`/blog/tags/${tag}/`, lang)}>{tagLabel(tag, lang)}</a>
                     </li>
                   ))}
                 </ul>

@@ -9,7 +9,7 @@ A prompt doesn't just give an AI a task. It gives it a point of view. And a poin
 
 ## One file, two prompts
 
-For the final project of my Data Analyst training, I had the same analysis audited by two AI models. Same data, same documents. One thing changed: how the prompt framed the work.
+For the final project of my Data Analyst training, I had the same analysis, the sales and stock of an online wine shop, audited by two AI models. Same data, same documents. One thing changed: how the prompt framed the work.
 
 - To the first one: "let's revisit a project you worked on."
 - To the other: "here's a student's notebook, audit it."
@@ -22,13 +22,13 @@ And it mattered: the audit caught a stock coverage figure reported as 35.6 month
 
 Telling a model it's reviewing its own work puts it in a position where validating becomes the natural outcome. It isn't lying, it isn't flattering: it answers the question as asked, and the question already carried a slant. That's why "what's wrong with my analysis?" and "confirm my analysis is sound" aren't the same request. The first opens, the second closes. And we write the second far more often than we think.
 
-It's *The Mom Test*, applied to AI. Ask your mother if your business idea is good and she'll say yes… not because she's lying, but because the question invited it. The fix is the same with a model: stop asking for validation, ask for facts you can check.
+It's *The Mom Test*, applied to AI. Ask your mother if your business idea is good and she'll say yes… not because she's lying, but because the question invited it. It's the same with an AI: instead of asking it to validate your work, ask it for facts you can check in the data.
 
 ## Three habits I've adopted since
 
 1. **Write the prompt that explicitly allows the work to be torn apart**, especially when the work is mine.
 2. **Change the posture, not just the question**, and compare what surfaces.
-3. **Never keep a finding without checking it against the data.** Both models got something wrong at least once, and each time the data settled it.
+3. **Never keep a finding without checking it against the data.** Both AIs got something wrong at least once. The one auditing "a student's notebook" accused me of distorting sales by deleting duplicates. In fact, every product appeared twice in the export, one row for its product page and one for its photo, and I had kept the right one. The one reviewing "its own" project judged my average margins to be miscalculated. Once recalculated, they barely changed, and neither did any decision. Each time, going back to the data is what settled it.
 
 Because whatever an AI tells you, the answer is always in the data. If a finding can't be backed by a number, it isn't a finding. It's an opinion, or worse, a guess.
 

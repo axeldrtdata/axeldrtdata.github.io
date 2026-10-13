@@ -2,6 +2,7 @@
 // One note in the notes list (/blog/ and the tag pages), in the same card style as the homepage.
 import type { CollectionEntry } from 'astro:content';
 import { getLang, localePath, formatDateIn } from '../i18n';
+import { tagLabel } from '../lib/tags';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -20,7 +21,7 @@ const href = localePath(`/blog/${post.id}/`, lang);
   </div>
   <h2 class="note-card-title"><a href={href}>{post.data.title}</a></h2>
   <p class="note-card-text">{post.data.description}</p>
-  {post.data.tags.length > 0 && <ul class="tag-row">{post.data.tags.map((tag) => <li>{tag}</li>)}</ul>}
+  {post.data.tags.length > 0 && <ul class="tag-row">{post.data.tags.map((tag) => <li>{tagLabel(tag, lang)}</li>)}</ul>}
   <a class="note-card-link" href={href}>{lang === 'fr' ? 'Lire la note →' : 'Read the note →'}</a>
 </article>
 

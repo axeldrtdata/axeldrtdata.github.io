@@ -9,6 +9,7 @@ import NoteTagFilter from '../../../../components/NoteTagFilter.astro';
 import { SITE } from '../../../../consts';
 import { getLang, useT, readingTimeIn } from '../../../../i18n';
 import { getPosts, type Post } from '../../../../lib/content';
+import { tagLabel } from '../../../../lib/tags';
 
 export const getStaticPaths = (async ({ paginate }) => {
   const posts = await getPosts('en');
@@ -39,6 +40,7 @@ const taggedPosts = page.data;
 const lang = getLang(Astro.url);
 const fr = lang === 'fr';
 const t = useT(lang);
+const label = tagLabel(tag, lang);
 
 const readingTimes = new Map(
   await Promise.all(
@@ -51,33 +53,33 @@ const readingTimes = new Map(
 
 const pageTitle =
   page.currentPage === 1
-    ? t('tag.title', { tag })
-    : t('tag.titlePaged', { tag, page: page.currentPage });
+    ? t('tag.title', { tag: label })
+    : t('tag.titlePaged', { tag: label, page: page.currentPage });
 ---
 
-<BaseLayout title={pageTitle} description={t('tag.description', { tag, site: SITE.title })}>
+<BaseLayout title={pageTitle} description={t('tag.description', { tag: label, site: SITE.title })}>
   <div class="page-wrap">
     <header class="notes-head">
       <span class="mono-label">{t('blog.eyebrow')} · {t('tag.eyebrow')}</span>
       {
         fr ? (
-          <h1 class="page-title">Notes sur <span class="accent">{tag}</span></h1>
+          <h1 class="page-title">Notes sur <span class="accent">{label}</span></h1>
         ) : (
-          <h1 class="page-title">Notes on <span class="accent">{tag}</span></h1>
+          <h1 class="page-title">Notes on <span class="accent">{label}</span></h1>
         )
       }
       <p class="page-lead">
         {
           fr
-            ? `${page.total} ${page.total === 1 ? 'note classée' : 'notes classées'} sous « ${tag} ». Choisissez un autre thème ci-dessous, ou revenez à toutes les notes.`
-            : `${page.total} ${page.total === 1 ? 'note' : 'notes'} tagged “${tag}”. Pick another tag below, or go back to all notes.`
+            ? `${page.total} ${page.total === 1 ? 'note classée' : 'notes classées'} sous « ${label} ». Choisissez un autre thème ci-dessous, ou revenez à toutes les notes.`
+            : `${page.total} ${page.total === 1 ? 'note' : 'notes'} tagged “${label}”. Pick another tag below, or go back to all notes.`
         }
       </p>
     </header>
 
     <NoteTagFilter tags={allTags} total={total} active={tag} />
 
-    <section class="bento" aria-label={t('tag.listLabel', { tag })}>
+    <section class="bento" aria-label={t('tag.listLabel', { tag: label })}>
       {taggedPosts.map((post) => <NoteCard post={post} readingTime={readingTimes.get(post.id)} />)}
     </section>
 
