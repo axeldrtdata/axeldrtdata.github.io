@@ -35,6 +35,8 @@ const COPY = {
     education: 'Education',
     rncp: "RNCP Level 6, Bachelor's equivalent",
     since: 'October 2025 – ongoing',
+    eap: 'English for Academic Purposes (EAP)',
+    eapWhere: 'Torrens University, Sydney · 2017',
     toolkitA: 'My',
     toolkitB: 'toolkit',
     quote: 'Finding the story behind the numbers',
@@ -78,6 +80,8 @@ const COPY = {
     education: 'Formation',
     rncp: 'Titre RNCP niveau 6, équivalent Bac+3',
     since: 'Depuis octobre 2025',
+    eap: 'English for Academic Purposes (EAP)',
+    eapWhere: 'Torrens University, Sydney · 2017',
     toolkitA: 'Ma',
     toolkitB: 'boîte à outils',
     quote: 'Trouver l’histoire derrière les chiffres',
@@ -273,6 +277,8 @@ const websiteSchema = {
           <span class="education-title">Data Analyst, <span class="accent">OpenClassrooms</span></span>
           <span class="muted-small">{c.rncp}</span>
           <span class="muted-small">{c.since}</span>
+          <span class="education-second">{c.eap}</span>
+          <span class="muted-small">{c.eapWhere}</span>
         </div>
       </div>
 
@@ -802,6 +808,14 @@ const websiteSchema = {
 
   .education-title .accent {
     font-size: 1.15em;
+  }
+
+  .education-second {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(22, 38, 96, 0.12);
+    font-size: 15px;
+    font-weight: 600;
   }
 
   /* ---------- Toolkit ---------- */
