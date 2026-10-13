@@ -118,7 +118,7 @@ export const en = {
   'notFound.eyebrow': '404 — Not found',
   'notFound.heading': 'This page drifted off course.',
   'notFound.lead':
-    'The address may have moved, or it never existed. The keel lines below lead back to steady water.',
+    'The address may have moved, or it never existed.',
   'notFound.linksLabel': 'Recovery links',
   'notFound.home': 'Back home',
   'notFound.blog': 'Read the notes',
