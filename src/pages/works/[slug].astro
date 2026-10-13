@@ -14,16 +14,17 @@ export async function getStaticPaths() {
   const entries = await getWorks('en');
   return entries.map((entry, index) => ({
     params: { slug: entry.id },
-    props: { entry, next: entries[(index + 1) % entries.length] },
+    props: { entry, previous: entries[index - 1], next: entries[index + 1] },
   }));
 }
 
 interface Props {
   entry: Work;
-  next: Work;
+  previous?: Work;
+  next?: Work;
 }
 
-const { entry, next } = Astro.props;
+const { entry, previous, next } = Astro.props;
 const lang = getLang(Astro.url);
 const fr = lang === 'fr';
 const { Content } = await render(entry.contentEntry);
@@ -42,7 +43,9 @@ const L = fr
       role: 'Rôle',
       year: 'Année',
       stack: 'Outils',
-      next: 'Étude de cas suivante',
+      previous: '← Étude de cas précédente',
+      next: 'Étude de cas suivante →',
+      navLabel: 'Autres études de cas',
       notTranslated: 'Cette étude de cas n’est pas encore traduite : elle s’affiche en anglais.',
     }
   : {
@@ -57,7 +60,9 @@ const L = fr
       role: 'Role',
       year: 'Year',
       stack: 'Stack',
-      next: 'Next case study',
+      previous: '← Previous case study',
+      next: 'Next case study →',
+      navLabel: 'Other case studies',
       notTranslated: '',
     };
 ---
@@ -139,11 +144,21 @@ const L = fr
     </article>
 
     {
-      next.id !== entry.id && (
-        <a class="card glass next-case" href={localePath(`/works/${next.id}/`, lang)}>
-          <span class="mono-label">{L.next}</span>
-          <span class="next-title">{next.data.title} →</span>
-        </a>
+      (previous || next) && (
+        <nav class="case-nav" aria-label={L.navLabel}>
+          {previous && (
+            <a class="card glass case-nav-card" rel="prev" href={localePath(`/works/${previous.id}/`, lang)}>
+              <span class="mono-label">{L.previous}</span>
+              <span class="case-nav-title">{previous.data.title}</span>
+            </a>
+          )}
+          {next && (
+            <a class="card glass case-nav-card is-next" rel="next" href={localePath(`/works/${next.id}/`, lang)}>
+              <span class="mono-label">{L.next}</span>
+              <span class="case-nav-title">{next.data.title}</span>
+            </a>
+          )}
+        </nav>
       )
     }
   </div>
@@ -360,15 +375,38 @@ const L = fr
     vertical-align: top;
   }
 
-  .next-case {
+  /* ---------- Previous / next (same as the notes) ---------- */
+  .case-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
     margin-top: 3rem;
-    gap: 8px;
-    padding: 28px 32px;
   }
 
-  .next-title {
-    font-size: 22px;
+  .case-nav-card {
+    gap: 8px;
+    padding: 26px 30px;
+  }
+
+  .case-nav-card.is-next {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .case-nav-title {
+    font-size: 19px;
     font-weight: 700;
+    line-height: 1.3;
+  }
+
+  @media (max-width: 860px) {
+    .case-nav {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .case-nav-card.is-next {
+      grid-column: auto;
+    }
   }
 
   @media (max-width: 860px) {

@@ -7,7 +7,7 @@ export async function getStaticPaths() {
   const entries = await getWorks('fr');
   return entries.map((entry, index) => ({
     params: { slug: entry.id },
-    props: { entry, next: entries[(index + 1) % entries.length] },
+    props: { entry, previous: entries[index - 1], next: entries[index + 1] },
   }));
 }
 ---
