@@ -285,7 +285,6 @@ const websiteSchema = {
       <div class="card glass toolkit">
         <div class="card-head">
           <h2 class="toolkit-title">{c.toolkitA} <span class="accent">{c.toolkitB}</span></h2>
-          <span class="mono-small toolkit-import">import *</span>
         </div>
         <ul class="pill-list">
           {toolkit.map((tool) => <li class:list={['pill', tool.tone]}>{tool.name}</li>)}
@@ -827,10 +826,6 @@ const websiteSchema = {
   .toolkit-title {
     font-size: 24px;
     font-weight: 700;
-  }
-
-  .toolkit-import {
-    font-size: 14px;
   }
 
   .toolkit-title .accent {
