@@ -18,7 +18,7 @@ export const SITE_FR = {
   description:
     'Data Analyst à Lyon. Python, SQL et dataviz pour aider les entreprises à comprendre ce qui fait leur performance.',
   footerText: 'Conçu et développé à Lyon avec Astro.',
-  status: 'Ouvert à un stage data · Lyon ou hybride',
+  status: 'Ouvert à un premier poste data · mobilité possible',
 } as const;
 
 /** Icons bundled with the theme — see `src/components/SocialLinks.astro`. */
@@ -117,7 +117,7 @@ export const HOME = {
   style: 'dark' as HomeStyle,
   /** Photo placed in `public/`, e.g. '/axel.jpg'. Leave '' for the placeholder. */
   photo: '/axel.jpg',
-  status: 'Open to a data internship · Lyon or hybrid',
+  status: 'Open to a first data role · open to relocation',
   linkedin: 'https://www.linkedin.com/in/axel-derobert-5717463b1/',
   github: 'https://github.com/axeldrtdata',
   /** Contact email. Leave '' to hide the email button. */
